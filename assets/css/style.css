@@ -44,14 +44,19 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 18px 16px;
+  padding: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, .08);
+  text-decoration: none;
 }
+.thanh-ben-dau:hover { background: rgba(255, 255, 255, .04); }
 .thanh-ben-dau .logo {
-  font-size: 26px;
-  line-height: 1;
-  color: #60a5fa;
-  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #fff;
+  padding: 2px;
+  flex-shrink: 0;
 }
 .thanh-ben-dau .ten-he-thong { color: #fff; font-weight: 700; font-size: 17px; letter-spacing: .5px; }
 .thanh-ben-dau .mo-ta { font-size: 11px; color: #94a3b8; }
@@ -437,7 +442,13 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
   max-width: 400px;
   padding: 36px 32px;
 }
-.khung-dang-nhap .logo-lon { font-size: 42px; text-align: center; }
+.khung-dang-nhap .logo-lon {
+  display: block;
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  margin: 0 auto 4px;
+}
 .khung-dang-nhap h1 { font-size: 22px; font-weight: 700; text-align: center; margin: 8px 0 2px; }
 .khung-dang-nhap .phu-de { text-align: center; color: var(--mau-chu-nhat); font-size: 13px; margin-bottom: 24px; }
 

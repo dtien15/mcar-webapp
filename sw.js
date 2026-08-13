@@ -78,8 +78,8 @@ async function xuLyDay() {
 function hienThongBao(tieuDe, noiDung, duongDan, canXuLy, nhan) {
   return self.registration.showNotification(tieuDe || 'MCAR', {
     body: noiDung || '',
-    icon: new URL('assets/img/icon-192.png', self.registration.scope).href,
-    badge: new URL('assets/img/icon-192.png', self.registration.scope).href,
+    icon: new URL('assets/img/favicon/web-app-manifest-192x192.png', self.registration.scope).href,
+    badge: new URL('assets/img/favicon/web-app-manifest-192x192.png', self.registration.scope).href,
     tag: nhan,
     renotify: true,
     requireInteraction: !!canXuLy,   // viec can lam thi giu tren man hinh

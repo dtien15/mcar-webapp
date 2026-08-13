@@ -32,14 +32,6 @@ $menu = [
     ['route' => 'nguoidung', 'nhan' => 'Người dùng',          'icon' => 'users',            'quyen' => ['admin']],
 ];
 
-// Favicon: bieu tuong o to cua Tabler Icons
-$favicon = 'data:image/svg+xml,' . rawurlencode(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2563eb" '
-    . 'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
-    . '<path d="M5 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />'
-    . '<path d="M15 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />'
-    . '<path d="M5 17h-2v-6l2 -5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0h-6m-6 -6h15m-6 0v-5" /></svg>'
-);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -50,25 +42,30 @@ $favicon = 'data:image/svg+xml,' . rawurlencode(
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css" rel="stylesheet">
 <link rel="stylesheet" href="<?= duongDan('assets/css/style.css') ?>">
-<link rel="icon" href="<?= $favicon ?>">
+
+<!-- Biểu tượng trang (favicon) -->
+<link rel="icon" type="image/png" sizes="96x96" href="<?= duongDan('assets/img/favicon/favicon-96x96.png') ?>">
+<link rel="shortcut icon" href="<?= duongDan('assets/img/favicon/favicon.ico') ?>">
+<link rel="apple-touch-icon" sizes="180x180" href="<?= duongDan('assets/img/favicon/apple-touch-icon.png') ?>">
+
 <link rel="manifest" href="<?= duongDan('manifest.json') ?>">
 <meta name="theme-color" content="#2563eb">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="MCAR">
-<link rel="apple-touch-icon" href="<?= duongDan('assets/img/icon-192.png') ?>">
 </head>
 <body>
 
 <!-- Thanh ben -->
 <aside class="thanh-ben" id="thanhBen">
-  <div class="thanh-ben-dau">
-    <span class="logo"><?= bieuTuong('car') ?></span>
+  <a class="thanh-ben-dau" href="<?= duongDan('tongquan') ?>">
+    <img class="logo" src="<?= duongDan('assets/img/logo-mcar-88.png') ?>"
+         alt="<?= h($tenHeThong) ?>" width="44" height="44">
     <div>
       <div class="ten-he-thong"><?= h($tenHeThong) ?></div>
       <div class="mo-ta">Quản lý xe &amp; tài xế</div>
     </div>
-  </div>
+  </a>
 
   <nav class="thanh-ben-menu">
     <?php foreach ($menu as $muc): ?>
@@ -227,8 +224,8 @@ $favicon = 'data:image/svg+xml,' . rawurlencode(
       var tieuDe = (tb.laNhacLai ? '⏰ Nhắc lại: ' : '') + tb.tieuDe;
       var popup = new Notification(tieuDe, {
         body: tb.noiDung || '',
-        icon: '<?= duongDan('assets/img/icon-192.png') ?>',
-        badge: '<?= duongDan('assets/img/icon-192.png') ?>',
+        icon: '<?= duongDan('assets/img/favicon/web-app-manifest-192x192.png') ?>',
+        badge: '<?= duongDan('assets/img/favicon/web-app-manifest-192x192.png') ?>',
         tag: 'mcar-' + tb.id,          // cung tag thi khong hien trung lap
         renotify: true,
         requireInteraction: tb.laNhacLai // nhac lai thi giu tren man hinh den khi bam
@@ -359,7 +356,7 @@ function dangKyNhanThongBaoDay(baoKetQua) {
         if (kq.ok) {
           new Notification('Đã bật thông báo', {
             body: 'Từ giờ bạn sẽ nhận được tin ngay cả khi đã tắt ứng dụng.',
-            icon: '<?= duongDan('assets/img/icon-192.png') ?>'
+            icon: '<?= duongDan('assets/img/favicon/web-app-manifest-192x192.png') ?>'
           });
         } else {
           alert('Chưa bật được thông báo đẩy: ' + (kq.loi || 'lỗi không rõ'));
