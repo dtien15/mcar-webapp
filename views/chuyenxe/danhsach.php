@@ -79,8 +79,74 @@
   </div>
 </div>
 
-<!-- Danh sach -->
-<div class="the">
+<!-- Danh sach dang the - danh cho dien thoai -->
+<div class="ds-the-dien-thoai">
+  <?php foreach ($danhSach as $chuyen):
+    $tt          = nhanTrangThaiChuyen($chuyen['status']);
+    $cuaToi      = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
+    $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
+  ?>
+    <div class="the-chuyen-xe <?= $duocXacNhan ? 'can-xac-nhan' : '' ?>">
+      <div class="dau-the">
+        <div>
+          <div class="ngay"><?= bieuTuong('calendar') ?> <?= dinhDangNgay($chuyen['trip_date']) ?>
+            <?php if ($chuyen['pickup_time']): ?>
+              <span class="gio"><?= bieuTuong('clock') ?> <?= h($chuyen['pickup_time']) ?></span>
+            <?php endif; ?>
+          </div>
+          <div class="hanh-trinh"><?= h($chuyen['route']) ?></div>
+        </div>
+        <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
+      </div>
+
+      <?php if (!empty($chuyen['pickup_dropoff'])): ?>
+        <div class="dia-diem"><?= bieuTuong('map-pin') ?> <?= h($chuyen['pickup_dropoff']) ?></div>
+      <?php endif; ?>
+
+      <div class="thong-tin-the">
+        <div><span class="nhan">Xe</span><span class="gt"><?= h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?></span></div>
+        <?php if (!laTaiXe()): ?>
+          <div><span class="nhan">Tài xế</span><span class="gt"><?= h($chuyen['ten_tai_xe']) ?></span></div>
+        <?php endif; ?>
+        <div><span class="nhan">Loại kèo</span><span class="gt"><?= h($chuyen['ten_loai_keo']) ?></span></div>
+        <div><span class="nhan">Khách trả</span><span class="gt"><?= dinhDangTien($chuyen['revenue_vnd']) ?>đ</span></div>
+        <div><span class="nhan">Tiền cuốc</span><span class="gt nhan-manh"><?= dinhDangTien($chuyen['trip_fee']) ?>đ</span></div>
+        <?php if ($chuyen['fuel_cost'] > 0): ?>
+          <div><span class="nhan">Xăng dầu</span><span class="gt"><?= dinhDangTien($chuyen['fuel_cost']) ?>đ</span></div>
+        <?php endif; ?>
+      </div>
+
+      <div class="chan-the">
+        <?php if (laQuanLy()): ?>
+          <a href="<?= duongDan('chuyenxe/sua/' . $chuyen['id']) ?>" class="btn btn-sm btn-outline-primary">
+            <?= bieuTuong('pencil') ?> Sửa
+          </a>
+          <?php if ($chuyen['status'] === 'tai_xe_xac_nhan'): ?>
+            <form method="post" action="<?= duongDan('chuyenxe/chot') ?>" onsubmit="return confirm('Chốt hoàn thành chuyến xe này?');">
+              <?php truongToken(); ?>
+              <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
+              <button class="btn btn-sm btn-success"><?= bieuTuong('check') ?> Chốt hoàn thành</button>
+            </form>
+          <?php endif; ?>
+        <?php elseif ($duocXacNhan): ?>
+          <button type="button" class="btn btn-primary w-100"
+                  data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">
+            <?= bieuTuong('writing') ?> Nhập chi phí &amp; Xác nhận
+          </button>
+        <?php endif; ?>
+      </div>
+    </div>
+  <?php endforeach; ?>
+
+  <?php if (!$danhSach): ?>
+    <div class="the"><div class="khong-co-du-lieu">
+      <?= bieuTuong('inbox') ?><br>Không có chuyến xe nào phù hợp bộ lọc
+    </div></div>
+  <?php endif; ?>
+</div>
+
+<!-- Danh sach dang bang - danh cho may tinh -->
+<div class="the bang-may-tinh">
   <div class="the-dau">
     <span>Danh sách chuyến xe (<?= count($danhSach) ?> dòng)</span>
   </div>

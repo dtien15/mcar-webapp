@@ -190,6 +190,31 @@ CREATE TABLE payroll (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
+-- Bảng thông báo gửi cho tài xế / kế toán
+-- ---------------------------------------------------------------------
+DROP TABLE IF EXISTS notifications;
+CREATE TABLE notifications (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NULL,
+  driver_id INT NULL,
+  title VARCHAR(255) NOT NULL,
+  content TEXT,
+  link VARCHAR(255) DEFAULT NULL,
+  type VARCHAR(50) DEFAULT 'chung',
+  ref_id INT DEFAULT NULL,
+  is_read TINYINT(1) NOT NULL DEFAULT 0,
+  need_action TINYINT(1) NOT NULL DEFAULT 0,
+  shown_at DATETIME DEFAULT NULL,
+  remind_at DATETIME DEFAULT NULL,
+  remind_count INT NOT NULL DEFAULT 0,
+  read_at DATETIME DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_nguoi_nhan (user_id, is_read),
+  INDEX idx_tai_xe (driver_id, is_read),
+  INDEX idx_nhac_lai (is_read, remind_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------
 -- Bảng theo dõi thanh toán / chi phí công ty
 -- ---------------------------------------------------------------------
 DROP TABLE IF EXISTS payments;

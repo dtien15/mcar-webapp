@@ -103,11 +103,25 @@ class ChuyenXeController extends Controller
         $duLieu = array_merge($duLieu, $duLieuTaiXe);
 
         if ($id > 0) {
+            $chuyenXeCu = $chuyenXeModel->layTheoId($id);
             $chuyenXeModel->capNhat($id, $duLieu);
+
+            // Neu doi sang tai xe khac thi bao cho tai xe moi biet
+            $taiXeCu  = $chuyenXeCu ? (int)$chuyenXeCu['driver_id'] : 0;
+            $taiXeMoi = (int)$duLieu['driver_id'];
+            if ($taiXeMoi && $taiXeMoi !== $taiXeCu) {
+                $this->baoChuyenXeMoi($id, $duLieu);
+            } elseif ($taiXeMoi && $chuyenXeCu && $chuyenXeCu['status'] === 'moi') {
+                $this->baoChuyenXeThayDoi($id, $duLieu);
+            }
             datThongBao('Đã cập nhật chuyến xe.');
         } else {
             $duLieu['status'] = 'moi';
-            $chuyenXeModel->them($duLieu);
+            $idMoi = $chuyenXeModel->them($duLieu);
+
+            if (!empty($duLieu['driver_id'])) {
+                $this->baoChuyenXeMoi($idMoi, $duLieu);
+            }
             datThongBao('Đã thêm chuyến xe mới và giao cho tài xế.');
         }
 
@@ -153,6 +167,22 @@ class ChuyenXeController extends Controller
         ]);
 
         if ($ketQua) {
+            $thongBaoModel = $this->model('ThongBaoModel');
+
+            // Tai xe da xu ly xong -> ngung nhac lai
+            $thongBaoModel->dongTheoChuyenXe($id, 'chuyen_xe_moi');
+
+            // Bao cho ke toan / quan tri biet de vao chot
+            $chuyen = $this->model('ChuyenXeModel')->layChiTiet($id);
+            $thongBaoModel->guiChoQuanLy(
+                'Tài xế ' . ($chuyen['ten_tai_xe'] ?? '') . ' đã xác nhận chuyến xe',
+                'Ngày ' . dinhDangNgay($chuyen['trip_date'] ?? '') . ' · ' . ($chuyen['route'] ?? '')
+                    . ' · Xăng dầu ' . dinhDangTien($chuyen['fuel_cost'] ?? 0) . 'đ — chờ chốt hoàn thành',
+                'chuyenxe?trang_thai=tai_xe_xac_nhan',
+                'cho_chot',
+                $id
+            );
+
             datThongBao('Đã xác nhận chuyến xe. Chờ công ty chốt.');
         } else {
             datThongBao('Chuyến xe không hợp lệ hoặc đã được xác nhận trước đó.', 'danger');
@@ -166,7 +196,24 @@ class ChuyenXeController extends Controller
         $this->yeuCauQuyen(['admin', 'ketoan']);
         $this->yeuCauPost();
 
-        $this->model('ChuyenXeModel')->chotHoanThanh((int)($_POST['id'] ?? 0));
+        $id     = (int)($_POST['id'] ?? 0);
+        $chuyen = $this->model('ChuyenXeModel')->layChiTiet($id);
+
+        $this->model('ChuyenXeModel')->chotHoanThanh($id);
+
+        // Bao cho tai xe biet chuyen xe da duoc chot
+        if ($chuyen && $chuyen['driver_id']) {
+            $this->model('ThongBaoModel')->guiChoTaiXe(
+                $chuyen['driver_id'],
+                'Chuyến xe ngày ' . dinhDangNgay($chuyen['trip_date']) . ' đã được chốt',
+                'Công ty đã xác nhận hoàn thành chuyến ' . $chuyen['route']
+                    . '. Chuyến này sẽ được tính vào lương kỳ này.',
+                'chuyenxe',
+                'chuyen_da_chot',
+                $id
+            );
+        }
+
         datThongBao('Đã chốt hoàn thành chuyến xe.');
         chuyenTrang('chuyenxe');
     }
@@ -227,6 +274,62 @@ class ChuyenXeController extends Controller
         }
         fclose($xuat);
         exit;
+    }
+
+    // -----------------------------------------------------------------
+    // Cac ham gui thong bao
+    // -----------------------------------------------------------------
+
+    /** Bao cho tai xe biet vua duoc giao chuyen xe moi */
+    private function baoChuyenXeMoi($idChuyenXe, array $duLieu)
+    {
+        $noiDung = $this->motTaChuyenXe($duLieu);
+
+        $this->model('ThongBaoModel')->guiChoTaiXe(
+            $duLieu['driver_id'],
+            'Bạn có chuyến xe mới ngày ' . dinhDangNgay($duLieu['trip_date']),
+            $noiDung,
+            'chuyenxe?trang_thai=moi',
+            'chuyen_xe_moi',
+            $idChuyenXe,
+            true  // can tai xe xac nhan -> se nhac lai neu bo quen
+        );
+    }
+
+    /** Bao cho tai xe biet chuyen xe vua duoc sua thong tin */
+    private function baoChuyenXeThayDoi($idChuyenXe, array $duLieu)
+    {
+        $this->model('ThongBaoModel')->guiChoTaiXe(
+            $duLieu['driver_id'],
+            'Chuyến xe ngày ' . dinhDangNgay($duLieu['trip_date']) . ' vừa được cập nhật',
+            $this->motTaChuyenXe($duLieu),
+            'chuyenxe?trang_thai=moi',
+            'chuyen_xe_moi',
+            $idChuyenXe,
+            true
+        );
+    }
+
+    /** Cau mo ta ngan gon cua chuyen xe, dung trong thong bao */
+    private function motTaChuyenXe(array $duLieu)
+    {
+        $phan = [];
+        if (!empty($duLieu['pickup_time'])) {
+            $phan[] = 'Giờ đón ' . $duLieu['pickup_time'];
+        }
+        if (!empty($duLieu['route'])) {
+            $phan[] = 'Hành trình ' . $duLieu['route'];
+        }
+        if (!empty($duLieu['car_id'])) {
+            $xe = $this->model('XeModel')->layTheoId($duLieu['car_id']);
+            if ($xe) {
+                $phan[] = 'Xe ' . trim($xe['name'] . ' ' . $xe['plate_number']);
+            }
+        }
+        if (!empty($duLieu['trip_fee'])) {
+            $phan[] = 'Tiền cuốc ' . dinhDangTien($duLieu['trip_fee']) . 'đ';
+        }
+        return implode(' · ', $phan);
     }
 
     /** Doc bo loc tu query string, tai xe chi thay du lieu cua minh */

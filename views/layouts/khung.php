@@ -51,6 +51,12 @@ $favicon = 'data:image/svg+xml,' . rawurlencode(
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css" rel="stylesheet">
 <link rel="stylesheet" href="<?= duongDan('assets/css/style.css') ?>">
 <link rel="icon" href="<?= $favicon ?>">
+<link rel="manifest" href="<?= duongDan('manifest.json') ?>">
+<meta name="theme-color" content="#2563eb">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MCAR">
+<link rel="apple-touch-icon" href="<?= duongDan('assets/img/icon-192.png') ?>">
 </head>
 <body>
 
@@ -95,6 +101,23 @@ $favicon = 'data:image/svg+xml,' . rawurlencode(
     <button class="nut-menu" id="nutMenu" type="button" aria-label="Mở menu"><?= bieuTuong('menu-2') ?></button>
     <h1 class="tieu-de-trang"><?= h($tieuDe ?? 'Tổng quan') ?></h1>
 
+    <!-- Chuong thong bao -->
+    <div class="dropdown khung-chuong">
+      <button class="nut-chuong" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-label="Thông báo">
+        <?= bieuTuong('bell') ?>
+        <span class="cham-thong-bao" id="chamThongBao" hidden></span>
+      </button>
+      <div class="dropdown-menu dropdown-menu-end khung-ds-thong-bao">
+        <div class="dau-ds-thong-bao">
+          <strong>Thông báo</strong>
+          <a href="<?= duongDan('thongbao') ?>" class="text-decoration-none" style="font-size:12px">Xem tất cả</a>
+        </div>
+        <div id="dsThongBaoNhanh" class="than-ds-thong-bao">
+          <div class="text-center text-muted py-3" style="font-size:13px">Đang tải…</div>
+        </div>
+      </div>
+    </div>
+
     <div class="thong-tin-tai-khoan dropdown">
       <button class="btn-tai-khoan dropdown-toggle" data-bs-toggle="dropdown" type="button">
         <span class="chu-cai-dau"><?= h(mb_substr($taiKhoan['ho_ten'] ?: $taiKhoan['ten_dang_nhap'], 0, 1, 'UTF-8')) ?></span>
@@ -114,6 +137,16 @@ $favicon = 'data:image/svg+xml,' . rawurlencode(
   </header>
 
   <main class="noi-dung">
+    <!-- Moi bat thong bao trinh duyet -->
+    <div class="alert alert-info d-none align-items-center gap-2 flex-wrap" id="moiBatThongBao">
+      <?= bieuTuong('bell-ringing') ?>
+      <span class="flex-grow-1">
+        Bật thông báo để nhận tin ngay khi có chuyến xe mới, không cần mở trang web liên tục.
+      </span>
+      <button class="btn btn-sm btn-primary" id="nutBatThongBao">Bật thông báo</button>
+      <button class="btn btn-sm btn-light" id="nutBoQuaThongBao">Để sau</button>
+    </div>
+
     <?php if ($thongBao): ?>
       <div class="alert alert-<?= h($thongBao['loai']) ?> alert-dismissible fade show" role="alert">
         <?= h($thongBao['noi_dung']) ?>
@@ -127,7 +160,9 @@ $favicon = 'data:image/svg+xml,' . rawurlencode(
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+// ---------------------------------------------------------------
 // Mo/dong thanh ben tren dien thoai
+// ---------------------------------------------------------------
 (function () {
   var nut = document.getElementById('nutMenu');
   var ben = document.getElementById('thanhBen');
@@ -136,6 +171,146 @@ $favicon = 'data:image/svg+xml,' . rawurlencode(
   if (nut) nut.addEventListener('click', bat);
   if (phu) phu.addEventListener('click', bat);
 })();
+
+// ---------------------------------------------------------------
+// He thong thong bao
+// ---------------------------------------------------------------
+(function () {
+  var URL_KIEM_TRA = '<?= duongDan('thongbao/kiemtra') ?>';
+  var URL_DOC      = '<?= duongDan('thongbao/doc') ?>';
+  var GIAY_KIEM_TRA = 30;
+  var KHOA_BO_QUA  = 'mcar_bo_qua_thong_bao';
+
+  var cham     = document.getElementById('chamThongBao');
+  var dsNhanh  = document.getElementById('dsThongBaoNhanh');
+  var oMoi     = document.getElementById('moiBatThongBao');
+  var nutBat   = document.getElementById('nutBatThongBao');
+  var nutBoQua = document.getElementById('nutBoQuaThongBao');
+
+  var hoTroThongBao = ('Notification' in window);
+
+  // --- Moi nguoi dung cap quyen nhan thong bao ---
+  function capNhatOMoi() {
+    if (!oMoi || !hoTroThongBao) return;
+    var daBoQua = localStorage.getItem(KHOA_BO_QUA) === '1';
+    if (Notification.permission === 'default' && !daBoQua) {
+      oMoi.classList.remove('d-none');
+      oMoi.classList.add('d-flex');
+    } else {
+      oMoi.classList.add('d-none');
+      oMoi.classList.remove('d-flex');
+    }
+  }
+
+  if (nutBat) {
+    nutBat.addEventListener('click', function () {
+      Notification.requestPermission().then(function (ketQua) {
+        capNhatOMoi();
+        if (ketQua === 'granted') {
+          new Notification('MCAR', {
+            body: 'Đã bật thông báo. Bạn sẽ nhận được tin khi có chuyến xe mới.',
+            icon: '<?= duongDan('assets/img/icon-192.png') ?>'
+          });
+        }
+      });
+    });
+  }
+  if (nutBoQua) {
+    nutBoQua.addEventListener('click', function () {
+      localStorage.setItem(KHOA_BO_QUA, '1');
+      capNhatOMoi();
+    });
+  }
+  capNhatOMoi();
+
+  // --- Hien popup thong bao cua trinh duyet ---
+  function hienPopup(tb) {
+    if (!hoTroThongBao || Notification.permission !== 'granted') return;
+    try {
+      var tieuDe = (tb.laNhacLai ? '⏰ Nhắc lại: ' : '') + tb.tieuDe;
+      var popup = new Notification(tieuDe, {
+        body: tb.noiDung || '',
+        icon: '<?= duongDan('assets/img/icon-192.png') ?>',
+        badge: '<?= duongDan('assets/img/icon-192.png') ?>',
+        tag: 'mcar-' + tb.id,          // cung tag thi khong hien trung lap
+        renotify: true,
+        requireInteraction: tb.laNhacLai // nhac lai thi giu tren man hinh den khi bam
+      });
+      popup.onclick = function () {
+        window.focus();
+        window.location.href = URL_DOC + '/' + tb.id;
+        popup.close();
+      };
+    } catch (e) { /* mot so trinh duyet chan Notification khi khong co tuong tac */ }
+  }
+
+  // --- Ve danh sach thong bao trong chuong ---
+  function veDanhSach(ds) {
+    if (!dsNhanh) return;
+    if (!ds || !ds.length) {
+      dsNhanh.innerHTML = '<div class="text-center text-muted py-4" style="font-size:13px">'
+                        + '<i class="ti ti-inbox" style="font-size:22px"></i><br>Chưa có thông báo nào</div>';
+      return;
+    }
+    dsNhanh.innerHTML = '';
+    ds.forEach(function (tb) {
+      var a = document.createElement('a');
+      a.className = 'muc-thong-bao' + (tb.chuaDoc ? ' chua-doc' : '');
+      a.href = URL_DOC + '/' + tb.id;
+
+      var tieuDe = document.createElement('div');
+      tieuDe.className = 'tieu-de';
+      tieuDe.textContent = tb.tieuDe;
+
+      var noiDung = document.createElement('div');
+      noiDung.className = 'noi-dung';
+      noiDung.textContent = tb.noiDung || '';
+
+      var thoiGian = document.createElement('div');
+      thoiGian.className = 'thoi-gian';
+      thoiGian.textContent = tb.thoiGian || '';
+
+      a.appendChild(tieuDe);
+      a.appendChild(noiDung);
+      a.appendChild(thoiGian);
+      dsNhanh.appendChild(a);
+    });
+  }
+
+  // --- Goi may chu kiem tra thong bao moi ---
+  function kiemTra() {
+    fetch(URL_KIEM_TRA, { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (kq) {
+        if (!kq.dangNhap) return;
+
+        if (cham) cham.hidden = !(kq.chuaDoc > 0);
+
+        var chuong = document.querySelector('.nut-chuong');
+        if (chuong) chuong.setAttribute('aria-label', 'Thông báo (' + kq.chuaDoc + ' chưa đọc)');
+
+        (kq.popup || []).forEach(hienPopup);
+
+        if (kq.danhSach) veDanhSach(kq.danhSach);
+      })
+      .catch(function () { /* mat mang thi bo qua, lan sau kiem tra tiep */ });
+  }
+
+  kiemTra();
+  setInterval(kiemTra, GIAY_KIEM_TRA * 1000);
+
+  // Kiem tra ngay khi nguoi dung quay lai tab
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) kiemTra();
+  });
+})();
+
+// ---------------------------------------------------------------
+// Dang ky Service Worker (de cai dat duoc nhu ung dung dien thoai)
+// ---------------------------------------------------------------
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('<?= duongDan('sw.js') ?>').catch(function () {});
+}
 </script>
 </body>
 </html>

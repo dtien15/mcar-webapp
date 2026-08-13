@@ -19,6 +19,7 @@ class Router
         'thanhtoan' => 'ThanhToanController',
         'baocao'    => 'BaoCaoController',
         'nguoidung' => 'NguoiDungController',
+        'thongbao'  => 'ThongBaoController',
     ];
 
     public function chay()

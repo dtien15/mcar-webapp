@@ -141,6 +141,90 @@ body {
 .dropdown-item .ti { font-size: 16px; vertical-align: -2px; }
 legend .ti { font-size: 15px; vertical-align: -2px; }
 
+/* ---------- Chuong thong bao ---------- */
+.khung-chuong { position: relative; }
+
+.nut-chuong {
+  background: none;
+  border: none;
+  font-size: 21px;
+  color: #475569;
+  padding: 6px 8px;
+  border-radius: 8px;
+  position: relative;
+  line-height: 1;
+}
+.nut-chuong:hover { background: #f1f5f9; color: var(--mau-chinh); }
+
+.cham-thong-bao {
+  position: absolute;
+  top: 4px; right: 5px;
+  width: 9px; height: 9px;
+  background: #ef4444;
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+
+.khung-ds-thong-bao { width: 340px; padding: 0; max-width: calc(100vw - 24px); }
+
+.dau-ds-thong-bao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--mau-vien);
+}
+
+.than-ds-thong-bao { max-height: 380px; overflow-y: auto; }
+
+.muc-thong-bao {
+  display: block;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  text-decoration: none;
+  color: var(--mau-chu);
+}
+.muc-thong-bao:hover { background: #f8fafc; }
+.muc-thong-bao.chua-doc { background: #eff6ff; }
+.muc-thong-bao.chua-doc:hover { background: #dbeafe; }
+.muc-thong-bao .tieu-de { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+.muc-thong-bao .noi-dung { font-size: 12px; color: var(--mau-chu-nhat); line-height: 1.4; }
+.muc-thong-bao .thoi-gian { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+
+/* Trang danh sach thong bao day du */
+.ds-thong-bao-day-du .dong-thong-bao {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  text-decoration: none;
+  color: var(--mau-chu);
+  position: relative;
+}
+.ds-thong-bao-day-du .dong-thong-bao:hover { background: #f8fafc; }
+.ds-thong-bao-day-du .dong-thong-bao.chua-doc { background: #eff6ff; }
+.ds-thong-bao-day-du .bieu-tuong {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  flex-shrink: 0;
+}
+.ds-thong-bao-day-du .phan-chu { flex: 1; min-width: 0; }
+.ds-thong-bao-day-du .tieu-de { font-weight: 600; font-size: 14px; }
+.ds-thong-bao-day-du .noi-dung { font-size: 13px; color: var(--mau-chu-nhat); margin-top: 2px; }
+.ds-thong-bao-day-du .thoi-gian { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+.cham-chua-doc {
+  width: 9px; height: 9px;
+  background: var(--mau-chinh);
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
 .btn-tai-khoan {
   background: none;
   border: none;
@@ -369,6 +453,55 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
   body { background: #fff; }
 }
 
+/* ---------- Danh sach dang the (dien thoai) ---------- */
+.ds-the-dien-thoai { display: none; }
+
+.the-chuyen-xe {
+  background: #fff;
+  border: 1px solid var(--mau-vien);
+  border-radius: var(--bo-goc);
+  box-shadow: var(--bong);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.the-chuyen-xe.can-xac-nhan {
+  border-left: 4px solid var(--mau-chinh);
+  background: #fbfdff;
+}
+.the-chuyen-xe .dau-the {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.the-chuyen-xe .ngay { font-size: 12px; color: var(--mau-chu-nhat); }
+.the-chuyen-xe .ngay .gio { margin-left: 10px; }
+.the-chuyen-xe .hanh-trinh { font-size: 17px; font-weight: 700; margin-top: 2px; }
+.the-chuyen-xe .dia-diem {
+  font-size: 12px;
+  color: var(--mau-chu-nhat);
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  line-height: 1.45;
+  max-height: 76px;
+  overflow: hidden;
+}
+.the-chuyen-xe .thong-tin-the {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin-bottom: 12px;
+}
+.the-chuyen-xe .thong-tin-the > div { display: flex; flex-direction: column; }
+.the-chuyen-xe .nhan { font-size: 11px; color: #94a3b8; }
+.the-chuyen-xe .gt { font-size: 13px; font-weight: 600; }
+.the-chuyen-xe .gt.nhan-manh { color: var(--mau-chinh); font-size: 15px; }
+.the-chuyen-xe .chan-the { display: flex; gap: 8px; flex-wrap: wrap; }
+.the-chuyen-xe .chan-the .btn { flex: 1; min-width: 120px; }
+
 /* ---------- Man hinh nho ---------- */
 @media (max-width: 992px) {
   .thanh-ben { transform: translateX(-100%); }
@@ -376,4 +509,31 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
   .vung-chinh { margin-left: 0; }
   .nut-menu { display: block; }
   .noi-dung { padding: 14px; }
+
+  /* Doi tu bang sang the cho de xem tren dien thoai */
+  .ds-the-dien-thoai { display: block; }
+  .bang-may-tinh { display: none; }
+
+  .tieu-de-trang { font-size: 16px; }
+  .luoi-thong-ke { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .o-thong-ke { padding: 12px; gap: 10px; }
+  .o-thong-ke .bieu-tuong { width: 36px; height: 36px; font-size: 19px; }
+  .o-thong-ke .gia-tri { font-size: 16px; }
+  .o-thong-ke .nhan { font-size: 11px; }
+
+  .dong-bieu-do .gia-tri-cot { width: 96px; font-size: 11px; }
+  .dong-bieu-do .so-chuyen-cot { display: none; }
+
+  /* Nut bam to hon cho de cham tren dien thoai */
+  .btn { padding: 8px 14px; }
+  .modal-dialog { margin: 8px; }
+
+  /* Cua so xac nhan chiem gan het man hinh */
+  .modal-lg { max-width: calc(100vw - 16px); }
+}
+
+@media (max-width: 576px) {
+  .luoi-thong-ke { grid-template-columns: 1fr; }
+  .the-chuyen-xe .thong-tin-the { grid-template-columns: 1fr 1fr; }
+  .khung-ds-thong-bao { width: calc(100vw - 20px); }
 }

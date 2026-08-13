@@ -147,6 +147,27 @@ function layNgayCuoiThang($thang, $nam)
     return date('Y-m-t', strtotime(layNgayDauThang($thang, $nam)));
 }
 
+/** Thoi gian tuong doi: "5 phút trước", "2 giờ trước", "3 ngày trước" */
+function thoiGianTuongDoi($thoiDiem)
+{
+    if (empty($thoiDiem)) {
+        return '';
+    }
+    $moc = strtotime($thoiDiem);
+    if (!$moc) {
+        return '';
+    }
+
+    $giay = time() - $moc;
+    if ($giay < 0)     return 'vừa xong';
+    if ($giay < 60)    return 'vừa xong';
+    if ($giay < 3600)  return floor($giay / 60) . ' phút trước';
+    if ($giay < 86400) return floor($giay / 3600) . ' giờ trước';
+    if ($giay < 604800) return floor($giay / 86400) . ' ngày trước';
+
+    return date('d/m/Y H:i', $moc);
+}
+
 /** Nhan hien thi cua trang thai chuyen xe */
 function nhanTrangThaiChuyen($trangThai)
 {
