@@ -1,20 +1,24 @@
 # =====================================================================
 # MCAR WebApp - Cau hinh Apache / LiteSpeed
+# Neu hosting bao loi 500 khi vao web: doi ten file nay thanh .htaccess.bak
+# roi tao config/cauhinh.php voi dong: define('URL_DEP', false);
 # =====================================================================
 
-# Chan truy cap truc tiep vao cac thu muc ma nguon
-RewriteEngine On
-RewriteRule ^(config|core|models|controllers|views|helpers|database)/ - [F,L]
+<IfModule mod_rewrite.c>
+  RewriteEngine On
 
-# Dieu huong moi request vao index.php (front controller)
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+  # Chan truy cap truc tiep vao cac thu muc ma nguon
+  RewriteRule ^(config|core|models|controllers|views|helpers|database)/ - [F,L]
 
-# Chan liet ke thu muc
-Options -Indexes
+  # Dieu huong moi request khong phai file/thu muc that vao index.php
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+</IfModule>
 
-# Chan truy cap file nhay cam
-<FilesMatch "\.(sql|md|example\.php)$">
-  Require all denied
-</FilesMatch>
+# Chan tai ve cac file nhay cam
+<IfModule mod_authz_core.c>
+  <FilesMatch "\.(sql|md)$">
+    Require all denied
+  </FilesMatch>
+</IfModule>
