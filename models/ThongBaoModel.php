@@ -43,6 +43,7 @@ class ThongBaoModel extends Model
                     $duongDan, $loai, $idThamChieu, $canXuLy ? 1 : 0, $nhacLuc,
                 ]
             );
+            $this->danhThucThietBi($taiKhoan['id']);
         }
         return count($dsTaiKhoan);
     }
@@ -59,8 +60,28 @@ class ThongBaoModel extends Model
                  VALUES (?,?,?,?,?,?)",
                 [$taiKhoan['id'], $tieuDe, $noiDung, $duongDan, $loai, $idThamChieu]
             );
+            $this->danhThucThietBi($taiKhoan['id']);
         }
         return count($dsTaiKhoan);
+    }
+
+    /**
+     * Danh thuc dien thoai/may tinh cua nguoi nhan bang thong bao day.
+     * Nho vay ho nhan duoc tin ngay ca khi da tat ung dung.
+     * Loi o day khong duoc lam hong viec luu du lieu chinh.
+     */
+    private function danhThucThietBi($idTaiKhoan)
+    {
+        if (!$idTaiKhoan) {
+            return;
+        }
+        try {
+            require_once DUONG_DAN_GOC . '/models/PushModel.php';
+            $pushModel = new PushModel();
+            $pushModel->danhThucTaiKhoan($idTaiKhoan);
+        } catch (Exception $e) {
+            // Bo qua: khong gui duoc thong bao day thi van con thong bao trong ung dung
+        }
     }
 
     /** Dem so thong bao chua doc cua 1 tai khoan */
@@ -108,6 +129,57 @@ class ThongBaoModel extends Model
              ORDER BY created_at ASC
              LIMIT 5",
             [(int)$idTaiKhoan]
+        );
+    }
+
+    /**
+     * Danh sach thong bao de Service Worker hien khi nhan tin day.
+     * Khac layCanHienPopup o cho khong xet remind_at, vi luc nay may chu
+     * da quyet dinh la "den luc bao" roi.
+     */
+    public function layChoThongBaoDay($idTaiKhoan)
+    {
+        return $this->truyVan(
+            "SELECT * FROM notifications
+             WHERE user_id = ? AND is_read = 0
+             ORDER BY need_action DESC, created_at DESC
+             LIMIT 3",
+            [(int)$idTaiKhoan]
+        );
+    }
+
+    /**
+     * Cac thong bao den han nhac lai (dung cho tac vu dinh ky tren may chu).
+     * Tra ve danh sach gom user_id de biet can danh thuc ai.
+     */
+    public function layDenHanNhacLai()
+    {
+        return $this->truyVan(
+            "SELECT id, user_id FROM notifications
+             WHERE is_read = 0 AND need_action = 1
+               AND user_id IS NOT NULL
+               AND remind_at IS NOT NULL AND remind_at <= NOW()
+               AND remind_count < " . self::SO_LAN_NHAC_TOI_DA
+        );
+    }
+
+    /**
+     * Hoan lich nhac cua cac thong bao vua duoc gui tin day,
+     * de lan chay ke tiep cua tac vu dinh ky khong gui trung.
+     */
+    public function hoanLichNhac(array $dsId)
+    {
+        if (!$dsId) {
+            return;
+        }
+        $dsId    = array_map('intval', $dsId);
+        $danhDau = implode(',', array_fill(0, count($dsId), '?'));
+
+        $this->thucThi(
+            "UPDATE notifications
+             SET remind_at = DATE_ADD(NOW(), INTERVAL " . self::PHUT_NHAC_LAI . " MINUTE)
+             WHERE id IN ($danhDau)",
+            $dsId
         );
     }
 

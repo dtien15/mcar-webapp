@@ -207,10 +207,7 @@ $favicon = 'data:image/svg+xml,' . rawurlencode(
       Notification.requestPermission().then(function (ketQua) {
         capNhatOMoi();
         if (ketQua === 'granted') {
-          new Notification('MCAR', {
-            body: 'Đã bật thông báo. Bạn sẽ nhận được tin khi có chuyến xe mới.',
-            icon: '<?= duongDan('assets/img/icon-192.png') ?>'
-          });
+          dangKyNhanThongBaoDay(true);
         }
       });
     });
@@ -306,10 +303,89 @@ $favicon = 'data:image/svg+xml,' . rawurlencode(
 })();
 
 // ---------------------------------------------------------------
+// Thong bao day: nhan duoc ca khi da tat ung dung
+// ---------------------------------------------------------------
+var URL_KHOA_PUSH   = '<?= duongDan('thongbao/khoapush') ?>';
+var URL_DANG_KY_PUSH= '<?= duongDan('thongbao/dangkypush') ?>';
+var URL_HUY_PUSH    = '<?= duongDan('thongbao/huypush') ?>';
+
+// Doi khoa dang base64url thanh mang byte ma trinh duyet yeu cau
+function khoaSangByte(khoaBase64Url) {
+  var dem = '='.repeat((4 - khoaBase64Url.length % 4) % 4);
+  var chuoi = (khoaBase64Url + dem).replace(/-/g, '+').replace(/_/g, '/');
+  var thoi = atob(chuoi);
+  var mang = new Uint8Array(thoi.length);
+  for (var i = 0; i < thoi.length; i++) mang[i] = thoi.charCodeAt(i);
+  return mang;
+}
+
+function dangKyNhanThongBaoDay(baoKetQua) {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    if (baoKetQua) alert('Trình duyệt này không hỗ trợ thông báo đẩy. Hãy dùng Chrome trên Android, '
+      + 'hoặc trên iPhone hãy thêm ứng dụng vào Màn hình chính trước.');
+    return;
+  }
+  if (Notification.permission !== 'granted') return;
+
+  navigator.serviceWorker.ready
+    .then(function (dangKySw) {
+      return dangKySw.pushManager.getSubscription().then(function (daCo) {
+        if (daCo) return daCo;
+        return fetch(URL_KHOA_PUSH, { credentials: 'same-origin' })
+          .then(function (r) { return r.json(); })
+          .then(function (kq) {
+            if (!kq.khoa) throw new Error('Máy chủ chưa có khóa thông báo đẩy');
+            return dangKySw.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: khoaSangByte(kq.khoa)
+            });
+          });
+      });
+    })
+    .then(function (dangKy) {
+      var khoa = dangKy.toJSON().keys || {};
+      return fetch(URL_DANG_KY_PUSH, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          endpoint: dangKy.endpoint, p256dh: khoa.p256dh, auth: khoa.auth
+        })
+      });
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (kq) {
+      if (baoKetQua) {
+        if (kq.ok) {
+          new Notification('Đã bật thông báo', {
+            body: 'Từ giờ bạn sẽ nhận được tin ngay cả khi đã tắt ứng dụng.',
+            icon: '<?= duongDan('assets/img/icon-192.png') ?>'
+          });
+        } else {
+          alert('Chưa bật được thông báo đẩy: ' + (kq.loi || 'lỗi không rõ'));
+        }
+      }
+    })
+    .catch(function (e) {
+      if (baoKetQua) {
+        alert('Chưa bật được thông báo đẩy: ' + e.message
+            + '\n\nLưu ý: chức năng này cần trang web chạy HTTPS.');
+      }
+    });
+}
+
+// ---------------------------------------------------------------
 // Dang ky Service Worker (de cai dat duoc nhu ung dung dien thoai)
 // ---------------------------------------------------------------
-if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('<?= duongDan('sw.js') ?>').catch(function () {});
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  navigator.serviceWorker.register('<?= duongDan('sw.js') ?>')
+    .then(function () {
+      // Da cap quyen tu truoc thi tu dong dang ky lai (vd doi thiet bi, xoa du lieu)
+      if ('Notification' in window && Notification.permission === 'granted') {
+        dangKyNhanThongBaoDay(false);
+      }
+    })
+    .catch(function () {});
 }
 </script>
 </body>

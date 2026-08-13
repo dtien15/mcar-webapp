@@ -77,11 +77,57 @@ tên hàm và biến viết bằng tiếng Việt không dấu (`danhSach`, `lay
 
 ---
 
-## 3. Nâng cấp từ bản 1.0 (đã chạy trên hosting)
+## 3. Nâng cấp từ bản cũ (đã chạy trên hosting)
 
-- **Không cần import lại database** — cấu trúc bảng giữ nguyên.
-- Chỉ cần chạy 1 lần `database/migration_trip_workflow.sql` (nếu chưa chạy) trong phpMyAdmin → tab **SQL**.
-- File `config/db.php` cũ **vẫn dùng được** — hệ thống tự nhận. Khi rảnh có thể chuyển sang `config/cauhinh.php`.
+**Không cần import lại database.** Chỉ cần chạy các file migration còn thiếu trong
+phpMyAdmin → tab **SQL** (mỗi file chỉ chạy 1 lần):
+
+| File | Thêm chức năng gì |
+|---|---|
+| `database/migration_trip_workflow.sql` | Quy trình xác nhận chuyến xe |
+| `database/migration_thongbao.sql` | Hệ thống thông báo |
+| `database/migration_push.sql` | Thông báo đẩy về điện thoại |
+
+File `config/db.php` cũ **vẫn dùng được** — hệ thống tự nhận.
+
+---
+
+## 3b. Bật thông báo đẩy về điện thoại (quan trọng)
+
+Thông báo đẩy giúp tài xế nhận tin **ngay cả khi đã tắt hẳn ứng dụng**, giống Zalo/Facebook.
+
+### Điều kiện bắt buộc
+- Trang web phải chạy **HTTPS** (cPanel → SSL/TLS Status → bật AutoSSL). Không có HTTPS thì
+  trình duyệt chặn hoàn toàn, không có cách nào khác.
+- Đã chạy `database/migration_push.sql`.
+
+### Cài đặt lịch chạy tự động (để nhắc lại khi tài xế bỏ quên)
+cPanel → **Cron Jobs** → thêm lịch chạy **mỗi 10 phút**:
+
+- Common Settings: chọn `Once every 10 minutes` (hoặc điền `*/10 * * * *`)
+- Command:
+  ```
+  /usr/local/bin/php /home/TEN_TAI_KHOAN/DUONG_DAN_WEB/cron.php
+  ```
+  (thay `TEN_TAI_KHOAN` và `DUONG_DAN_WEB` cho đúng, ví dụ
+  `/home/muathem1/test.muatheme247.com/cron.php`)
+
+> Nếu hosting không cho chạy cron dòng lệnh, có thể dùng dịch vụ gọi URL định kỳ với địa chỉ
+> `https://ten-mien.com/cron.php?khoa=KHOA_BI_MAT`. Khóa nằm trong bảng `app_settings`,
+> dòng `cron_khoa` (hệ thống tự sinh trong lần chạy đầu).
+
+### Hướng dẫn tài xế bật thông báo
+- **Android**: mở web bằng Chrome → bấm **"Bật thông báo"** → chọn Cho phép.
+  Nên bấm thêm menu ⋮ → **"Thêm vào Màn hình chính"** để dùng như ứng dụng thật.
+- **iPhone**: bắt buộc mở bằng **Safari** → nút Chia sẻ → **"Thêm vào MH chính"** →
+  mở ứng dụng vừa thêm → bật thông báo trong đó. (Quy định của Apple, iOS 16.4 trở lên.)
+
+Tài xế xem trạng thái thông báo của mình ở menu **Thông báo**.
+
+### Khóa bảo mật
+Hệ thống tự sinh cặp khóa VAPID trong lần dùng đầu tiên và lưu ở bảng `app_settings`.
+**Không xóa 2 dòng `vapid_cong_khai` và `vapid_bi_mat`** — xóa đi thì mọi thiết bị đã đăng ký
+sẽ ngừng nhận thông báo và phải bật lại từ đầu.
 
 ---
 
