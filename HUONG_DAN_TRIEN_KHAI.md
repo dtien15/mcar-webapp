@@ -1,42 +1,155 @@
-# Hướng dẫn triển khai webapp MCAR lên cPanel
+# MCAR WebApp 2.0 — Hệ thống quản lý xe & tài xế
 
-## 1. Chuẩn bị database
-1. Vào cPanel → **MySQL Databases**
-2. Tạo database mới, ví dụ: `mcar` (tên đầy đủ sẽ là `cpaneluser_mcar`)
-3. Tạo user MySQL mới + đặt mật khẩu mạnh, gắn user vào database với **All Privileges**
-4. Vào **phpMyAdmin** → chọn database vừa tạo → tab **Import** → chọn file `database/mcar.sql` → Go
+Ứng dụng PHP thuần theo mô hình **MVC**, chạy được trên hosting cPanel thông thường
+(PHP 7.4+ / MySQL / MariaDB), không cần Composer hay Node.
 
-## 2. Cấu hình kết nối
-Mở file `config/db.php`, sửa 3 dòng:
-```php
-define('DB_NAME', 'cpaneluser_mcar');   // tên database đầy đủ
-define('DB_USER', 'cpaneluser_dbuser'); // tên user đầy đủ
-define('DB_PASS', 'mật khẩu bạn đặt');
+---
+
+## 1. Cấu trúc thư mục
+
 ```
-`DB_HOST` thường để `localhost`.
+webapp/
+├── index.php              ← Điểm vào duy nhất (Front Controller)
+├── .htaccess              ← Điều hướng URL + chặn truy cập mã nguồn
+│
+├── config/
+│   ├── cauhinh.example.php   ← File mẫu (có trên Git)
+│   └── cauhinh.php           ← File thật, tự tạo trên hosting (KHÔNG có trên Git)
+│
+├── core/                  ← Phần lõi khung MVC
+│   ├── KetNoi.php            Kết nối database (PDO)
+│   ├── Model.php             Lớp cha mọi Model (CRUD sẵn)
+│   ├── Controller.php        Lớp cha mọi Controller
+│   └── Router.php            Phân tích URL → gọi Controller
+│
+├── helpers/
+│   └── HamChung.php       ← Hàm dùng chung (định dạng tiền/ngày, phân quyền, token…)
+│
+├── controllers/           ← Điều khiển (nhận yêu cầu, xử lý, gọi Model)
+│   ├── DangNhapController.php     Đăng nhập / đăng xuất / đổi mật khẩu
+│   ├── TongQuanController.php     Trang tổng quan
+│   ├── ChuyenXeController.php     Chuyến xe (chức năng chính)
+│   ├── XeController.php           Danh mục xe
+│   ├── TaiXeController.php        Danh mục tài xế
+│   ├── LoaiKeoController.php      Danh mục loại kèo
+│   ├── BangGiaController.php      Bảng giá
+│   ├── LuongController.php        Bảng lương + phiếu lương
+│   ├── ThanhToanController.php    Khoản chi & công nợ
+│   ├── BaoCaoController.php       Báo cáo doanh thu
+│   └── NguoiDungController.php    Quản lý tài khoản
+│
+├── models/                ← Truy vấn database
+│   ├── ChuyenXeModel.php   ├── XeModel.php       ├── TaiXeModel.php
+│   ├── LoaiKeoModel.php    ├── BangGiaModel.php  ├── LuongModel.php
+│   ├── ThanhToanModel.php  └── NguoiDungModel.php
+│
+├── views/                 ← Giao diện
+│   ├── layouts/khung.php     Khung chung (sidebar + thanh trên)
+│   ├── dangnhap/  tongquan/  chuyenxe/  xe/  taixe/
+│   └── loaikeo/  banggia/  luong/  thanhtoan/  baocao/  nguoidung/
+│
+├── assets/css/style.css
+└── database/
+    ├── mcar.sql                        ← Cài mới từ đầu
+    └── migration_trip_workflow.sql     ← Nâng cấp DB đã có (chạy 1 lần)
+```
 
-## 3. Upload code
-- Nén toàn bộ thư mục `webapp` (trừ thư mục này) thành file zip
-- cPanel → **File Manager** → vào `public_html` (hoặc subdomain riêng nếu muốn) → Upload → giải nén
-- Đảm bảo file `index.php` nằm ngay trong thư mục gốc của domain/subdomain
+**Quy tắc đặt tên:** file có hậu tố `Controller` / `Model` để nhận biết vai trò,
+tên hàm và biến viết bằng tiếng Việt không dấu (`danhSach`, `layTheoId`, `tinhLai`, `dinhDangTien`…).
 
-## 4. Đăng nhập lần đầu
-- Truy cập `https://tenmien.com/`
-- Tài khoản mặc định: **admin / admin123**
-- Vào **Người dùng** → sửa tài khoản admin → đổi mật khẩu ngay
+---
 
-## 5. Yêu cầu hosting
-- PHP >= 7.4 (khuyến nghị 8.0+)
-- MySQL/MariaDB
-- Extension PDO + pdo_mysql (mặc định có sẵn trên hầu hết cPanel)
+## 2. Cài đặt lần đầu (hosting mới)
 
-## 6. Sau khi lên hosting
-1. Vào **Danh mục Xe / Tài xế / Loại kèo / Bảng giá** — kiểm tra/bổ sung dữ liệu (đã seed sẵn dữ liệu mẫu từ file Excel gốc)
-2. Vào **Chuyến xe** — bắt đầu nhập dữ liệu hàng ngày (hoặc import dần từ Excel cũ)
-3. Cuối tháng vào **Bảng lương** → chọn tháng → bấm "Tính lại lương tất cả tài xế"
-4. Theo dõi công nợ ở mục **Thanh toán / công nợ**
+1. **Tạo database** trong cPanel → *MySQL® Databases* → tạo DB + user → gán **ALL PRIVILEGES**
+2. **Import** `database/mcar.sql` qua phpMyAdmin
+3. **Upload code** vào thư mục web (hoặc dùng Git — xem mục 4)
+4. **Tạo file cấu hình**: copy `config/cauhinh.example.php` → `config/cauhinh.php`, điền:
+   ```php
+   define('DB_NAME', 'tenuser_mcar');
+   define('DB_USER', 'tenuser_mcar');
+   define('DB_PASS', 'mật khẩu của bạn');
+   ```
+5. Truy cập tên miền → đăng nhập `admin` / `admin123` → **đổi mật khẩu ngay**
 
-## Ghi chú bảo mật
-- Đổi mật khẩu admin ngay sau khi cài đặt
-- Không commit/chia sẻ file `config/db.php` chứa mật khẩu thật ra nơi công khai
-- Định kỳ backup database qua phpMyAdmin (Export)
+> Nếu hosting không hỗ trợ `.htaccess` rewrite (trang chủ vào được nhưng bấm menu bị 404),
+> mở `config/cauhinh.php` sửa `define('URL_DEP', true);` thành `false`.
+
+---
+
+## 3. Nâng cấp từ bản 1.0 (đã chạy trên hosting)
+
+- **Không cần import lại database** — cấu trúc bảng giữ nguyên.
+- Chỉ cần chạy 1 lần `database/migration_trip_workflow.sql` (nếu chưa chạy) trong phpMyAdmin → tab **SQL**.
+- File `config/db.php` cũ **vẫn dùng được** — hệ thống tự nhận. Khi rảnh có thể chuyển sang `config/cauhinh.php`.
+
+---
+
+## 4. Quy trình cập nhật code qua Git
+
+Máy lập trình → GitHub → cPanel:
+
+1. Code được đẩy lên GitHub (`git push`)
+2. Trong cPanel → **Git™ Version Control** → **Manage** → tab **Pull or Deploy**
+3. Bấm **Update from Remote** → **Deploy HEAD Commit**
+
+File `config/cauhinh.php` và `config/db.php` không nằm trong Git nên không bị ghi đè khi deploy.
+
+---
+
+## 5. Quy trình nghiệp vụ chuyến xe
+
+```
+[Kế toán/Admin]              [Tài xế]                    [Kế toán/Admin]
+Tạo chuyến, gán xe,   →   Nhập chi phí thực tế    →    Kiểm tra, bấm
+tài xế, giá tiền          (xăng dầu, VETC, phạt…)      "Chốt hoàn thành"
+     ↓                          ↓                            ↓
+  "Mới giao"            "Tài xế đã xác nhận"           "Hoàn thành"
+```
+
+- Tài xế **không sửa được** thông tin công ty giao (ngày, tuyến, xe, giá tiền) — chỉ xem để đối chiếu.
+- Chuyến đã **Hoàn thành** thì kế toán không sửa được; chỉ Quản trị viên mới sửa hoặc **Mở lại**.
+
+---
+
+## 6. Công thức tính lương
+
+```
+Tổng lương  = Lương cơ bản + Lưu đêm + Tiền cuốc xe + Phí sân bay + Phát sinh − Phạt
+Còn lại     = Tổng lương + Số dư kỳ trước − Tiền tài xế đã thu của khách
+              + Hoàn tiền − Công ty đã trả
+```
+- **Còn lại > 0**: công ty còn nợ tài xế
+- **Còn lại < 0**: tài xế còn nợ công ty (số dư này tự động chuyển sang kỳ sau)
+
+Vào **Bảng lương** → chọn tháng → **Tính lại lương** (tính lại được nhiều lần, số tiền
+"Công ty đã trả" đã nhập tay sẽ được giữ nguyên).
+
+---
+
+## 7. Phân quyền
+
+| Chức năng | Quản trị viên | Kế toán | Tài xế |
+|---|:---:|:---:|:---:|
+| Tổng quan | ✓ | ✓ | ✓ (số liệu của mình) |
+| Xem chuyến xe | tất cả | tất cả | của mình |
+| Thêm/sửa/xóa chuyến xe | ✓ | ✓ | — |
+| Nhập chi phí & xác nhận chuyến | — | — | ✓ |
+| Chốt hoàn thành chuyến | ✓ | ✓ | — |
+| Mở lại chuyến đã chốt | ✓ | — | — |
+| Bảng lương / phiếu lương | ✓ | ✓ | của mình |
+| Thanh toán & công nợ, Báo cáo | ✓ | ✓ | — |
+| Danh mục (xe, tài xế, loại kèo, bảng giá) | ✓ | ✓ | — |
+| Quản lý tài khoản | ✓ | — | — |
+
+---
+
+## 8. Bảo mật
+
+- Mọi truy vấn dùng **prepared statement** (chống SQL Injection)
+- Mọi dữ liệu hiển thị đều qua hàm `h()` (chống XSS)
+- Mọi form POST có **token chống giả mạo yêu cầu (CSRF)**
+- Mật khẩu lưu dạng băm `password_hash()`
+- `.htaccess` chặn truy cập trực tiếp vào `config/`, `core/`, `models/`, `database/`…
+
+**Việc cần làm ngay sau khi cài:** đổi mật khẩu tài khoản `admin`.

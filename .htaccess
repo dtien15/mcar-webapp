@@ -1,0 +1,20 @@
+# =====================================================================
+# MCAR WebApp - Cau hinh Apache / LiteSpeed
+# =====================================================================
+
+# Chan truy cap truc tiep vao cac thu muc ma nguon
+RewriteEngine On
+RewriteRule ^(config|core|models|controllers|views|helpers|database)/ - [F,L]
+
+# Dieu huong moi request vao index.php (front controller)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+
+# Chan liet ke thu muc
+Options -Indexes
+
+# Chan truy cap file nhay cam
+<FilesMatch "\.(sql|md|example\.php)$">
+  Require all denied
+</FilesMatch>

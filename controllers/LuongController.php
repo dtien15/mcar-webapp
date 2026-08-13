@@ -1,0 +1,111 @@
+<?php
+// =====================================================================
+// LuongController - Bang luong tai xe theo thang + phieu luong chi tiet
+// =====================================================================
+
+class LuongController extends Controller
+{
+    /** Bang luong cua mot ky */
+    public function danhSach()
+    {
+        $this->yeuCauDangNhap();
+
+        $thang = max(1, min(12, (int)layGet('thang', date('n'))));
+        $nam   = (int)layGet('nam', date('Y'));
+
+        $luongModel = $this->model('LuongModel');
+
+        // Tai xe chi xem duoc bang luong cua chinh minh
+        if (laTaiXe()) {
+            $idTaiXe = taiKhoanHienTai()['id_tai_xe'];
+            $bangLuong = [];
+            if ($idTaiXe) {
+                $cuaToi = $luongModel->layCuaTaiXe($idTaiXe, $thang, $nam);
+                if ($cuaToi) {
+                    $bangLuong[] = $cuaToi;
+                }
+            }
+        } else {
+            $bangLuong = $luongModel->layTheoKy($thang, $nam);
+        }
+
+        $this->view('luong/danhsach', [
+            'thang'     => $thang,
+            'nam'       => $nam,
+            'bangLuong' => $bangLuong,
+        ], 'Bảng lương');
+    }
+
+    /** Tinh lai luong cho toan bo tai xe trong ky */
+    public function tinh()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->yeuCauPost();
+
+        $thang = max(1, min(12, (int)($_POST['thang'] ?? date('n'))));
+        $nam   = (int)($_POST['nam'] ?? date('Y'));
+
+        $soLuong = $this->model('LuongModel')->tinhLaiTatCa($thang, $nam);
+
+        datThongBao("Đã tính lại lương cho {$soLuong} tài xế trong kỳ {$thang}/{$nam}.");
+        chuyenTrang("luong?thang={$thang}&nam={$nam}");
+    }
+
+    /** Cap nhat so tien cong ty da thanh toan */
+    public function capNhatThanhToan()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->yeuCauPost();
+
+        $id    = (int)($_POST['id'] ?? 0);
+        $thang = (int)($_POST['thang'] ?? date('n'));
+        $nam   = (int)($_POST['nam'] ?? date('Y'));
+
+        $this->model('LuongModel')->capNhatThanhToan(
+            $id,
+            $this->soTuForm('cty_da_tra'),
+            $this->chuTuForm('ghi_chu')
+        );
+
+        datThongBao('Đã cập nhật thanh toán lương.');
+        chuyenTrang("luong?thang={$thang}&nam={$nam}");
+    }
+
+    /** Phieu luong chi tiet cua 1 tai xe trong 1 ky (in duoc) */
+    public function phieu($idTaiXe = 0, $thang = 0, $nam = 0)
+    {
+        $this->yeuCauDangNhap();
+
+        $idTaiXe = (int)$idTaiXe;
+        $thang   = (int)$thang ?: (int)date('n');
+        $nam     = (int)$nam ?: (int)date('Y');
+
+        // Tai xe chi duoc xem phieu luong cua chinh minh
+        if (laTaiXe() && taiKhoanHienTai()['id_tai_xe'] != $idTaiXe) {
+            http_response_code(403);
+            die('Bạn chỉ được xem phiếu lương của chính mình.');
+        }
+
+        $luongModel    = $this->model('LuongModel');
+        $chuyenXeModel = $this->model('ChuyenXeModel');
+        $taiXeModel    = $this->model('TaiXeModel');
+
+        $bangLuong = $luongModel->layCuaTaiXe($idTaiXe, $thang, $nam);
+        if (!$bangLuong) {
+            datThongBao('Chưa có dữ liệu lương của kỳ này. Hãy bấm "Tính lại lương" trước.', 'danger');
+            chuyenTrang("luong?thang={$thang}&nam={$nam}");
+        }
+
+        $tuNgay  = layNgayDauThang($thang, $nam);
+        $denNgay = layNgayCuoiThang($thang, $nam);
+
+        $this->view('luong/phieuluong', [
+            'thang'     => $thang,
+            'nam'       => $nam,
+            'taiXe'     => $taiXeModel->layTheoId($idTaiXe),
+            'bangLuong' => $bangLuong,
+            'dsChuyen'  => $chuyenXeModel->chuyenXeCuaTaiXeTheoKy($idTaiXe, $tuNgay, $denNgay),
+            'lichSu'    => $luongModel->lichSuTaiXe($idTaiXe, 6),
+        ], 'Phiếu lương');
+    }
+}
