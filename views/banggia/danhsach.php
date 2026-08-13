@@ -1,5 +1,5 @@
 <div class="the">
-  <div class="the-dau"><?= $dangSua ? '✏️ Sửa tuyến trong bảng giá' : '➕ Thêm tuyến mới vào bảng giá' ?></div>
+  <div class="the-dau"><?= $dangSua ? bieuTuong('pencil') . ' Sửa tuyến trong bảng giá' : bieuTuong('plus') . ' Thêm tuyến mới vào bảng giá' ?></div>
   <div class="the-than">
     <form method="post" action="<?= duongDan('banggia/luu') ?>" class="row g-2">
       <?php truongToken(); ?>
@@ -44,7 +44,7 @@
       </div>
 
       <div class="col-12 mt-2">
-        <button class="btn btn-primary"><?= $dangSua ? '💾 Cập nhật' : '➕ Thêm mới' ?></button>
+        <button class="btn btn-primary"><?= $dangSua ? bieuTuong('device-floppy') . ' Cập nhật' : bieuTuong('plus') . ' Thêm mới' ?></button>
         <?php if ($dangSua): ?><a href="<?= duongDan('banggia') ?>" class="btn btn-light">Hủy</a><?php endif; ?>
       </div>
     </form>
@@ -52,7 +52,7 @@
 </div>
 
 <div class="the">
-  <div class="the-dau">💵 Bảng giá tuyến / tour (<?= count($danhSach) ?>)</div>
+  <div class="the-dau"><?= bieuTuong('tag') ?> Bảng giá tuyến / tour (<?= count($danhSach) ?>)</div>
   <div class="the-than the-than-khong-dem bang-cuon">
     <table class="bang">
       <thead>

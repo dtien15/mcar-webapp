@@ -48,11 +48,11 @@
         <input type="text" name="tu_khoa" class="form-control form-control-sm" placeholder="Điểm đón, ghi chú..." value="<?= h($loc['tu_khoa']) ?>">
       </div>
       <div class="col-12 d-flex gap-2">
-        <button class="btn btn-primary btn-sm">🔍 Lọc</button>
+        <button class="btn btn-primary btn-sm"><?= bieuTuong('search') ?> Lọc</button>
         <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light btn-sm">Bỏ lọc</a>
         <?php if (laQuanLy()): ?>
-          <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm ms-auto">➕ Thêm chuyến xe</a>
-          <a href="<?= duongDan('chuyenxe/xuatcsv?' . http_build_query($loc)) ?>" class="btn btn-light btn-sm">⬇ Xuất Excel</a>
+          <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm ms-auto"><?= bieuTuong('plus') ?> Thêm chuyến xe</a>
+          <a href="<?= duongDan('chuyenxe/xuatcsv?' . http_build_query($loc)) ?>" class="btn btn-light btn-sm"><?= bieuTuong('download') ?> Xuất Excel</a>
         <?php endif; ?>
       </div>
     </form>
@@ -62,19 +62,19 @@
 <!-- Tong hop nhanh -->
 <div class="luoi-thong-ke">
   <div class="o-thong-ke">
-    <div class="bieu-tuong nen-xanh">🚕</div>
+    <div class="bieu-tuong nen-xanh"><?= bieuTuong('route') ?></div>
     <div><div class="nhan">Số cuốc</div><div class="gia-tri"><?= (int)$tongHop['so_chuyen'] ?></div></div>
   </div>
   <div class="o-thong-ke">
-    <div class="bieu-tuong nen-luc">💵</div>
+    <div class="bieu-tuong nen-luc"><?= bieuTuong('tag') ?></div>
     <div><div class="nhan">Tổng thu</div><div class="gia-tri"><?= dinhDangTien($tongHop['thu_vnd']) ?> <span class="don-vi">₫</span></div></div>
   </div>
   <div class="o-thong-ke">
-    <div class="bieu-tuong nen-tim">🧑‍✈️</div>
+    <div class="bieu-tuong nen-tim"><?= bieuTuong('steering-wheel') ?></div>
     <div><div class="nhan">Tiền cuốc xe</div><div class="gia-tri"><?= dinhDangTien($tongHop['tien_tai']) ?> <span class="don-vi">₫</span></div></div>
   </div>
   <div class="o-thong-ke">
-    <div class="bieu-tuong nen-cam">⛽</div>
+    <div class="bieu-tuong nen-cam"><?= bieuTuong('gas-station') ?></div>
     <div><div class="nhan">Xăng dầu</div><div class="gia-tri"><?= dinhDangTien($tongHop['xang_dau']) ?> <span class="don-vi">₫</span></div></div>
   </div>
 </div>
@@ -134,7 +134,7 @@
                   <form method="post" action="<?= duongDan('chuyenxe/chot') ?>" onsubmit="return confirm('Chốt hoàn thành chuyến xe này?');">
                     <?php truongToken(); ?>
                     <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-                    <button class="btn btn-sm btn-success">✔ Chốt</button>
+                    <button class="btn btn-sm btn-success"><?= bieuTuong('check') ?> Chốt</button>
                   </form>
                 <?php endif; ?>
 
@@ -142,7 +142,7 @@
                   <form method="post" action="<?= duongDan('chuyenxe/molai') ?>" onsubmit="return confirm('Mở lại chuyến xe đã chốt?');">
                     <?php truongToken(); ?>
                     <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-                    <button class="btn btn-sm btn-outline-secondary">↺ Mở lại</button>
+                    <button class="btn btn-sm btn-outline-secondary"><?= bieuTuong('arrow-back-up') ?> Mở lại</button>
                   </form>
                 <?php endif; ?>
 
@@ -155,7 +155,7 @@
               <?php elseif ($duocXacNhan): ?>
                 <button type="button" class="btn btn-sm btn-primary"
                         data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">
-                  ✍ Nhập &amp; Xác nhận
+                  <?= bieuTuong('writing') ?> Nhập &amp; Xác nhận
                 </button>
               <?php endif; ?>
             </div>
@@ -193,7 +193,7 @@
       <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
 
       <div class="modal-header">
-        <h5 class="modal-title">✍ Xác nhận chuyến xe ngày <?= dinhDangNgay($chuyen['trip_date']) ?></h5>
+        <h5 class="modal-title"><?= bieuTuong('writing') ?> Xác nhận chuyến xe ngày <?= dinhDangNgay($chuyen['trip_date']) ?></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
@@ -294,7 +294,7 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-        <button class="btn btn-primary">✔ Xác nhận chuyến xe</button>
+        <button class="btn btn-primary"><?= bieuTuong('check') ?> Xác nhận chuyến xe</button>
       </div>
     </form>
   </div>

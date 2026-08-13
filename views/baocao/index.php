@@ -29,9 +29,9 @@ $loiNhuan     = (float)$tongHop['thu_vnd'] - (float)$tongHop['tien_tai'] - (floa
         <input type="date" name="den_ngay" class="form-control form-control-sm" value="<?= h($denNgay) ?>">
       </div>
       <div class="col-6 col-md-4 d-flex gap-2">
-        <button class="btn btn-primary btn-sm">🔍 Xem báo cáo</button>
+        <button class="btn btn-primary btn-sm"><?= bieuTuong('search') ?> Xem báo cáo</button>
         <a href="<?= duongDan('baocao/xuatcsv?' . http_build_query(['nam' => $nam, 'tu_ngay' => $tuNgay, 'den_ngay' => $denNgay])) ?>"
-           class="btn btn-light btn-sm">⬇ Xuất Excel</a>
+           class="btn btn-light btn-sm"><?= bieuTuong('download') ?> Xuất Excel</a>
       </div>
     </form>
   </div>
@@ -40,27 +40,27 @@ $loiNhuan     = (float)$tongHop['thu_vnd'] - (float)$tongHop['tien_tai'] - (floa
 <!-- Tong hop ky bao cao -->
 <div class="luoi-thong-ke">
   <div class="o-thong-ke">
-    <div class="bieu-tuong nen-xanh">🚕</div>
+    <div class="bieu-tuong nen-xanh"><?= bieuTuong('route') ?></div>
     <div><div class="nhan">Số cuốc xe</div><div class="gia-tri"><?= (int)$tongHop['so_chuyen'] ?></div></div>
   </div>
   <div class="o-thong-ke">
-    <div class="bieu-tuong nen-luc">💵</div>
+    <div class="bieu-tuong nen-luc"><?= bieuTuong('tag') ?></div>
     <div><div class="nhan">Tổng doanh thu</div><div class="gia-tri"><?= dinhDangTien($tongHop['thu_vnd']) ?> <span class="don-vi">₫</span></div></div>
   </div>
   <div class="o-thong-ke">
-    <div class="bieu-tuong nen-tim">🧑‍✈️</div>
+    <div class="bieu-tuong nen-tim"><?= bieuTuong('steering-wheel') ?></div>
     <div><div class="nhan">Tiền tài xế</div><div class="gia-tri"><?= dinhDangTien($tongHop['tien_tai']) ?> <span class="don-vi">₫</span></div></div>
   </div>
   <div class="o-thong-ke">
-    <div class="bieu-tuong nen-cam">⛽</div>
+    <div class="bieu-tuong nen-cam"><?= bieuTuong('gas-station') ?></div>
     <div><div class="nhan">Xăng dầu + bảo dưỡng</div><div class="gia-tri"><?= dinhDangTien($tongHop['xang_dau'] + $tongHop['bao_duong']) ?> <span class="don-vi">₫</span></div></div>
   </div>
   <div class="o-thong-ke">
-    <div class="bieu-tuong nen-do">🧾</div>
+    <div class="bieu-tuong nen-do"><?= bieuTuong('receipt') ?></div>
     <div><div class="nhan">Khoản chi khác của cty</div><div class="gia-tri"><?= dinhDangTien($chiPhiCty) ?> <span class="don-vi">₫</span></div></div>
   </div>
   <div class="o-thong-ke">
-    <div class="bieu-tuong <?= $loiNhuan >= 0 ? 'nen-luc' : 'nen-do' ?>">📊</div>
+    <div class="bieu-tuong <?= $loiNhuan >= 0 ? 'nen-luc' : 'nen-do' ?>"><?= bieuTuong('layout-dashboard') ?></div>
     <div>
       <div class="nhan">Chênh lệch thu − chi</div>
       <div class="gia-tri <?= $loiNhuan < 0 ? 'so-am' : '' ?>"><?= dinhDangTien($loiNhuan) ?> <span class="don-vi">₫</span></div>
@@ -71,7 +71,7 @@ $loiNhuan     = (float)$tongHop['thu_vnd'] - (float)$tongHop['tien_tai'] - (floa
 <!-- Bieu do 12 thang -->
 <div class="the">
   <div class="the-dau">
-    <span>📈 Doanh thu theo tháng năm <?= (int)$nam ?> (VNĐ)</span>
+    <span><?= bieuTuong('chart-bar') ?> Doanh thu theo tháng năm <?= (int)$nam ?> (VNĐ)</span>
   </div>
   <div class="the-than">
     <div class="bieu-do-cot">
@@ -95,7 +95,7 @@ $loiNhuan     = (float)$tongHop['thu_vnd'] - (float)$tongHop['tien_tai'] - (floa
   <!-- Theo xe -->
   <div class="col-lg-6">
     <div class="the">
-      <div class="the-dau">🚙 Doanh thu theo xe</div>
+      <div class="the-dau"><?= bieuTuong('car') ?> Doanh thu theo xe</div>
       <div class="the-than the-than-khong-dem bang-cuon">
         <table class="bang">
           <thead>
@@ -124,7 +124,7 @@ $loiNhuan     = (float)$tongHop['thu_vnd'] - (float)$tongHop['tien_tai'] - (floa
   <!-- Theo tai xe -->
   <div class="col-lg-6">
     <div class="the">
-      <div class="the-dau">🧑‍✈️ Doanh thu theo tài xế</div>
+      <div class="the-dau"><?= bieuTuong('steering-wheel') ?> Doanh thu theo tài xế</div>
       <div class="the-than the-than-khong-dem bang-cuon">
         <table class="bang">
           <thead>
@@ -150,7 +150,7 @@ $loiNhuan     = (float)$tongHop['thu_vnd'] - (float)$tongHop['tien_tai'] - (floa
   <!-- Theo loai keo -->
   <div class="col-lg-6">
     <div class="the">
-      <div class="the-dau">📋 Doanh thu theo loại kèo</div>
+      <div class="the-dau"><?= bieuTuong('list-details') ?> Doanh thu theo loại kèo</div>
       <div class="the-than the-than-khong-dem bang-cuon">
         <table class="bang">
           <thead>

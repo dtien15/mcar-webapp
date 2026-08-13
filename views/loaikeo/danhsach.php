@@ -1,7 +1,7 @@
 <div class="row g-3">
   <div class="col-lg-4">
     <div class="the">
-      <div class="the-dau"><?= $dangSua ? '✏️ Sửa loại kèo' : '➕ Thêm loại kèo' ?></div>
+      <div class="the-dau"><?= $dangSua ? bieuTuong('pencil') . ' Sửa loại kèo' : bieuTuong('plus') . ' Thêm loại kèo' ?></div>
       <div class="the-than">
         <form method="post" action="<?= duongDan('loaikeo/luu') ?>">
           <?php truongToken(); ?>
@@ -20,7 +20,7 @@
             <input type="number" step="0.01" name="phan_tram_chia" class="form-control" value="<?= h($dangSua['revenue_share_percent'] ?? 0) ?>">
           </div>
 
-          <button class="btn btn-primary"><?= $dangSua ? '💾 Cập nhật' : '➕ Thêm mới' ?></button>
+          <button class="btn btn-primary"><?= $dangSua ? bieuTuong('device-floppy') . ' Cập nhật' : bieuTuong('plus') . ' Thêm mới' ?></button>
           <?php if ($dangSua): ?><a href="<?= duongDan('loaikeo') ?>" class="btn btn-light">Hủy</a><?php endif; ?>
         </form>
       </div>
@@ -29,7 +29,7 @@
 
   <div class="col-lg-8">
     <div class="the">
-      <div class="the-dau">📋 Danh sách loại kèo (<?= count($danhSach) ?>)</div>
+      <div class="the-dau"><?= bieuTuong('list-details') ?> Danh sách loại kèo (<?= count($danhSach) ?>)</div>
       <div class="the-than the-than-khong-dem bang-cuon">
         <table class="bang">
           <thead>

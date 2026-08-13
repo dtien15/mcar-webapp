@@ -47,7 +47,12 @@ body {
   padding: 18px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, .08);
 }
-.thanh-ben-dau .logo { font-size: 26px; line-height: 1; }
+.thanh-ben-dau .logo {
+  font-size: 26px;
+  line-height: 1;
+  color: #60a5fa;
+  display: inline-flex;
+}
 .thanh-ben-dau .ten-he-thong { color: #fff; font-weight: 700; font-size: 17px; letter-spacing: .5px; }
 .thanh-ben-dau .mo-ta { font-size: 11px; color: #94a3b8; }
 
@@ -74,7 +79,15 @@ body {
 }
 .muc-menu:hover { background: rgba(255, 255, 255, .07); color: #fff; }
 .muc-menu.dang-chon { background: var(--mau-chinh); color: #fff; font-weight: 600; }
-.muc-menu .icon { width: 20px; text-align: center; font-size: 15px; }
+.muc-menu .icon {
+  width: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  opacity: .85;
+}
+.muc-menu.dang-chon .icon { opacity: 1; }
 .muc-menu .nhan { flex: 1; }
 .muc-menu .huy-hieu {
   background: #ef4444;
@@ -116,10 +129,17 @@ body {
   display: none;
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: 22px;
   cursor: pointer;
   color: var(--mau-chu);
+  line-height: 1;
 }
+
+/* Bieu tuong trong tieu de the va nut bam */
+.the-dau .ti { font-size: 17px; vertical-align: -3px; color: var(--mau-chinh); margin-right: 4px; }
+.btn .ti { font-size: 15px; vertical-align: -2px; }
+.dropdown-item .ti { font-size: 16px; vertical-align: -2px; }
+legend .ti { font-size: 15px; vertical-align: -2px; }
 
 .btn-tai-khoan {
   background: none;
@@ -190,7 +210,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 23px;
   flex-shrink: 0;
 }
 .o-thong-ke .nhan { font-size: 12px; color: var(--mau-chu-nhat); margin-bottom: 2px; }

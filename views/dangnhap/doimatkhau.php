@@ -1,5 +1,5 @@
 <div class="the" style="max-width:520px">
-  <div class="the-dau">🔑 Đổi mật khẩu</div>
+  <div class="the-dau"><?= bieuTuong('key') ?> Đổi mật khẩu</div>
   <div class="the-than">
     <form method="post" action="<?= duongDan('dangnhap/luumatkhau') ?>">
       <?php truongToken(); ?>

@@ -18,19 +18,28 @@ try {
 }
 
 $menu = [
-    ['route' => 'tongquan',  'nhan' => 'Tổng quan',           'icon' => '📊', 'quyen' => ['admin','ketoan','taixe']],
-    ['route' => 'chuyenxe',  'nhan' => 'Chuyến xe',           'icon' => '🚕', 'quyen' => ['admin','ketoan','taixe'], 'huyHieu' => $soChoXuLy],
-    ['route' => 'luong',     'nhan' => 'Bảng lương',          'icon' => '💰', 'quyen' => ['admin','ketoan','taixe']],
-    ['route' => 'thanhtoan', 'nhan' => 'Thanh toán & công nợ','icon' => '🧾', 'quyen' => ['admin','ketoan']],
-    ['route' => 'baocao',    'nhan' => 'Báo cáo doanh thu',   'icon' => '📈', 'quyen' => ['admin','ketoan']],
+    ['route' => 'tongquan',  'nhan' => 'Tổng quan',           'icon' => 'layout-dashboard', 'quyen' => ['admin','ketoan','taixe']],
+    ['route' => 'chuyenxe',  'nhan' => 'Chuyến xe',           'icon' => 'route',            'quyen' => ['admin','ketoan','taixe'], 'huyHieu' => $soChoXuLy],
+    ['route' => 'luong',     'nhan' => 'Bảng lương',          'icon' => 'report-money',     'quyen' => ['admin','ketoan','taixe']],
+    ['route' => 'thanhtoan', 'nhan' => 'Thanh toán & công nợ','icon' => 'receipt',          'quyen' => ['admin','ketoan']],
+    ['route' => 'baocao',    'nhan' => 'Báo cáo doanh thu',   'icon' => 'chart-bar',        'quyen' => ['admin','ketoan']],
     ['nhom'  => 'DANH MỤC',  'quyen' => ['admin','ketoan']],
-    ['route' => 'xe',        'nhan' => 'Xe',                  'icon' => '🚙', 'quyen' => ['admin','ketoan']],
-    ['route' => 'taixe',     'nhan' => 'Tài xế',              'icon' => '🧑‍✈️', 'quyen' => ['admin','ketoan']],
-    ['route' => 'loaikeo',   'nhan' => 'Loại kèo',            'icon' => '📋', 'quyen' => ['admin','ketoan']],
-    ['route' => 'banggia',   'nhan' => 'Bảng giá',            'icon' => '💵', 'quyen' => ['admin','ketoan']],
+    ['route' => 'xe',        'nhan' => 'Xe',                  'icon' => 'car',              'quyen' => ['admin','ketoan']],
+    ['route' => 'taixe',     'nhan' => 'Tài xế',              'icon' => 'steering-wheel',   'quyen' => ['admin','ketoan']],
+    ['route' => 'loaikeo',   'nhan' => 'Loại kèo',            'icon' => 'list-details',     'quyen' => ['admin','ketoan']],
+    ['route' => 'banggia',   'nhan' => 'Bảng giá',            'icon' => 'tag',              'quyen' => ['admin','ketoan']],
     ['nhom'  => 'HỆ THỐNG',  'quyen' => ['admin']],
-    ['route' => 'nguoidung', 'nhan' => 'Người dùng',          'icon' => '👤', 'quyen' => ['admin']],
+    ['route' => 'nguoidung', 'nhan' => 'Người dùng',          'icon' => 'users',            'quyen' => ['admin']],
 ];
+
+// Favicon: bieu tuong o to cua Tabler Icons
+$favicon = 'data:image/svg+xml,' . rawurlencode(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2563eb" '
+    . 'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+    . '<path d="M5 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />'
+    . '<path d="M15 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />'
+    . '<path d="M5 17h-2v-6l2 -5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0h-6m-6 -6h15m-6 0v-5" /></svg>'
+);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -39,15 +48,16 @@ $menu = [
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= h($tieuDe ?? 'MCAR') ?> · <?= h($tenHeThong) ?></title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css" rel="stylesheet">
 <link rel="stylesheet" href="<?= duongDan('assets/css/style.css') ?>">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+<link rel="icon" href="<?= $favicon ?>">
 </head>
 <body>
 
 <!-- Thanh ben -->
 <aside class="thanh-ben" id="thanhBen">
   <div class="thanh-ben-dau">
-    <span class="logo">🚗</span>
+    <span class="logo"><?= bieuTuong('car') ?></span>
     <div>
       <div class="ten-he-thong"><?= h($tenHeThong) ?></div>
       <div class="mo-ta">Quản lý xe &amp; tài xế</div>
@@ -62,7 +72,7 @@ $menu = [
       <?php else: ?>
         <a class="muc-menu <?= $duongDanHienTai === $muc['route'] ? 'dang-chon' : '' ?>"
            href="<?= duongDan($muc['route']) ?>">
-          <span class="icon"><?= $muc['icon'] ?></span>
+          <span class="icon"><?= bieuTuong($muc['icon']) ?></span>
           <span class="nhan"><?= h($muc['nhan']) ?></span>
           <?php if (!empty($muc['huyHieu'])): ?>
             <span class="huy-hieu"><?= (int)$muc['huyHieu'] ?></span>
@@ -82,7 +92,7 @@ $menu = [
 <!-- Vung noi dung -->
 <div class="vung-chinh">
   <header class="thanh-tren">
-    <button class="nut-menu" id="nutMenu" type="button" aria-label="Mở menu">☰</button>
+    <button class="nut-menu" id="nutMenu" type="button" aria-label="Mở menu"><?= bieuTuong('menu-2') ?></button>
     <h1 class="tieu-de-trang"><?= h($tieuDe ?? 'Tổng quan') ?></h1>
 
     <div class="thong-tin-tai-khoan dropdown">
@@ -96,9 +106,9 @@ $menu = [
         </span>
       </button>
       <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="<?= duongDan('dangnhap/doimatkhau') ?>">🔑 Đổi mật khẩu</a></li>
+        <li><a class="dropdown-item" href="<?= duongDan('dangnhap/doimatkhau') ?>"><?= bieuTuong('key', 'me-1') ?> Đổi mật khẩu</a></li>
         <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item text-danger" href="<?= duongDan('dangnhap/thoat') ?>">🚪 Đăng xuất</a></li>
+        <li><a class="dropdown-item text-danger" href="<?= duongDan('dangnhap/thoat') ?>"><?= bieuTuong('logout', 'me-1') ?> Đăng xuất</a></li>
       </ul>
     </div>
   </header>

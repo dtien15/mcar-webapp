@@ -53,28 +53,28 @@ $namHienTai   = (int)date('Y');
 <!-- O thong ke thang -->
 <div class="luoi-thong-ke">
   <div class="o-thong-ke">
-    <div class="bieu-tuong nen-xanh">🚕</div>
+    <div class="bieu-tuong nen-xanh"><?= bieuTuong('route') ?></div>
     <div>
       <div class="nhan">Số cuốc xe</div>
       <div class="gia-tri"><?= (int)$tongHop['so_chuyen'] ?></div>
     </div>
   </div>
   <div class="o-thong-ke">
-    <div class="bieu-tuong nen-luc">💵</div>
+    <div class="bieu-tuong nen-luc"><?= bieuTuong('tag') ?></div>
     <div>
       <div class="nhan">Doanh thu</div>
       <div class="gia-tri"><?= dinhDangTien($tongHop['thu_vnd']) ?> <span class="don-vi">₫</span></div>
     </div>
   </div>
   <div class="o-thong-ke">
-    <div class="bieu-tuong nen-cam">⛽</div>
+    <div class="bieu-tuong nen-cam"><?= bieuTuong('gas-station') ?></div>
     <div>
       <div class="nhan">Chi phí xăng dầu</div>
       <div class="gia-tri"><?= dinhDangTien($tongHop['xang_dau']) ?> <span class="don-vi">₫</span></div>
     </div>
   </div>
   <div class="o-thong-ke">
-    <div class="bieu-tuong nen-tim">🧑‍✈️</div>
+    <div class="bieu-tuong nen-tim"><?= bieuTuong('steering-wheel') ?></div>
     <div>
       <div class="nhan">Tiền tài (chi cho tài xế)</div>
       <div class="gia-tri"><?= dinhDangTien($tongHop['tien_tai']) ?> <span class="don-vi">₫</span></div>
@@ -82,7 +82,7 @@ $namHienTai   = (int)date('Y');
   </div>
   <?php if (laQuanLy()): ?>
   <div class="o-thong-ke">
-    <div class="bieu-tuong nen-vang">🛠️</div>
+    <div class="bieu-tuong nen-vang"><?= bieuTuong('tool') ?></div>
     <div>
       <div class="nhan">Bảo dưỡng + phạt</div>
       <div class="gia-tri"><?= dinhDangTien($tongHop['bao_duong'] + $tongHop['phat']) ?> <span class="don-vi">₫</span></div>
@@ -94,7 +94,7 @@ $namHienTai   = (int)date('Y');
 <!-- Bieu do doanh thu 12 thang -->
 <div class="the">
   <div class="the-dau">
-    <span>📈 Doanh thu theo tháng năm <?= (int)$nam ?> (VNĐ)</span>
+    <span><?= bieuTuong('chart-bar') ?> Doanh thu theo tháng năm <?= (int)$nam ?> (VNĐ)</span>
     <span class="text-muted" style="font-size:12px">Cột đậm màu xanh lá là tháng hiện tại</span>
   </div>
   <div class="the-than">
@@ -119,7 +119,7 @@ $namHienTai   = (int)date('Y');
 <div class="row g-3">
   <div class="col-lg-6">
     <div class="the">
-      <div class="the-dau">🚙 Doanh thu theo xe (tháng <?= (int)$thang ?>)</div>
+      <div class="the-dau"><?= bieuTuong('car') ?> Doanh thu theo xe (tháng <?= (int)$thang ?>)</div>
       <div class="the-than the-than-khong-dem bang-cuon">
         <table class="bang">
           <thead>
@@ -145,7 +145,7 @@ $namHienTai   = (int)date('Y');
 
   <div class="col-lg-6">
     <div class="the">
-      <div class="the-dau">🧑‍✈️ Doanh thu theo tài xế (tháng <?= (int)$thang ?>)</div>
+      <div class="the-dau"><?= bieuTuong('steering-wheel') ?> Doanh thu theo tài xế (tháng <?= (int)$thang ?>)</div>
       <div class="the-than the-than-khong-dem bang-cuon">
         <table class="bang">
           <thead>
@@ -174,7 +174,7 @@ $namHienTai   = (int)date('Y');
 <!-- Chuyen xe gan day -->
 <div class="the">
   <div class="the-dau">
-    <span>🕐 Chuyến xe gần đây</span>
+    <span><?= bieuTuong('clock') ?> Chuyến xe gần đây</span>
     <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-sm btn-light">Xem tất cả</a>
   </div>
   <div class="the-than the-than-khong-dem bang-cuon">

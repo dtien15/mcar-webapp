@@ -1,7 +1,7 @@
 <div class="row g-3">
   <div class="col-lg-4">
     <div class="the">
-      <div class="the-dau"><?= $dangSua ? '✏️ Sửa xe' : '➕ Thêm xe mới' ?></div>
+      <div class="the-dau"><?= $dangSua ? bieuTuong('pencil') . ' Sửa xe' : bieuTuong('plus') . ' Thêm xe mới' ?></div>
       <div class="the-than">
         <form method="post" action="<?= duongDan('xe/luu') ?>">
           <?php truongToken(); ?>
@@ -44,7 +44,7 @@
             <textarea name="ghi_chu" class="form-control" rows="2"><?= h($dangSua['note'] ?? '') ?></textarea>
           </div>
 
-          <button class="btn btn-primary"><?= $dangSua ? '💾 Cập nhật' : '➕ Thêm mới' ?></button>
+          <button class="btn btn-primary"><?= $dangSua ? bieuTuong('device-floppy') . ' Cập nhật' : bieuTuong('plus') . ' Thêm mới' ?></button>
           <?php if ($dangSua): ?><a href="<?= duongDan('xe') ?>" class="btn btn-light">Hủy</a><?php endif; ?>
         </form>
       </div>
@@ -53,7 +53,7 @@
 
   <div class="col-lg-8">
     <div class="the">
-      <div class="the-dau">🚙 Danh sách xe (<?= count($danhSach) ?>)</div>
+      <div class="the-dau"><?= bieuTuong('car') ?> Danh sách xe (<?= count($danhSach) ?>)</div>
       <div class="the-than the-than-khong-dem bang-cuon">
         <table class="bang">
           <thead>

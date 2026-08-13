@@ -1,7 +1,7 @@
 <div class="row g-3">
   <div class="col-lg-4">
     <div class="the">
-      <div class="the-dau"><?= $dangSua ? '✏️ Sửa tài khoản' : '➕ Tạo tài khoản mới' ?></div>
+      <div class="the-dau"><?= $dangSua ? bieuTuong('pencil') . ' Sửa tài khoản' : bieuTuong('plus') . ' Tạo tài khoản mới' ?></div>
       <div class="the-than">
         <form method="post" action="<?= duongDan('nguoidung/luu') ?>">
           <?php truongToken(); ?>
@@ -48,7 +48,7 @@
             </select>
           </div>
 
-          <button class="btn btn-primary"><?= $dangSua ? '💾 Cập nhật' : '➕ Tạo tài khoản' ?></button>
+          <button class="btn btn-primary"><?= $dangSua ? bieuTuong('device-floppy') . ' Cập nhật' : bieuTuong('plus') . ' Tạo tài khoản' ?></button>
           <?php if ($dangSua): ?><a href="<?= duongDan('nguoidung') ?>" class="btn btn-light">Hủy</a><?php endif; ?>
         </form>
       </div>
@@ -57,7 +57,7 @@
 
   <div class="col-lg-8">
     <div class="the">
-      <div class="the-dau">👤 Danh sách tài khoản (<?= count($danhSach) ?>)</div>
+      <div class="the-dau"><?= bieuTuong('users') ?> Danh sách tài khoản (<?= count($danhSach) ?>)</div>
       <div class="the-than the-than-khong-dem bang-cuon">
         <table class="bang">
           <thead>

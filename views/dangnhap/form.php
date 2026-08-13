@@ -6,12 +6,12 @@
 <title>Đăng nhập · <?= defined('TEN_HE_THONG') ? h(TEN_HE_THONG) : 'MCAR' ?></title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="<?= duongDan('assets/css/style.css') ?>">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'><?= bieuTuong('car') ?></text></svg>">
 </head>
 <body>
 <div class="trang-dang-nhap">
   <div class="khung-dang-nhap">
-    <div class="logo-lon">🚗</div>
+    <div class="logo-lon"><?= bieuTuong('car') ?></div>
     <h1><?= defined('TEN_HE_THONG') ? h(TEN_HE_THONG) : 'MCAR' ?></h1>
     <p class="phu-de">Hệ thống quản lý xe &amp; tài xế</p>
 

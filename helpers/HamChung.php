@@ -9,6 +9,16 @@ function h($chuoi)
     return htmlspecialchars((string)$chuoi, ENT_QUOTES, 'UTF-8');
 }
 
+/**
+ * In ra bieu tuong Tabler Icons.
+ * Vi du: bieuTuong('car'), bieuTuong('plus', 'me-1')
+ * Danh sach ten icon: https://tabler.io/icons
+ */
+function bieuTuong($ten, $themLop = '')
+{
+    return '<i class="ti ti-' . h($ten) . ($themLop ? ' ' . h($themLop) : '') . '"></i>';
+}
+
 /** Dinh dang so tien kieu Viet Nam: 1234567 -> 1.234.567 */
 function dinhDangTien($so, $soLeThapPhan = 0)
 {

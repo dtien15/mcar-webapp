@@ -28,7 +28,7 @@
         <?php truongToken(); ?>
         <input type="hidden" name="thang" value="<?= (int)$thang ?>">
         <input type="hidden" name="nam" value="<?= (int)$nam ?>">
-        <button class="btn btn-success btn-sm">🔄 Tính lại lương kỳ <?= (int)$thang ?>/<?= (int)$nam ?></button>
+        <button class="btn btn-success btn-sm"><?= bieuTuong('refresh') ?> Tính lại lương kỳ <?= (int)$thang ?>/<?= (int)$nam ?></button>
       </form>
     <?php endif; ?>
   </div>
@@ -36,7 +36,7 @@
 
 <div class="the">
   <div class="the-dau">
-    <span>💰 Bảng lương tháng <?= (int)$thang ?>/<?= (int)$nam ?></span>
+    <span><?= bieuTuong('report-money') ?> Bảng lương tháng <?= (int)$thang ?>/<?= (int)$nam ?></span>
     <span class="text-muted" style="font-size:12px">
       Còn lại &gt; 0: công ty còn nợ tài xế · &lt; 0: tài xế còn nợ công ty
     </span>
@@ -90,10 +90,10 @@
           <td class="canh-phai">
             <div class="d-flex gap-1 justify-content-end">
               <a href="<?= duongDan('luong/phieu/' . $dong['driver_id'] . '/' . (int)$thang . '/' . (int)$nam) ?>"
-                 class="btn btn-sm btn-outline-secondary">📄 Phiếu lương</a>
+                 class="btn btn-sm btn-outline-secondary"><?= bieuTuong('file-invoice') ?> Phiếu lương</a>
               <?php if (laQuanLy()): ?>
                 <button type="button" class="btn btn-sm btn-outline-primary"
-                        data-bs-toggle="modal" data-bs-target="#thanhToan<?= $dong['id'] ?>">💵 Thanh toán</button>
+                        data-bs-toggle="modal" data-bs-target="#thanhToan<?= $dong['id'] ?>"><?= bieuTuong('tag') ?> Thanh toán</button>
               <?php endif; ?>
             </div>
           </td>
@@ -139,7 +139,7 @@
           <input type="hidden" name="nam" value="<?= (int)$nam ?>">
 
           <div class="modal-header">
-            <h5 class="modal-title">💵 Thanh toán lương — <?= h($dong['ten_tai_xe']) ?></h5>
+            <h5 class="modal-title"><?= bieuTuong('tag') ?> Thanh toán lương — <?= h($dong['ten_tai_xe']) ?></h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
 
@@ -166,7 +166,7 @@
 
           <div class="modal-footer">
             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-            <button class="btn btn-primary">💾 Lưu</button>
+            <button class="btn btn-primary"><?= bieuTuong('device-floppy') ?> Lưu</button>
           </div>
         </form>
       </div>

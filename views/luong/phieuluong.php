@@ -1,6 +1,6 @@
 <div class="khong-in mb-3 d-flex gap-2">
-  <a href="<?= duongDan('luong?thang=' . (int)$thang . '&nam=' . (int)$nam) ?>" class="btn btn-light btn-sm">← Quay lại bảng lương</a>
-  <button onclick="window.print()" class="btn btn-primary btn-sm">🖨️ In phiếu lương</button>
+  <a href="<?= duongDan('luong?thang=' . (int)$thang . '&nam=' . (int)$nam) ?>" class="btn btn-light btn-sm"><?= bieuTuong('arrow-left') ?> Quay lại bảng lương</a>
+  <button onclick="window.print()" class="btn btn-primary btn-sm"><?= bieuTuong('printer') ?> In phiếu lương</button>
 </div>
 
 <div class="the">
@@ -145,7 +145,7 @@
 
 <!-- Lich su cac ky gan day -->
 <div class="the khong-in">
-  <div class="the-dau">📆 Lịch sử lương các kỳ gần đây</div>
+  <div class="the-dau"><?= bieuTuong('calendar') ?> Lịch sử lương các kỳ gần đây</div>
   <div class="the-than the-than-khong-dem bang-cuon">
     <table class="bang">
       <thead>

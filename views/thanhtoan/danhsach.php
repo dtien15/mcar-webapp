@@ -1,13 +1,13 @@
 <ul class="nav nav-tabs mb-3">
-  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabChi">🧾 Khoản chi công ty</a></li>
-  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabNo">⚖️ Công nợ tài xế</a></li>
+  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabChi"><?= bieuTuong('receipt') ?> Khoản chi công ty</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabNo"><?= bieuTuong('scale') ?> Công nợ tài xế</a></li>
 </ul>
 
 <div class="tab-content">
   <!-- Tab khoan chi -->
   <div class="tab-pane fade show active" id="tabChi">
     <div class="the">
-      <div class="the-dau"><?= $dangSua ? '✏️ Sửa khoản chi' : '➕ Thêm khoản chi mới' ?></div>
+      <div class="the-dau"><?= $dangSua ? bieuTuong('pencil') . ' Sửa khoản chi' : bieuTuong('plus') . ' Thêm khoản chi mới' ?></div>
       <div class="the-than">
         <form method="post" action="<?= duongDan('thanhtoan/luu') ?>" class="row g-2">
           <?php truongToken(); ?>
@@ -37,7 +37,7 @@
             <input name="ghi_chu" class="form-control" value="<?= h($dangSua['note'] ?? '') ?>">
           </div>
           <div class="col-12">
-            <button class="btn btn-primary"><?= $dangSua ? '💾 Cập nhật' : '➕ Thêm mới' ?></button>
+            <button class="btn btn-primary"><?= $dangSua ? bieuTuong('device-floppy') . ' Cập nhật' : bieuTuong('plus') . ' Thêm mới' ?></button>
             <?php if ($dangSua): ?><a href="<?= duongDan('thanhtoan') ?>" class="btn btn-light">Hủy</a><?php endif; ?>
           </div>
         </form>
@@ -65,7 +65,7 @@
             </select>
           </div>
           <div class="col-6 col-md-3 d-flex gap-2">
-            <button class="btn btn-primary btn-sm">🔍 Lọc</button>
+            <button class="btn btn-primary btn-sm"><?= bieuTuong('search') ?> Lọc</button>
             <a href="<?= duongDan('thanhtoan') ?>" class="btn btn-light btn-sm">Bỏ lọc</a>
           </div>
         </form>
@@ -115,7 +115,7 @@
   <div class="tab-pane fade" id="tabNo">
     <div class="the">
       <div class="the-dau">
-        <span>⚖️ Công nợ mới nhất theo tài xế</span>
+        <span><?= bieuTuong('scale') ?> Công nợ mới nhất theo tài xế</span>
         <span class="text-muted" style="font-size:12px">Số dương: công ty còn nợ tài xế · Số âm: tài xế còn nợ công ty</span>
       </div>
       <div class="the-than the-than-khong-dem bang-cuon">
@@ -139,7 +139,7 @@
               </td>
               <td class="canh-phai">
                 <a href="<?= duongDan('luong/phieu/' . $no['driver_id'] . '/' . (int)$no['month'] . '/' . (int)$no['year']) ?>"
-                   class="btn btn-sm btn-outline-secondary">📄 Phiếu lương</a>
+                   class="btn btn-sm btn-outline-secondary"><?= bieuTuong('file-invoice') ?> Phiếu lương</a>
               </td>
             </tr>
           <?php endforeach; ?>

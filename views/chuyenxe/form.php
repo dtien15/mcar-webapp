@@ -15,9 +15,9 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
 <?php if ($daChot): ?>
   <div class="alert alert-<?= laQuanTri() ? 'warning' : 'secondary' ?>">
     <?php if (laQuanTri()): ?>
-      ⚠️ Chuyến xe này <strong>đã chốt hoàn thành</strong>. Bạn đang sửa dữ liệu đã chốt — hãy cân nhắc kỹ.
+      <?= bieuTuong('alert-triangle') ?> Chuyến xe này <strong>đã chốt hoàn thành</strong>. Bạn đang sửa dữ liệu đã chốt — hãy cân nhắc kỹ.
     <?php else: ?>
-      🔒 Chuyến xe này đã chốt hoàn thành nên không sửa được. Liên hệ quản trị viên để mở lại chuyến.
+      <?= bieuTuong('lock') ?> Chuyến xe này đã chốt hoàn thành nên không sửa được. Liên hệ quản trị viên để mở lại chuyến.
     <?php endif; ?>
   </div>
 <?php endif; ?>
@@ -28,7 +28,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
 
   <div class="the">
     <div class="the-dau">
-      <span><?= $dangSua ? '✏️ Sửa chuyến xe #' . (int)$chuyenXe['id'] : '➕ Thêm chuyến xe mới' ?></span>
+      <span><?= $dangSua ? bieuTuong('pencil') . ' Sửa chuyến xe #' . (int)$chuyenXe['id'] : bieuTuong('plus') . ' Thêm chuyến xe mới' ?></span>
       <?php if ($dangSua): $tt = nhanTrangThaiChuyen($chuyenXe['status']); ?>
         <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
       <?php endif; ?>
@@ -213,7 +213,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
 
       <div class="d-flex gap-2">
         <?php if (!$khoaSua): ?>
-          <button class="btn btn-primary"><?= $dangSua ? '💾 Cập nhật' : '➕ Thêm & giao cho tài xế' ?></button>
+          <button class="btn btn-primary"><?= $dangSua ? bieuTuong('device-floppy') . ' Cập nhật' : bieuTuong('plus') . ' Thêm & giao cho tài xế' ?></button>
         <?php endif; ?>
         <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light">Quay lại danh sách</a>
       </div>
@@ -224,7 +224,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
 <script>
 // Tu dong dien gia goi y theo tuyen + so cho xe + loai keo
 (function () {
-  var bangGia = <?= json_encode($giaGoiY, JSON_UNESCAPED_UNICODE) ?>;
+  var bangGia = <?= json_encode($giaGoiY, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   var oBangGia = document.getElementById('oBangGia');
   var oXe      = document.getElementById('oXe');
   var oLoaiKeo = document.getElementById('oLoaiKeo');
@@ -256,8 +256,13 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
     var gia  = bangGia[id][khoa] || 0;
     if (gia > 0) {
       oThuVnd.value = gia;
-      ghiChu.textContent = '→ Đã điền ' + dinhDang(gia) + ' ₫ (' + bangGia[id].ten + ' · xe ' + soChoXe()
-                          + ' · ' + (laKeoNgoai() ? 'giá kèo ngoài' : 'giá công ty') + ')';
+      // Chen icon bang the that, con phan chu dung textContent de an toan
+      ghiChu.innerHTML = '<i class="ti ti-arrow-right"></i> ';
+      var chu = document.createElement('span');
+      chu.textContent = 'Đã điền ' + dinhDang(gia) + ' ₫ (' + bangGia[id].ten
+                      + ' · xe ' + soChoXe() + ' · '
+                      + (laKeoNgoai() ? 'giá kèo ngoài' : 'giá công ty') + ')';
+      ghiChu.appendChild(chu);
     } else {
       ghiChu.textContent = 'Bảng giá chưa có mức giá cho xe ' + soChoXe()
                           + ' ở tuyến này — vui lòng nhập tay.';
