@@ -80,26 +80,44 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
 
           <div class="col-6 col-md-3">
             <label class="form-label">Xe</label>
-            <select name="id_xe" id="oXe" class="form-select" <?= $chiXemSel ?>>
-              <option value="">-- Chọn xe --</option>
-              <?php foreach ($dsXe as $xe): ?>
-                <option value="<?= $xe['id'] ?>" data-socho="<?= h($xe['seats']) ?>"
-                  <?= giaTri($chuyenXe, 'car_id') == $xe['id'] ? 'selected' : '' ?>>
-                  <?= h(trim($xe['name'] . ' ' . $xe['plate_number'])) ?> (<?= h($xe['seats']) ?>)
-                </option>
-              <?php endforeach; ?>
-            </select>
+            <?php if (laTaiXe()): $xeCuaToi = $dsXe[0] ?? null; ?>
+              <!-- Tai xe tu tao: khoa cung xe cua minh, khong chon duoc xe khac -->
+              <input type="hidden" name="id_xe" value="<?= h($xeCuaToi['id'] ?? '') ?>">
+              <select id="oXe" class="form-select" disabled>
+                <?php if ($xeCuaToi): ?>
+                  <option data-socho="<?= h($xeCuaToi['seats']) ?>" selected>
+                    <?= h(trim($xeCuaToi['name'] . ' ' . $xeCuaToi['plate_number'])) ?> (<?= h($xeCuaToi['seats']) ?>)
+                  </option>
+                <?php endif; ?>
+              </select>
+            <?php else: ?>
+              <select name="id_xe" id="oXe" class="form-select" <?= $chiXemSel ?>>
+                <option value="">-- Chọn xe --</option>
+                <?php foreach ($dsXe as $xe): ?>
+                  <option value="<?= $xe['id'] ?>" data-socho="<?= h($xe['seats']) ?>"
+                    <?= giaTri($chuyenXe, 'car_id') == $xe['id'] ? 'selected' : '' ?>>
+                    <?= h(trim($xe['name'] . ' ' . $xe['plate_number'])) ?> (<?= h($xe['seats']) ?>)
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            <?php endif; ?>
           </div>
           <div class="col-6 col-md-3">
             <label class="form-label">Tài xế</label>
-            <select name="id_tai_xe" class="form-select" <?= $chiXemSel ?>>
-              <option value="">-- Chọn tài xế --</option>
-              <?php foreach ($dsTaiXe as $tx): ?>
-                <option value="<?= $tx['id'] ?>" <?= giaTri($chuyenXe, 'driver_id') == $tx['id'] ? 'selected' : '' ?>>
-                  <?= h($tx['full_name']) ?>
-                </option>
-              <?php endforeach; ?>
-            </select>
+            <?php if (laTaiXe()): $txCuaToi = $dsTaiXe[0] ?? null; ?>
+              <!-- Tai xe tu tao: khoa cung la chinh minh -->
+              <input type="hidden" name="id_tai_xe" value="<?= h($txCuaToi['id'] ?? '') ?>">
+              <input class="form-control" value="<?= h($txCuaToi['full_name'] ?? '') ?>" readonly>
+            <?php else: ?>
+              <select name="id_tai_xe" class="form-select" <?= $chiXemSel ?>>
+                <option value="">-- Chọn tài xế --</option>
+                <?php foreach ($dsTaiXe as $tx): ?>
+                  <option value="<?= $tx['id'] ?>" <?= giaTri($chuyenXe, 'driver_id') == $tx['id'] ? 'selected' : '' ?>>
+                    <?= h($tx['full_name']) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            <?php endif; ?>
           </div>
           <div class="col-12 col-md-6">
             <label class="form-label">Gợi ý giá từ bảng giá <span class="text-muted">(chọn để tự điền tiền khách trả)</span></label>
@@ -175,11 +193,13 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
             <input name="nguoi_tra_xang_dau" class="form-control" <?= $chiXem ?>
                    value="<?= h(giaTri($chuyenXe, 'fuel_payer')) ?>">
           </div>
+          <?php if (!laTaiXe()): ?>
           <div class="col-6 col-md-2">
             <label class="form-label">VETC</label>
             <input type="number" step="1000" name="vetc" class="form-control" <?= $chiXem ?>
                    value="<?= h(giaTri($chuyenXe, 'vetc', 0)) ?>">
           </div>
+          <?php endif; ?>
           <div class="col-6 col-md-2">
             <label class="form-label">Bảo dưỡng xe</label>
             <input type="number" step="1000" name="bao_duong" class="form-control" <?= $chiXem ?>
