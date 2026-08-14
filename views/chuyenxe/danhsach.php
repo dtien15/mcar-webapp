@@ -1,9 +1,25 @@
-<?php $idTaiXeHienTai = laTaiXe() ? taiKhoanHienTai()['id_tai_xe'] : null; ?>
+<?php
+$idTaiXeHienTai = laTaiXe() ? taiKhoanHienTai()['id_tai_xe'] : null;
+
+/** Dung URL loc hien tai nhung doi 1 tham so (dung cho tab trang thai) */
+function urlLocDoi(array $loc, array $doi)
+{
+    $q = array_merge($loc, $doi);
+    return duongDan('chuyenxe?' . http_build_query($q));
+}
+$dsTab = [
+    ''                => 'Tất cả',
+    'moi'             => 'Mới giao',
+    'tai_xe_xac_nhan' => 'Tài xế đã xác nhận',
+    'hoan_thanh'      => 'Hoàn thành',
+];
+?>
 
 <!-- Bo loc -->
 <div class="the">
   <div class="the-than">
     <form class="row g-2 align-items-end" method="get" action="<?= duongDan('chuyenxe') ?>">
+      <input type="hidden" name="trang_thai" value="<?= h($loc['trang_thai']) ?>">
       <div class="col-6 col-md-2">
         <label class="form-label">Từ ngày</label>
         <input type="date" name="tu_ngay" class="form-control form-control-sm" value="<?= h($loc['tu_ngay']) ?>">
@@ -35,12 +51,11 @@
         </select>
       </div>
       <div class="col-6 col-md-2">
-        <label class="form-label">Trạng thái</label>
-        <select name="trang_thai" class="form-select form-select-sm">
-          <option value="">Tất cả</option>
-          <option value="moi" <?= $loc['trang_thai'] === 'moi' ? 'selected' : '' ?>>Mới giao</option>
-          <option value="tai_xe_xac_nhan" <?= $loc['trang_thai'] === 'tai_xe_xac_nhan' ? 'selected' : '' ?>>Tài xế đã xác nhận</option>
-          <option value="hoan_thanh" <?= $loc['trang_thai'] === 'hoan_thanh' ? 'selected' : '' ?>>Hoàn thành</option>
+        <label class="form-label">Số dòng/trang</label>
+        <select name="so_dong" class="form-select form-select-sm">
+          <?php foreach ([20, 50, 100] as $sd): ?>
+            <option value="<?= $sd ?>" <?= $soDong === $sd ? 'selected' : '' ?>><?= $sd ?></option>
+          <?php endforeach; ?>
         </select>
       </div>
       <div class="col-6 col-md-2">
@@ -60,6 +75,16 @@
     </form>
   </div>
 </div>
+
+<!-- Tab trang thai -->
+<ul class="nav nav-tabs nhan-tab-trang-thai">
+  <?php foreach ($dsTab as $gt => $nhan): ?>
+    <li class="nav-item">
+      <a class="nav-link <?= $loc['trang_thai'] === $gt ? 'active' : '' ?>"
+         href="<?= urlLocDoi($loc, ['trang_thai' => $gt]) ?>"><?= h($nhan) ?></a>
+    </li>
+  <?php endforeach; ?>
+</ul>
 
 <!-- Tong hop nhanh -->
 <div class="luoi-thong-ke">
@@ -82,112 +107,8 @@
 </div>
 
 <!-- Danh sach dang the - danh cho dien thoai -->
-<div class="ds-the-dien-thoai">
-  <?php foreach ($danhSach as $chuyen):
-    $tt          = nhanTrangThaiChuyen($chuyen['status']);
-    $cuaToi      = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
-    $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
-  ?>
-    <div class="the-chuyen-xe <?= $duocXacNhan ? 'can-xac-nhan' : '' ?>"
-         <?php if ($cuaToi): ?>data-cua-toi="1" data-dang-dinh-vi="<?= (int)$chuyen['dang_dinh_vi'] ?>" data-id-chuyen="<?= $chuyen['id'] ?>"<?php endif; ?>>
-      <div class="dau-the">
-        <div>
-          <div class="ngay"><?= bieuTuong('calendar') ?> <?= dinhDangNgay($chuyen['trip_date']) ?>
-            <?php if ($chuyen['pickup_time']): ?>
-              <span class="gio"><?= bieuTuong('clock') ?> <?= h($chuyen['pickup_time']) ?></span>
-            <?php endif; ?>
-          </div>
-          <div class="hanh-trinh"><?= h($chuyen['route']) ?></div>
-        </div>
-        <div class="cot-trang-thai">
-          <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
-          <?php if ($chuyen['customer_paid']): ?>
-            <span class="huy-hieu-trang-thai tt-success" title="Không cần thu tiền khách"><?= bieuTuong('circle-check') ?> Đã TT</span>
-          <?php elseif ($chuyen['cash_remitted']): ?>
-            <span class="huy-hieu-trang-thai tt-success" title="Tài xế đã nộp lại tiền cho công ty"><?= bieuTuong('cash') ?> Đã nộp lại</span>
-          <?php elseif (in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
-            <span class="huy-hieu-trang-thai tt-warning" title="Tài xế đang cầm tiền của khách, chưa nộp lại"><?= bieuTuong('cash') ?> Chưa nộp lại</span>
-          <?php endif; ?>
-          <?php if ($chuyen['dang_dinh_vi']): ?>
-            <span class="huy-hieu-dinh-vi" title="Đang gửi vị trí"><span class="cham-nhap-nhay"></span> GPS</span>
-          <?php endif; ?>
-        </div>
-      </div>
-
-      <?php if (!empty($chuyen['pickup_dropoff'])): ?>
-        <div class="dia-diem"><?= bieuTuong('map-pin') ?> <?= h($chuyen['pickup_dropoff']) ?></div>
-      <?php endif; ?>
-
-      <div class="thong-tin-the">
-        <div><span class="nhan">Xe</span><span class="gt"><?= h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?></span></div>
-        <?php if (!laTaiXe()): ?>
-          <div><span class="nhan">Tài xế</span><span class="gt"><?= h($chuyen['ten_tai_xe']) ?></span></div>
-        <?php endif; ?>
-        <?php if (!empty($chuyen['customer_name'])): ?>
-          <div><span class="nhan">Khách</span><span class="gt"><?= h($chuyen['customer_name']) ?></span></div>
-        <?php endif; ?>
-        <div><span class="nhan">Loại kèo</span><span class="gt"><?= h($chuyen['ten_loai_keo']) ?></span></div>
-        <div><span class="nhan">Khách trả</span><span class="gt"><?= dinhDangTien($chuyen['revenue_vnd']) ?>đ</span></div>
-        <div><span class="nhan">Tiền cuốc</span><span class="gt nhan-manh"><?= dinhDangTien($chuyen['trip_fee']) ?>đ</span></div>
-        <?php if ($chuyen['fuel_cost'] > 0): ?>
-          <div><span class="nhan">Xăng dầu</span><span class="gt"><?= dinhDangTien($chuyen['fuel_cost']) ?>đ</span></div>
-        <?php endif; ?>
-      </div>
-
-      <div class="chan-the">
-        <?php if (laQuanLy()): ?>
-          <a href="<?= duongDan('chuyenxe/sua/' . $chuyen['id']) ?>" class="btn btn-sm btn-outline-primary">
-            <?= bieuTuong('pencil') ?> Sửa
-          </a>
-          <?php if ($chuyen['status'] === 'tai_xe_xac_nhan'): ?>
-            <form method="post" action="<?= duongDan('chuyenxe/chot') ?>" onsubmit="return confirm('Chốt hoàn thành chuyến xe này?');">
-              <?php truongToken(); ?>
-              <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-              <button class="btn btn-sm btn-success"><?= bieuTuong('check') ?> Chốt hoàn thành</button>
-            </form>
-          <?php endif; ?>
-          <?php if ((int)$chuyen['customer_paid'] === 0 && (int)$chuyen['cash_remitted'] === 0
-                     && in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
-            <button type="button" class="btn btn-sm btn-outline-success"
-                    data-bs-toggle="modal" data-bs-target="#nopLai<?= $chuyen['id'] ?>">
-              <?= bieuTuong('cash') ?> Đã nộp lại
-            </button>
-          <?php elseif ($chuyen['cash_remitted'] && laQuanTri()): ?>
-            <form method="post" action="<?= duongDan('chuyenxe/huyxacnhannoplai') ?>" onsubmit="return confirm('Hủy xác nhận đã nộp lại tiền?');">
-              <?php truongToken(); ?>
-              <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-              <button class="btn btn-sm btn-outline-secondary"><?= bieuTuong('arrow-back-up') ?> Hủy xác nhận nộp lại</button>
-            </form>
-          <?php endif; ?>
-        <?php elseif ($cuaToi): ?>
-          <?php if ($chuyen['status'] !== 'hoan_thanh'): ?>
-            <?php if (!$chuyen['dang_dinh_vi']): ?>
-              <form method="post" action="<?= duongDan('chuyenxe/batdauhanhtrinh') ?>" class="w-100">
-                <?php truongToken(); ?>
-                <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-                <button class="btn btn-outline-success w-100"><?= bieuTuong('player-play') ?> Bắt đầu hành trình</button>
-              </form>
-            <?php else: ?>
-              <form method="post" action="<?= duongDan('chuyenxe/ketthuchanhtrinh') ?>" class="w-100">
-                <?php truongToken(); ?>
-                <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-                <button class="btn btn-outline-danger w-100"><?= bieuTuong('player-stop') ?> Kết thúc hành trình</button>
-              </form>
-            <?php endif; ?>
-            <?php if ($duocXacNhan): ?>
-              <button type="button" class="btn btn-primary w-100"
-                      data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">
-                <?= bieuTuong('writing') ?> Nhập chi phí &amp; Xác nhận
-              </button>
-            <?php endif; ?>
-          <?php endif; ?>
-          <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-outline-secondary w-100">
-            <?= bieuTuong('file-invoice') ?> Xem chi tiết phiếu
-          </a>
-        <?php endif; ?>
-      </div>
-    </div>
-  <?php endforeach; ?>
+<div class="ds-the-dien-thoai" id="dsTheDienThoai">
+  <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_the_chuyen.php'; endforeach; ?>
 
   <?php if (!$danhSach): ?>
     <div class="the"><div class="khong-co-du-lieu">
@@ -199,7 +120,7 @@
 <!-- Danh sach dang bang - danh cho may tinh -->
 <div class="the bang-may-tinh">
   <div class="the-dau">
-    <span>Danh sách chuyến xe (<?= count($danhSach) ?> dòng)</span>
+    <span>Danh sách chuyến xe (<?= (int)$tongSo ?> dòng)</span>
   </div>
   <div class="the-than the-than-khong-dem bang-cuon">
     <table class="bang">
@@ -218,113 +139,8 @@
           <th class="canh-phai">Thao tác</th>
         </tr>
       </thead>
-      <tbody>
-      <?php foreach ($danhSach as $chuyen):
-        $tt        = nhanTrangThaiChuyen($chuyen['status']);
-        $cuaToi    = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
-        $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
-      ?>
-        <tr <?php if ($cuaToi): ?>data-cua-toi="1" data-dang-dinh-vi="<?= (int)$chuyen['dang_dinh_vi'] ?>" data-id-chuyen="<?= $chuyen['id'] ?>"<?php endif; ?>>
-          <td><?= dinhDangNgay($chuyen['trip_date']) ?></td>
-          <td><?= h($chuyen['pickup_time']) ?></td>
-          <td>
-            <?= h($chuyen['route']) ?>
-            <?php if (!empty($chuyen['pickup_dropoff'])): ?>
-              <div class="text-muted" style="font-size:11px; max-width:220px; white-space:normal">
-                <?= h(mb_substr($chuyen['pickup_dropoff'], 0, 60, 'UTF-8')) ?><?= mb_strlen($chuyen['pickup_dropoff'], 'UTF-8') > 60 ? '…' : '' ?>
-              </div>
-            <?php endif; ?>
-          </td>
-          <td><?= h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?></td>
-          <td><?= h($chuyen['ten_tai_xe']) ?></td>
-          <td><?= h($chuyen['ten_loai_keo']) ?></td>
-          <td class="canh-phai"><?= dinhDangTien($chuyen['revenue_vnd']) ?></td>
-          <td class="canh-phai"><?= dinhDangTien($chuyen['trip_fee']) ?></td>
-          <td class="canh-phai"><?= dinhDangTien($chuyen['fuel_cost']) ?></td>
-          <td>
-            <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
-            <?php if ($chuyen['customer_paid']): ?>
-              <span class="huy-hieu-trang-thai tt-success" title="Không cần thu tiền khách"><?= bieuTuong('circle-check') ?> Đã TT</span>
-            <?php elseif ($chuyen['cash_remitted']): ?>
-              <span class="huy-hieu-trang-thai tt-success" title="Tài xế đã nộp lại tiền cho công ty"><?= bieuTuong('cash') ?> Đã nộp lại</span>
-            <?php elseif (in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
-              <span class="huy-hieu-trang-thai tt-warning" title="Tài xế đang cầm tiền của khách, chưa nộp lại"><?= bieuTuong('cash') ?> Chưa nộp lại</span>
-            <?php endif; ?>
-            <?php if ($chuyen['dang_dinh_vi']): ?>
-              <span class="huy-hieu-dinh-vi" title="Đang gửi vị trí"><span class="cham-nhap-nhay"></span> GPS</span>
-            <?php endif; ?>
-          </td>
-          <td class="canh-phai">
-            <div class="d-flex gap-1 justify-content-end">
-              <?php if (laQuanLy()): ?>
-                <a href="<?= duongDan('chuyenxe/sua/' . $chuyen['id']) ?>" class="btn btn-sm btn-outline-primary">Sửa</a>
-
-                <?php if ($chuyen['status'] === 'tai_xe_xac_nhan'): ?>
-                  <form method="post" action="<?= duongDan('chuyenxe/chot') ?>" onsubmit="return confirm('Chốt hoàn thành chuyến xe này?');">
-                    <?php truongToken(); ?>
-                    <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-                    <button class="btn btn-sm btn-success"><?= bieuTuong('check') ?> Chốt</button>
-                  </form>
-                <?php endif; ?>
-
-                <?php if ($chuyen['status'] === 'hoan_thanh' && laQuanTri()): ?>
-                  <form method="post" action="<?= duongDan('chuyenxe/molai') ?>" onsubmit="return confirm('Mở lại chuyến xe đã chốt?');">
-                    <?php truongToken(); ?>
-                    <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-                    <button class="btn btn-sm btn-outline-secondary"><?= bieuTuong('arrow-back-up') ?> Mở lại</button>
-                  </form>
-                <?php endif; ?>
-
-                <?php if ((int)$chuyen['customer_paid'] === 0 && (int)$chuyen['cash_remitted'] === 0
-                           && in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
-                  <button type="button" class="btn btn-sm btn-outline-success"
-                          data-bs-toggle="modal" data-bs-target="#nopLai<?= $chuyen['id'] ?>">
-                    <?= bieuTuong('cash') ?> Đã nộp lại
-                  </button>
-                <?php elseif ($chuyen['cash_remitted'] && laQuanTri()): ?>
-                  <form method="post" action="<?= duongDan('chuyenxe/huyxacnhannoplai') ?>" onsubmit="return confirm('Hủy xác nhận đã nộp lại tiền?');">
-                    <?php truongToken(); ?>
-                    <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-                    <button class="btn btn-sm btn-outline-secondary"><?= bieuTuong('arrow-back-up') ?> Hủy nộp lại</button>
-                  </form>
-                <?php endif; ?>
-
-                <form method="post" action="<?= duongDan('chuyenxe/xoa') ?>" onsubmit="return confirm('Xóa chuyến xe này? Không khôi phục được.');">
-                  <?php truongToken(); ?>
-                  <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-                  <button class="btn btn-sm btn-outline-danger">Xóa</button>
-                </form>
-
-              <?php elseif ($cuaToi): ?>
-                <?php if ($chuyen['status'] !== 'hoan_thanh'): ?>
-                  <?php if (!$chuyen['dang_dinh_vi']): ?>
-                    <form method="post" action="<?= duongDan('chuyenxe/batdauhanhtrinh') ?>">
-                      <?php truongToken(); ?>
-                      <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-                      <button class="btn btn-sm btn-outline-success"><?= bieuTuong('player-play') ?> Bắt đầu</button>
-                    </form>
-                  <?php else: ?>
-                    <form method="post" action="<?= duongDan('chuyenxe/ketthuchanhtrinh') ?>">
-                      <?php truongToken(); ?>
-                      <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-                      <button class="btn btn-sm btn-outline-danger"><?= bieuTuong('player-stop') ?> Kết thúc</button>
-                    </form>
-                  <?php endif; ?>
-                  <?php if ($duocXacNhan): ?>
-                    <button type="button" class="btn btn-sm btn-primary"
-                            data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">
-                      <?= bieuTuong('writing') ?> Nhập &amp; Xác nhận
-                    </button>
-                  <?php endif; ?>
-                <?php endif; ?>
-                <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-sm btn-outline-secondary">
-                  <?= bieuTuong('file-invoice') ?> Chi tiết
-                </a>
-              <?php endif; ?>
-            </div>
-          </td>
-        </tr>
-      <?php endforeach; ?>
+      <tbody id="dsDongBang">
+      <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_dong_bang.php'; endforeach; ?>
 
       <?php if (!$danhSach): ?>
         <tr><td colspan="11" class="khong-co-du-lieu">Không có chuyến xe nào phù hợp bộ lọc</td></tr>
@@ -345,230 +161,75 @@
   </div>
 </div>
 
-<!-- Hop thoai tai xe nhap chi phi & xac nhan -->
-<?php foreach ($danhSach as $chuyen):
-  if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] === 'moi')) continue;
-?>
-<div class="modal fade" id="xacNhan<?= $chuyen['id'] ?>" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <form method="post" action="<?= duongDan('chuyenxe/xacnhan') ?>" class="modal-content"
-          onsubmit="return confirm('Bạn chắc chắn muốn xác nhận chuyến xe này? Sau khi xác nhận sẽ không tự sửa lại được nữa, phải liên hệ công ty nếu cần đổi.');">
-      <?php truongToken(); ?>
-      <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-
-      <div class="modal-header">
-        <h5 class="modal-title"><?= bieuTuong('writing') ?> Xác nhận chuyến xe ngày <?= dinhDangNgay($chuyen['trip_date']) ?></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <div class="modal-body">
-        <!-- Thong tin chuyen di: chi xem, khong sua -->
-        <fieldset class="nhom-truong">
-          <legend>Thông tin chuyến đi</legend>
-          <div class="row g-2">
-            <div class="col-6 col-md-3">
-              <label class="form-label">Ngày chạy</label>
-              <input class="form-control form-control-sm" value="<?= dinhDangNgay($chuyen['trip_date']) ?>" readonly>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Giờ đón</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['pickup_time']) ?>" readonly>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Hành trình</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['route']) ?>" readonly>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Xe</label>
-              <input class="form-control form-control-sm" value="<?= h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?>" readonly>
-            </div>
-            <?php if ($chuyen['passenger_count'] !== null): ?>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Số lượng khách</label>
-              <input class="form-control form-control-sm" value="<?= (int)$chuyen['passenger_count'] ?>" readonly>
-            </div>
-            <?php endif; ?>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Điểm đón</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['pickup_location']) ?>" readonly>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Điểm trả</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['dropoff_location']) ?>" readonly>
-            </div>
-            <?php if (!empty($chuyen['pickup_sign'])): ?>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Bảng đón khách</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['pickup_sign']) ?>" readonly>
-            </div>
-            <?php endif; ?>
-            <?php if (!empty($chuyen['customer_name']) || !empty($chuyen['customer_phone'])): ?>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Họ tên khách</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['customer_name']) ?>" readonly>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label">SĐT khách</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['customer_phone']) ?>" readonly>
-            </div>
-            <?php endif; ?>
-            <?php if (!empty($chuyen['customer_note'])): ?>
-            <div class="col-12">
-              <label class="form-label">Ghi chú khách</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['customer_note']) ?>" readonly>
-            </div>
-            <?php endif; ?>
-            <?php if (!empty($chuyen['company_note'])): ?>
-            <div class="col-12">
-              <label class="form-label">Lưu ý từ công ty</label>
-              <input class="form-control form-control-sm text-danger" value="<?= h($chuyen['company_note']) ?>" readonly>
-            </div>
-            <?php endif; ?>
-          </div>
-        </fieldset>
-
-        <!-- Doanh thu & tien cuoc: tai xe sua duoc neu khac thuc te -->
-        <?php
-          $loaiPhuPhiModal = '0';
-          if ((float)$chuyen['overnight_fee'] == 200000) { $loaiPhuPhiModal = '200000'; }
-          elseif ((float)$chuyen['overnight_fee'] == 100000) { $loaiPhuPhiModal = '100000'; }
-        ?>
-        <fieldset class="nhom-truong">
-          <legend>Doanh thu &amp; tiền tài</legend>
-          <div class="row g-2">
-            <div class="col-6 col-md-4">
-              <label class="form-label">Khách trả (VNĐ)</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien o-khach-tra" placeholder="0"
-                     name="thu_vnd" value="<?= h(giaTriTienForm($chuyen, 'revenue_vnd')) ?>">
-              <div class="form-check mt-1">
-                <input class="form-check-input" type="checkbox" name="khach_da_thanh_toan" value="1"
-                       id="oKhachDaTT<?= $chuyen['id'] ?>" <?= $chuyen['customer_paid'] ? 'checked' : '' ?>>
-                <label class="form-check-label" for="oKhachDaTT<?= $chuyen['id'] ?>" style="font-size:12px">Khách đã thanh toán đủ</label>
-              </div>
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Đặt cọc</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien o-dat-coc" placeholder="0"
-                     name="dat_coc" value="<?= h(giaTriTienForm($chuyen, 'deposit_amount')) ?>">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Còn lại</label>
-              <input type="text" class="form-control form-control-sm o-con-lai" placeholder="0" readonly tabindex="-1">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Tiền cuốc xe</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0"
-                     name="tien_cuoc_xe" value="<?= h(giaTriTienForm($chuyen, 'trip_fee')) ?>">
-            </div>
-            <div class="col-6 col-md-2">
-              <label class="form-label">Phụ phí</label>
-              <select class="form-select form-select-sm o-chon-phu-phi">
-                <option value="0" <?= $loaiPhuPhiModal === '0' ? 'selected' : '' ?>>Không có</option>
-                <option value="200000" <?= $loaiPhuPhiModal === '200000' ? 'selected' : '' ?>>Lưu đêm (200k)</option>
-                <option value="100000" <?= $loaiPhuPhiModal === '100000' ? 'selected' : '' ?>>Chạy khuya (100k)</option>
-              </select>
-            </div>
-            <div class="col-6 col-md-2">
-              <label class="form-label">Số tiền</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien o-phu-phi-tien" placeholder="0"
-                     name="luu_dem" value="<?= h(giaTriTienForm($chuyen, 'overnight_fee')) ?>">
-            </div>
-          </div>
-          <div class="text-muted mt-2" style="font-size:12px">
-            Sửa lại nếu số liệu thực tế khác với công ty đã giao.
-          </div>
-        </fieldset>
-
-        <!-- Phan chi phi thuc te -->
-        <fieldset class="nhom-truong">
-          <legend>Chi phí thực tế bạn nhập</legend>
-          <div class="row g-2">
-            <div class="col-6 col-md-4">
-              <label class="form-label">Tiền xăng dầu</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien o-xang-dau" placeholder="0" name="xang_dau">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">VAT 10% xăng/dầu</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien o-vat-xang-dau" placeholder="0" name="vat_xang_dau">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Người trả xăng dầu</label>
-              <input class="form-control form-control-sm" name="nguoi_tra_xang_dau" placeholder="VD: VCB Nin, tiền mặt...">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Bảo dưỡng xe</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0" name="bao_duong">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Phạt</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0" name="phat">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Tạm ứng</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0" name="tam_ung">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Hoàn tiền VNĐ</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0" name="hoan_tien_vnd">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Hoàn tiền USD</label>
-              <input type="number" step="0.01" class="form-control form-control-sm" placeholder="0.00" name="hoan_tien_usd">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Khách TT trực tiếp cty</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0" name="khach_tt_truc_tiep">
-            </div>
-            <div class="col-12">
-              <label class="form-label">Ghi chú của tài xế</label>
-              <textarea class="form-control form-control-sm" name="ghi_chu" rows="2"></textarea>
-            </div>
-          </div>
-        </fieldset>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-        <button class="btn btn-primary"><?= bieuTuong('check') ?> Xác nhận chuyến xe</button>
-      </div>
-    </form>
-  </div>
+<!-- Xem them -->
+<div class="text-center my-3" id="khoiXemThem" <?= $conThem ? '' : 'hidden' ?>>
+  <button type="button" class="btn btn-outline-primary" id="nutXemThem">
+    <?= bieuTuong('chevron-down') ?> Xem thêm
+  </button>
 </div>
-<?php endforeach; ?>
+
+<!-- Hop thoai tai xe nhap chi phi & xac nhan -->
+<div id="khoiModalXacNhan">
+  <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_xacnhan.php'; endforeach; ?>
+</div>
 
 <!-- Hop thoai ke toan/quan ly xac nhan tai xe da nop lai tien -->
-<?php foreach ($danhSach as $chuyen):
-  if (!(laQuanLy() && (int)$chuyen['customer_paid'] === 0 && (int)$chuyen['cash_remitted'] === 0
-        && in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true))) continue;
-?>
-<div class="modal fade" id="nopLai<?= $chuyen['id'] ?>" tabindex="-1">
-  <div class="modal-dialog">
-    <form method="post" action="<?= duongDan('chuyenxe/xacnhannoplai') ?>" class="modal-content"
-          onsubmit="return confirm('Xác nhận tài xế đã nộp lại tiền cho công ty? Sau khi xác nhận sẽ không tính khoản này vào nợ tài xế nữa.');">
-      <?php truongToken(); ?>
-      <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-      <div class="modal-header">
-        <h5 class="modal-title"><?= bieuTuong('cash') ?> Xác nhận nộp lại tiền</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p>Chuyến <strong><?= h($chuyen['route']) ?></strong> ngày <?= dinhDangNgay($chuyen['trip_date']) ?>
-          — tài xế <strong><?= h($chuyen['ten_tai_xe']) ?></strong> đã thu của khách
-          <strong><?= dinhDangTien($chuyen['revenue_vnd']) ?>đ</strong>.</p>
-        <label class="form-label">Hình thức nộp lại</label>
-        <select name="hinh_thuc_nop" class="form-select" required>
-          <option value="tien_mat">Tiền mặt</option>
-          <option value="chuyen_khoan">Chuyển khoản</option>
-        </select>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-        <button class="btn btn-success"><?= bieuTuong('check') ?> Xác nhận đã nộp lại</button>
-      </div>
-    </form>
-  </div>
+<div id="khoiModalNopLai">
+  <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_noplai.php'; endforeach; ?>
 </div>
-<?php endforeach; ?>
+
+<script>
+// ---------------------------------------------------------------
+// "Xem them": tai them 1 trang chuyen xe qua AJAX, noi vao DOM
+// thay vi tai lai ca trang / tai het du lieu 1 luc (do nang).
+// ---------------------------------------------------------------
+(function () {
+  var nutXemThem = document.getElementById('nutXemThem');
+  if (!nutXemThem) return;
+
+  var boQua = <?= (int)count($danhSach) ?>;
+  var dangTai = false;
+
+  nutXemThem.addEventListener('click', function () {
+    if (dangTai) return;
+    dangTai = true;
+    nutXemThem.disabled = true;
+    nutXemThem.textContent = 'Đang tải...';
+
+    var thamSo = new URLSearchParams(window.location.search);
+    thamSo.set('bo_qua', boQua);
+
+    fetch('<?= duongDan('chuyenxe/taithem') ?>?' + thamSo.toString(), { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (kq) {
+        if (!kq.ok) return;
+
+        document.getElementById('dsTheDienThoai').insertAdjacentHTML('beforeend', kq.the_html);
+        document.getElementById('dsDongBang').insertAdjacentHTML('beforeend', kq.dong_html);
+        document.getElementById('khoiModalXacNhan').insertAdjacentHTML('beforeend', kq.modal_xacnhan_html);
+        document.getElementById('khoiModalNopLai').insertAdjacentHTML('beforeend', kq.modal_noplai_html);
+
+        boQua += kq.so_dong_them;
+
+        if (kq.con_them) {
+          nutXemThem.disabled = false;
+          nutXemThem.textContent = 'Xem thêm';
+        } else {
+          document.getElementById('khoiXemThem').setAttribute('hidden', '');
+        }
+        dangTai = false;
+
+        // Neu tai xe dang o trang nay va co chuyen moi tai them dang chay GPS,
+        // khong can xu ly gi them - script gui vi tri chi chay 1 lan luc tai trang.
+      })
+      .catch(function () {
+        dangTai = false;
+        nutXemThem.disabled = false;
+        nutXemThem.textContent = 'Xem thêm (thử lại)';
+      });
+  });
+})();
+</script>
 
 <?php if (laTaiXe()): ?>
 <script>

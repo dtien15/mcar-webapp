@@ -30,10 +30,10 @@ class ChuyenXeModel extends Model
     }
 
     /**
-     * Lay danh sach chuyen xe kem thong tin xe / tai xe / loai keo.
+     * Lay danh sach chuyen xe kem thong tin xe / tai xe / loai keo, co phan trang.
      * $loc: ['tu_ngay','den_ngay','id_tai_xe','id_xe','trang_thai','tu_khoa']
      */
-    public function locDanhSach(array $loc, $gioiHan = 500)
+    public function locDanhSach(array $loc, $gioiHan = 20, $boQua = 0)
     {
         [$dieuKien, $thamSo] = $this->dungDieuKien($loc);
 
@@ -48,7 +48,18 @@ class ChuyenXeModel extends Model
              LEFT JOIN contract_types ct ON ct.id = t.contract_type_id
              WHERE {$dieuKien}
              ORDER BY t.trip_date DESC, t.id DESC
-             LIMIT " . (int)$gioiHan,
+             LIMIT " . (int)$gioiHan . " OFFSET " . (int)$boQua,
+            $thamSo
+        );
+    }
+
+    /** Dem tong so chuyen xe khop bo loc (dung de biet con du lieu de "xem them" khong) */
+    public function demTheoLoc(array $loc)
+    {
+        [$dieuKien, $thamSo] = $this->dungDieuKien($loc);
+
+        return (int)$this->motGiaTri(
+            "SELECT COUNT(*) FROM trips t WHERE {$dieuKien}",
             $thamSo
         );
     }

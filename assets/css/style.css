@@ -276,6 +276,28 @@ legend .ti { font-size: 15px; vertical-align: -2px; }
 .the-than { padding: 18px; }
 .the-than-khong-dem { padding: 0; }
 
+/* ---------- Tab trang thai (chuyen xe) ---------- */
+.nhan-tab-trang-thai {
+  margin: 14px 0;
+  border-bottom-color: var(--mau-vien);
+}
+.nhan-tab-trang-thai .nav-link {
+  color: var(--mau-chu-mo, #64748b);
+  font-weight: 500;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 16px;
+}
+.nhan-tab-trang-thai .nav-link.active {
+  color: var(--mau-chinh, #2563eb);
+  background: transparent;
+  border-bottom: 2px solid var(--mau-chinh, #2563eb);
+}
+.nhan-tab-trang-thai .nav-link:hover:not(.active) {
+  color: var(--mau-chinh, #2563eb);
+  border-color: transparent;
+}
+
 /* ---------- O thong ke ---------- */
 .luoi-thong-ke {
   display: grid;

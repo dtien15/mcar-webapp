@@ -6,17 +6,23 @@
 
 class ChuyenXeController extends Controller
 {
-    /** Danh sach chuyen xe kem bo loc */
+    /** Danh sach chuyen xe kem bo loc, phan trang "xem them" (mac dinh 20 dong/trang) */
     public function danhSach()
     {
         $this->yeuCauDangNhap();
 
         $loc           = $this->layBoLoc();
+        $soDong        = $this->soDongMoiTrang();
         $chuyenXeModel = $this->model('ChuyenXeModel');
+        $danhSach      = $chuyenXeModel->locDanhSach($loc, $soDong, 0);
+        $tongSo        = $chuyenXeModel->demTheoLoc($loc);
 
         $duLieu = [
             'loc'          => $loc,
-            'danhSach'     => $chuyenXeModel->locDanhSach($loc),
+            'danhSach'     => $danhSach,
+            'tongSo'       => $tongSo,
+            'soDong'       => $soDong,
+            'conThem'      => $tongSo > count($danhSach),
             'tongHop'      => $chuyenXeModel->tongHopTheoLoc($loc),
             'dsXe'         => $this->model('XeModel')->layTatCa(),
             'dsTaiXe'      => $this->model('TaiXeModel')->layTatCa(),
@@ -24,6 +30,64 @@ class ChuyenXeController extends Controller
         ];
 
         $this->view('chuyenxe/danhsach', $duLieu, 'Chuyến xe');
+    }
+
+    /**
+     * API "Xem thêm" - tai them 1 trang chuyen xe theo bo loc hien tai (AJAX,
+     * tra ve JSON chua san HTML da render de JS chi can noi vao DOM, khong
+     * phai tai lai toan bo trang / load het du lieu nang mot luc).
+     */
+    public function taiThem()
+    {
+        $this->yeuCauDangNhap();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $loc           = $this->layBoLoc();
+        $soDong        = $this->soDongMoiTrang();
+        $boQua         = max(0, (int)layGet('bo_qua', 0));
+        $idTaiXeHienTai = laTaiXe() ? taiKhoanHienTai()['id_tai_xe'] : null;
+
+        $chuyenXeModel = $this->model('ChuyenXeModel');
+        $danhSach      = $chuyenXeModel->locDanhSach($loc, $soDong, $boQua);
+        $tongSo        = $chuyenXeModel->demTheoLoc($loc);
+
+        $theHtml         = '';
+        $dongHtml        = '';
+        $modalXacNhanHtml = '';
+        $modalNopLaiHtml  = '';
+        foreach ($danhSach as $chuyen) {
+            $theHtml          .= $this->renderPhanView('chuyenxe/_the_chuyen', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
+            $dongHtml         .= $this->renderPhanView('chuyenxe/_dong_bang', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
+            $modalXacNhanHtml .= $this->renderPhanView('chuyenxe/_modal_xacnhan', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
+            $modalNopLaiHtml  .= $this->renderPhanView('chuyenxe/_modal_noplai', ['chuyen' => $chuyen]);
+        }
+
+        echo json_encode([
+            'ok'                 => true,
+            'the_html'           => $theHtml,
+            'dong_html'          => $dongHtml,
+            'modal_xacnhan_html' => $modalXacNhanHtml,
+            'modal_noplai_html'  => $modalNopLaiHtml,
+            'so_dong_them'       => count($danhSach),
+            'con_them'           => $tongSo > ($boQua + count($danhSach)),
+        ]);
+        exit;
+    }
+
+    /** Doc so dong/trang tu query string, chi cho phep 20/50/100, mac dinh 20 */
+    private function soDongMoiTrang()
+    {
+        $soDong = (int)layGet('so_dong', 20);
+        return in_array($soDong, [20, 50, 100], true) ? $soDong : 20;
+    }
+
+    /** Render 1 file view thanh chuoi HTML (dung cho fragment tra ve qua AJAX) */
+    private function renderPhanView($tenView, array $duLieu)
+    {
+        extract($duLieu);
+        ob_start();
+        require DUONG_DAN_GOC . '/views/' . $tenView . '.php';
+        return ob_get_clean();
     }
 
     /** Form them chuyen xe moi */

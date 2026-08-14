@@ -118,6 +118,24 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
             </select>
           </div>
           <div class="col-6 col-md-4">
+            <label class="form-label">Tài xế</label>
+            <?php if (laTaiXe()): $txCuaToi = $dsTaiXe[0] ?? null; ?>
+              <!-- Tai xe tu tao: khoa cung la chinh minh -->
+              <input type="hidden" name="id_tai_xe" value="<?= h($txCuaToi['id'] ?? '') ?>">
+              <input class="form-control" value="<?= h($txCuaToi['full_name'] ?? '') ?>" readonly>
+            <?php else: ?>
+              <select name="id_tai_xe" id="oTaiXe" class="form-select" <?= $chiXemSel ?>>
+                <option value="">-- Chọn tài xế --</option>
+                <?php foreach ($dsTaiXe as $tx): ?>
+                  <option value="<?= $tx['id'] ?>" data-idxe="<?= h($tx['car_id']) ?>"
+                    <?= giaTri($chuyenXe, 'driver_id') == $tx['id'] ? 'selected' : '' ?>>
+                    <?= h($tx['full_name']) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            <?php endif; ?>
+          </div>
+          <div class="col-6 col-md-4">
             <label class="form-label">Xe</label>
             <?php if (laTaiXe()): $xeCuaToi = $dsXe[0] ?? null; ?>
               <!-- Tai xe tu tao: khoa cung xe cua minh, khong chon duoc xe khac -->
@@ -139,23 +157,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                   </option>
                 <?php endforeach; ?>
               </select>
-            <?php endif; ?>
-          </div>
-          <div class="col-6 col-md-4">
-            <label class="form-label">Tài xế</label>
-            <?php if (laTaiXe()): $txCuaToi = $dsTaiXe[0] ?? null; ?>
-              <!-- Tai xe tu tao: khoa cung la chinh minh -->
-              <input type="hidden" name="id_tai_xe" value="<?= h($txCuaToi['id'] ?? '') ?>">
-              <input class="form-control" value="<?= h($txCuaToi['full_name'] ?? '') ?>" readonly>
-            <?php else: ?>
-              <select name="id_tai_xe" class="form-select" <?= $chiXemSel ?>>
-                <option value="">-- Chọn tài xế --</option>
-                <?php foreach ($dsTaiXe as $tx): ?>
-                  <option value="<?= $tx['id'] ?>" <?= giaTri($chuyenXe, 'driver_id') == $tx['id'] ? 'selected' : '' ?>>
-                    <?= h($tx['full_name']) ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
+              <div class="text-muted mt-1" style="font-size:12px">Tự chọn xe mặc định của tài xế, có thể đổi nếu tài xế chạy xe khác.</div>
             <?php endif; ?>
           </div>
 
@@ -343,6 +345,27 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
 </form>
 
 <script>
+// Quan ly chon tai xe -> tu dong active xe mac dinh cua tai xe do (van sua duoc,
+// vi co the tai xe nay dang chay xe khac).
+(function () {
+  var oTaiXe = document.getElementById('oTaiXe');
+  var oXe    = document.getElementById('oXe');
+  if (!oTaiXe || !oXe) return;
+
+  oTaiXe.addEventListener('change', function () {
+    var chon = oTaiXe.options[oTaiXe.selectedIndex];
+    var idXe = chon ? chon.getAttribute('data-idxe') : '';
+    if (!idXe) return;
+    for (var i = 0; i < oXe.options.length; i++) {
+      if (oXe.options[i].value === idXe) {
+        oXe.selectedIndex = i;
+        oXe.dispatchEvent(new Event('change'));
+        break;
+      }
+    }
+  });
+})();
+
 // Tu dong dien gia goi y theo tuyen + so cho xe + loai keo
 (function () {
   var bangGia = <?= json_encode($giaGoiY, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
