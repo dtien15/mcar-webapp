@@ -62,7 +62,12 @@ tên hàm và biến viết bằng tiếng Việt không dấu (`danhSach`, `lay
 ## 2. Cài đặt lần đầu (hosting mới)
 
 1. **Tạo database** trong cPanel → *MySQL® Databases* → tạo DB + user → gán **ALL PRIVILEGES**
-2. **Import** `database/mcar.sql` qua phpMyAdmin
+2. **Import `database/mcar.sql`** qua phpMyAdmin — **chỉ cần đúng 1 file này**.
+   File đã gộp sẵn cả 3 file migration, cài mới **không cần** chạy thêm
+   `migration_trip_workflow.sql`, `migration_thongbao.sql`, `migration_push.sql`.
+   Sau khi import phải có đủ **11 bảng**: `users`, `cars`, `drivers`, `contract_types`,
+   `price_list`, `trips`, `payroll`, `payments`, `notifications`, `app_settings`,
+   `push_subscriptions`.
 3. **Upload code** vào thư mục web (hoặc dùng Git — xem mục 4)
 4. **Tạo file cấu hình**: copy `config/cauhinh.example.php` → `config/cauhinh.php`, điền:
    ```php
@@ -79,8 +84,9 @@ tên hàm và biến viết bằng tiếng Việt không dấu (`danhSach`, `lay
 
 ## 3. Nâng cấp từ bản cũ (đã chạy trên hosting)
 
-**Không cần import lại database.** Chỉ cần chạy các file migration còn thiếu trong
-phpMyAdmin → tab **SQL** (mỗi file chỉ chạy 1 lần):
+**Không cần import lại database** (import `mcar.sql` sẽ XÓA SẠCH dữ liệu đang có).
+Chỉ chạy các file migration còn thiếu trong phpMyAdmin → tab **SQL**
+(mỗi file chỉ chạy 1 lần, chạy lại lần nữa cũng không sao vì dùng `IF NOT EXISTS`):
 
 | File | Thêm chức năng gì |
 |---|---|

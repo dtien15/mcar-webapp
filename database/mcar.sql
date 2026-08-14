@@ -1,6 +1,19 @@
 -- =====================================================================
--- MCAR WEBAPP - DATABASE SCHEMA + SEED DATA
--- Import file này qua phpMyAdmin (cPanel) để tạo toàn bộ database
+-- MCAR WEBAPP - TOÀN BỘ CẤU TRÚC DATABASE + DỮ LIỆU MẪU
+--
+-- ĐÂY LÀ FILE DUY NHẤT CẦN IMPORT KHI CÀI MỚI.
+-- Đã bao gồm đầy đủ nội dung của cả 3 file migration:
+--   - migration_trip_workflow.sql  (quy trình xác nhận chuyến xe)
+--   - migration_thongbao.sql       (hệ thống thông báo)
+--   - migration_push.sql           (thông báo đẩy về điện thoại)
+-- Các file migration chỉ dùng để NÂNG CẤP website đã chạy từ trước,
+-- cài mới thì KHÔNG cần chạy chúng.
+--
+-- Cách dùng: phpMyAdmin -> chọn database -> tab Import -> chọn file này -> Go
+-- Tài khoản đăng nhập đầu tiên: admin / admin123 (đổi ngay sau khi cài)
+--
+-- CẢNH BÁO: file này XÓA và tạo lại toàn bộ bảng (DROP TABLE).
+-- Chỉ chạy trên database trống hoặc khi muốn xóa sạch làm lại từ đầu.
 -- =====================================================================
 
 SET NAMES utf8mb4;
@@ -212,6 +225,35 @@ CREATE TABLE notifications (
   INDEX idx_nguoi_nhan (user_id, is_read),
   INDEX idx_tai_xe (driver_id, is_read),
   INDEX idx_nhac_lai (is_read, remind_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------
+-- Cài đặt hệ thống (khóa VAPID cho thông báo đẩy, khóa cron...)
+-- ---------------------------------------------------------------------
+DROP TABLE IF EXISTS app_settings;
+CREATE TABLE app_settings (
+  name VARCHAR(60) PRIMARY KEY,
+  value TEXT,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------
+-- Thiết bị đã đăng ký nhận thông báo đẩy (Web Push)
+-- ---------------------------------------------------------------------
+DROP TABLE IF EXISTS push_subscriptions;
+CREATE TABLE push_subscriptions (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  endpoint TEXT NOT NULL,
+  endpoint_hash CHAR(64) NOT NULL,
+  p256dh VARCHAR(255) DEFAULT NULL,
+  auth VARCHAR(255) DEFAULT NULL,
+  user_agent VARCHAR(255) DEFAULT NULL,
+  fail_count INT NOT NULL DEFAULT 0,
+  last_sent_at DATETIME DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_endpoint (endpoint_hash),
+  INDEX idx_nguoi_dung (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
