@@ -1,3 +1,7 @@
 # File cau hinh chua mat khau that - khong dua len Git
 config/cauhinh.php
 config/db.php
+
+# File SQL va tai lieu - chi dung o may lap trinh, khong can dua len hosting
+database/
+HUONG_DAN_TRIEN_KHAI.md
