@@ -1,6 +1,10 @@
 <?php
 // Khung giao dien chung: thanh ben + thanh tren + vung noi dung
-$duongDanHienTai = explode('/', trim(strtolower($_GET['url'] ?? 'tongquan'), '/'))[0] ?: 'tongquan';
+$duongDanDayDu   = trim(strtolower($_GET['url'] ?? 'tongquan'), '/');
+// "chuyenxe/vitri" dung chung controller voi "chuyenxe" nen can phan biet rieng de menu sang dung muc
+$duongDanHienTai = strpos($duongDanDayDu, 'chuyenxe/vitri') === 0
+    ? 'vitri'
+    : (explode('/', $duongDanDayDu)[0] ?: 'tongquan');
 $taiKhoan        = taiKhoanHienTai();
 $thongBao        = layThongBao();
 $tenHeThong      = defined('TEN_HE_THONG') ? TEN_HE_THONG : 'MCAR';
@@ -20,6 +24,7 @@ try {
 $menu = [
     ['route' => 'tongquan',  'nhan' => 'Tổng quan',           'icon' => 'layout-dashboard', 'quyen' => ['admin','ketoan','taixe']],
     ['route' => 'chuyenxe',  'nhan' => 'Chuyến xe',           'icon' => 'route',            'quyen' => ['admin','ketoan','taixe'], 'huyHieu' => $soChoXuLy],
+    ['route' => 'chuyenxe/vitri', 'active' => 'vitri', 'nhan' => 'Vị trí xe', 'icon' => 'map-2', 'quyen' => ['admin','ketoan']],
     ['route' => 'luong',     'nhan' => 'Bảng lương',          'icon' => 'report-money',     'quyen' => ['admin','ketoan','taixe']],
     ['route' => 'thanhtoan', 'nhan' => 'Thanh toán & công nợ','icon' => 'receipt',          'quyen' => ['admin','ketoan']],
     ['route' => 'baocao',    'nhan' => 'Báo cáo doanh thu',   'icon' => 'chart-bar',        'quyen' => ['admin','ketoan']],
@@ -73,7 +78,7 @@ $menu = [
       <?php if (isset($muc['nhom'])): ?>
         <div class="nhom-menu"><?= h($muc['nhom']) ?></div>
       <?php else: ?>
-        <a class="muc-menu <?= $duongDanHienTai === $muc['route'] ? 'dang-chon' : '' ?>"
+        <a class="muc-menu <?= $duongDanHienTai === ($muc['active'] ?? $muc['route']) ? 'dang-chon' : '' ?>"
            href="<?= duongDan($muc['route']) ?>">
           <span class="icon"><?= bieuTuong($muc['icon']) ?></span>
           <span class="nhan"><?= h($muc['nhan']) ?></span>

@@ -81,6 +81,10 @@ require_once DUONG_DAN_GOC . '/models/GhiNhoModel.php';
 (new GhiNhoModel())->xoaMaHetHan();
 $ghiLog[] = 'Đã dọn mã ghi nhớ đăng nhập hết hạn';
 
+require_once DUONG_DAN_GOC . '/models/ChuyenXeModel.php';
+(new ChuyenXeModel())->tatDinhViQuaHan(30);
+$ghiLog[] = 'Đã tắt định vị các chuyến quá 30 phút không cập nhật (tài xế quên bấm Kết thúc)';
+
 // ---------------------------------------------------------------------
 // Ket qua
 // ---------------------------------------------------------------------

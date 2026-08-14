@@ -86,7 +86,8 @@
     $cuaToi      = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
     $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
   ?>
-    <div class="the-chuyen-xe <?= $duocXacNhan ? 'can-xac-nhan' : '' ?>">
+    <div class="the-chuyen-xe <?= $duocXacNhan ? 'can-xac-nhan' : '' ?>"
+         <?php if ($cuaToi): ?>data-cua-toi="1" data-dang-dinh-vi="<?= (int)$chuyen['dang_dinh_vi'] ?>" data-id-chuyen="<?= $chuyen['id'] ?>"<?php endif; ?>>
       <div class="dau-the">
         <div>
           <div class="ngay"><?= bieuTuong('calendar') ?> <?= dinhDangNgay($chuyen['trip_date']) ?>
@@ -96,7 +97,12 @@
           </div>
           <div class="hanh-trinh"><?= h($chuyen['route']) ?></div>
         </div>
-        <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
+        <div class="cot-trang-thai">
+          <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
+          <?php if ($chuyen['dang_dinh_vi']): ?>
+            <span class="huy-hieu-dinh-vi" title="Đang gửi vị trí"><span class="cham-nhap-nhay"></span> GPS</span>
+          <?php endif; ?>
+        </div>
       </div>
 
       <?php if (!empty($chuyen['pickup_dropoff'])): ?>
@@ -128,11 +134,26 @@
               <button class="btn btn-sm btn-success"><?= bieuTuong('check') ?> Chốt hoàn thành</button>
             </form>
           <?php endif; ?>
-        <?php elseif ($duocXacNhan): ?>
-          <button type="button" class="btn btn-primary w-100"
-                  data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">
-            <?= bieuTuong('writing') ?> Nhập chi phí &amp; Xác nhận
-          </button>
+        <?php elseif ($cuaToi && $chuyen['status'] !== 'hoan_thanh'): ?>
+          <?php if (!$chuyen['dang_dinh_vi']): ?>
+            <form method="post" action="<?= duongDan('chuyenxe/batdauhanhtrinh') ?>" class="w-100">
+              <?php truongToken(); ?>
+              <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
+              <button class="btn btn-outline-success w-100"><?= bieuTuong('player-play') ?> Bắt đầu hành trình</button>
+            </form>
+          <?php else: ?>
+            <form method="post" action="<?= duongDan('chuyenxe/ketthuchanhtrinh') ?>" class="w-100">
+              <?php truongToken(); ?>
+              <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
+              <button class="btn btn-outline-danger w-100"><?= bieuTuong('player-stop') ?> Kết thúc hành trình</button>
+            </form>
+          <?php endif; ?>
+          <?php if ($duocXacNhan): ?>
+            <button type="button" class="btn btn-primary w-100"
+                    data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">
+              <?= bieuTuong('writing') ?> Nhập chi phí &amp; Xác nhận
+            </button>
+          <?php endif; ?>
         <?php endif; ?>
       </div>
     </div>
@@ -173,7 +194,7 @@
         $cuaToi    = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
         $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
       ?>
-        <tr>
+        <tr <?php if ($cuaToi): ?>data-cua-toi="1" data-dang-dinh-vi="<?= (int)$chuyen['dang_dinh_vi'] ?>" data-id-chuyen="<?= $chuyen['id'] ?>"<?php endif; ?>>
           <td><?= dinhDangNgay($chuyen['trip_date']) ?></td>
           <td><?= h($chuyen['pickup_time']) ?></td>
           <td>
@@ -190,7 +211,12 @@
           <td class="canh-phai"><?= dinhDangTien($chuyen['revenue_vnd']) ?></td>
           <td class="canh-phai"><?= dinhDangTien($chuyen['trip_fee']) ?></td>
           <td class="canh-phai"><?= dinhDangTien($chuyen['fuel_cost']) ?></td>
-          <td><span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span></td>
+          <td>
+            <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
+            <?php if ($chuyen['dang_dinh_vi']): ?>
+              <span class="huy-hieu-dinh-vi" title="Đang gửi vị trí"><span class="cham-nhap-nhay"></span> GPS</span>
+            <?php endif; ?>
+          </td>
           <td class="canh-phai">
             <div class="d-flex gap-1 justify-content-end">
               <?php if (laQuanLy()): ?>
@@ -218,11 +244,26 @@
                   <button class="btn btn-sm btn-outline-danger">Xóa</button>
                 </form>
 
-              <?php elseif ($duocXacNhan): ?>
-                <button type="button" class="btn btn-sm btn-primary"
-                        data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">
-                  <?= bieuTuong('writing') ?> Nhập &amp; Xác nhận
-                </button>
+              <?php elseif ($cuaToi && $chuyen['status'] !== 'hoan_thanh'): ?>
+                <?php if (!$chuyen['dang_dinh_vi']): ?>
+                  <form method="post" action="<?= duongDan('chuyenxe/batdauhanhtrinh') ?>">
+                    <?php truongToken(); ?>
+                    <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
+                    <button class="btn btn-sm btn-outline-success"><?= bieuTuong('player-play') ?> Bắt đầu</button>
+                  </form>
+                <?php else: ?>
+                  <form method="post" action="<?= duongDan('chuyenxe/ketthuchanhtrinh') ?>">
+                    <?php truongToken(); ?>
+                    <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
+                    <button class="btn btn-sm btn-outline-danger"><?= bieuTuong('player-stop') ?> Kết thúc</button>
+                  </form>
+                <?php endif; ?>
+                <?php if ($duocXacNhan): ?>
+                  <button type="button" class="btn btn-sm btn-primary"
+                          data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">
+                    <?= bieuTuong('writing') ?> Nhập &amp; Xác nhận
+                  </button>
+                <?php endif; ?>
               <?php endif; ?>
             </div>
           </td>
@@ -368,3 +409,56 @@
   </div>
 </div>
 <?php endforeach; ?>
+
+<?php if (laTaiXe()): ?>
+<script>
+// ---------------------------------------------------------------
+// Dinh vi hanh trinh: gui vi tri len may chu trong khi dang chay xe
+// ---------------------------------------------------------------
+(function () {
+  var URL_CAP_NHAT = '<?= duongDan('chuyenxe/capnhatvitri') ?>';
+  var GIAY_TOI_THIEU_GIUA_2_LAN = 15;
+
+  var dsIdDangChay = [...document.querySelectorAll('[data-cua-toi="1"][data-dang-dinh-vi="1"]')]
+    .map(function (el) { return el.getAttribute('data-id-chuyen'); })
+    .filter(function (v, i, mang) { return v && mang.indexOf(v) === i; }); // bo trung (the + bang cung ton tai trong DOM)
+
+  if (!dsIdDangChay.length) return;
+
+  if (!('geolocation' in navigator)) {
+    console.warn('Trình duyệt này không hỗ trợ định vị.');
+    return;
+  }
+
+  var lanGuiCuoi = 0;
+
+  function guiViTri(vitri) {
+    var bayGio = Date.now();
+    if (bayGio - lanGuiCuoi < GIAY_TOI_THIEU_GIUA_2_LAN * 1000) return;
+    lanGuiCuoi = bayGio;
+
+    dsIdDangChay.forEach(function (id) {
+      fetch(URL_CAP_NHAT, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: id,
+          lat: vitri.coords.latitude,
+          lng: vitri.coords.longitude,
+          do_chinh_xac: Math.round(vitri.coords.accuracy || 0)
+        })
+      }).catch(function () { /* mat mang thi bo qua, lan sau gui lai */ });
+    });
+  }
+
+  navigator.geolocation.watchPosition(guiViTri, function (loi) {
+    console.warn('Không lấy được vị trí:', loi.message);
+  }, {
+    enableHighAccuracy: true,
+    maximumAge: 10000,
+    timeout: 20000
+  });
+})();
+</script>
+<?php endif; ?>

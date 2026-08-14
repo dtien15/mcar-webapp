@@ -486,6 +486,33 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
   gap: 10px;
   margin-bottom: 8px;
 }
+.cot-trang-thai { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+
+/* Huy hieu "dang gui vi tri GPS" nhap nhay */
+.huy-hieu-dinh-vi {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  margin-top: 4px;
+}
+.cham-nhap-nhay {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: nhapNhayGps 1.4s ease-in-out infinite;
+}
+@keyframes nhapNhayGps {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .35; transform: scale(.7); }
+}
+
 .the-chuyen-xe .ngay { font-size: 12px; color: var(--mau-chu-nhat); }
 .the-chuyen-xe .ngay .gio { margin-left: 10px; }
 .the-chuyen-xe .hanh-trinh { font-size: 17px; font-weight: 700; margin-top: 2px; }

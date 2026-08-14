@@ -152,8 +152,13 @@ class ChuyenXeModel extends Model
     /** Quan ly chot hoan thanh chuyen xe */
     public function chotHoanThanh($id)
     {
+        // Chot xong thi tat luon dinh vi (neu tai xe quen bam Ket thuc hanh trinh)
+        // de khong con hien "dang chay" tren ban do quan ly sau khi chuyen da xong.
         return $this->thucThi(
-            "UPDATE trips SET status='hoan_thanh', completed_at=NOW() WHERE id = ? AND status <> 'hoan_thanh'",
+            "UPDATE trips SET status='hoan_thanh', completed_at=NOW(),
+                    dang_dinh_vi=0, vi_tri_lat=NULL, vi_tri_lng=NULL,
+                    vi_tri_do_chinh_xac=NULL, vi_tri_cap_nhat_luc=NULL
+             WHERE id = ? AND status <> 'hoan_thanh'",
             [(int)$id]
         );
     }
@@ -164,6 +169,94 @@ class ChuyenXeModel extends Model
         return $this->thucThi(
             "UPDATE trips SET status='tai_xe_xac_nhan', completed_at=NULL WHERE id = ?",
             [(int)$id]
+        );
+    }
+
+    // -----------------------------------------------------------------
+    // Dinh vi tai xe theo thoi gian thuc
+    // -----------------------------------------------------------------
+
+    /** Tai xe bam Bat dau hanh trinh cho 1 chuyen xe cua chinh minh */
+    public function batDauHanhTrinh($id, $idTaiXe)
+    {
+        $chuyen = $this->motDong(
+            "SELECT id FROM trips WHERE id = ? AND driver_id = ? AND status <> 'hoan_thanh'",
+            [(int)$id, (int)$idTaiXe]
+        );
+        if (!$chuyen) {
+            return false;
+        }
+        $this->thucThi("UPDATE trips SET dang_dinh_vi = 1 WHERE id = ?", [(int)$id]);
+        return true;
+    }
+
+    /** Tai xe bam Ket thuc hanh trinh - xoa vi tri, tat co dinh vi */
+    public function ketThucHanhTrinh($id, $idTaiXe)
+    {
+        return $this->thucThi(
+            "UPDATE trips SET dang_dinh_vi = 0, vi_tri_lat = NULL, vi_tri_lng = NULL,
+                    vi_tri_do_chinh_xac = NULL, vi_tri_cap_nhat_luc = NULL
+             WHERE id = ? AND driver_id = ?",
+            [(int)$id, (int)$idTaiXe]
+        );
+    }
+
+    /**
+     * Cap nhat toa do vi tri cua 1 chuyen dang dinh vi.
+     * Chi chap nhan neu chuyen thuoc dung tai xe nay VA dang bat dinh vi
+     * (tranh truong hop gui vi tri sau khi da bam Ket thuc / bi chot).
+     */
+    public function capNhatViTri($id, $idTaiXe, $lat, $lng, $doChinhXac = null)
+    {
+        $chuyen = $this->motDong(
+            "SELECT id FROM trips WHERE id = ? AND driver_id = ? AND dang_dinh_vi = 1",
+            [(int)$id, (int)$idTaiXe]
+        );
+        if (!$chuyen) {
+            return false;
+        }
+        $this->thucThi(
+            "UPDATE trips SET vi_tri_lat = ?, vi_tri_lng = ?, vi_tri_do_chinh_xac = ?, vi_tri_cap_nhat_luc = NOW()
+             WHERE id = ?",
+            [$lat, $lng, $doChinhXac, (int)$id]
+        );
+        return true;
+    }
+
+    /** Danh sach cac chuyen dang duoc dinh vi (cho quan ly xem ban do) */
+    public function layDangDinhVi()
+    {
+        return $this->truyVan(
+            "SELECT t.id, t.trip_date, t.route, t.pickup_time,
+                    t.vi_tri_lat, t.vi_tri_lng, t.vi_tri_do_chinh_xac, t.vi_tri_cap_nhat_luc,
+                    d.id AS driver_id, d.full_name AS ten_tai_xe, d.short_name AS ten_goi,
+                    c.name AS ten_xe, c.plate_number AS bien_so
+             FROM trips t
+             JOIN drivers d ON d.id = t.driver_id
+             LEFT JOIN cars c ON c.id = t.car_id
+             WHERE t.dang_dinh_vi = 1
+             ORDER BY t.vi_tri_cap_nhat_luc DESC"
+        );
+    }
+
+    /** Chuyen xe cua rieng 1 tai xe dang duoc dinh vi (kiem tra trang thai nut) */
+    public function layDangDinhViCuaTaiXe($idTaiXe)
+    {
+        return $this->motGiaTri(
+            "SELECT id FROM trips WHERE driver_id = ? AND dang_dinh_vi = 1 LIMIT 1",
+            [(int)$idTaiXe]
+        );
+    }
+
+    /** Tat dinh vi cac chuyen lau khong co cap nhat (tai xe quen bam Ket thuc) */
+    public function tatDinhViQuaHan($soPhut = 30)
+    {
+        return $this->thucThi(
+            "UPDATE trips SET dang_dinh_vi = 0, vi_tri_lat = NULL, vi_tri_lng = NULL,
+                    vi_tri_do_chinh_xac = NULL, vi_tri_cap_nhat_luc = NULL
+             WHERE dang_dinh_vi = 1
+               AND (vi_tri_cap_nhat_luc IS NULL OR vi_tri_cap_nhat_luc < DATE_SUB(NOW(), INTERVAL ? MINUTE))",
+            [(int)$soPhut]
         );
     }
 

@@ -139,6 +139,112 @@ class ChuyenXeController extends Controller
         chuyenTrang('chuyenxe');
     }
 
+    // -----------------------------------------------------------------
+    // Dinh vi tai xe theo thoi gian thuc
+    // -----------------------------------------------------------------
+
+    /** Tai xe bam Bat dau hanh trinh */
+    public function batdauhanhtrinh()
+    {
+        $this->yeuCauQuyen(['taixe']);
+        $this->yeuCauPost();
+
+        $id      = (int)($_POST['id'] ?? 0);
+        $idTaiXe = taiKhoanHienTai()['id_tai_xe'];
+
+        if ($idTaiXe && $this->model('ChuyenXeModel')->batDauHanhTrinh($id, $idTaiXe)) {
+            datThongBao('Đã bắt đầu hành trình. Quản lý có thể xem vị trí của bạn.');
+        } else {
+            datThongBao('Không bắt đầu được hành trình cho chuyến xe này.', 'danger');
+        }
+        chuyenTrang('chuyenxe');
+    }
+
+    /** Tai xe bam Ket thuc hanh trinh */
+    public function ketthuchanhtrinh()
+    {
+        $this->yeuCauQuyen(['taixe']);
+        $this->yeuCauPost();
+
+        $id      = (int)($_POST['id'] ?? 0);
+        $idTaiXe = taiKhoanHienTai()['id_tai_xe'];
+
+        if ($idTaiXe) {
+            $this->model('ChuyenXeModel')->ketThucHanhTrinh($id, $idTaiXe);
+        }
+        datThongBao('Đã kết thúc hành trình.');
+        chuyenTrang('chuyenxe');
+    }
+
+    /**
+     * API nhan toa do dinh vi tu trinh duyet cua tai xe (goi lien tuc bang JS).
+     * Tra ve JSON, khong dung form POST thuong.
+     */
+    public function capnhatvitri()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        if (!taiKhoanHienTai() || vaiTroHienTai() !== 'taixe') {
+            http_response_code(403);
+            echo json_encode(['ok' => false]);
+            exit;
+        }
+
+        $duLieu  = json_decode(file_get_contents('php://input'), true) ?: [];
+        $id      = (int)($duLieu['id'] ?? 0);
+        $lat     = isset($duLieu['lat']) ? (float)$duLieu['lat'] : null;
+        $lng     = isset($duLieu['lng']) ? (float)$duLieu['lng'] : null;
+        $doChinhXac = isset($duLieu['do_chinh_xac']) ? (int)$duLieu['do_chinh_xac'] : null;
+        $idTaiXe = taiKhoanHienTai()['id_tai_xe'];
+
+        if (!$idTaiXe || !$id || $lat === null || $lng === null) {
+            echo json_encode(['ok' => false]);
+            exit;
+        }
+
+        $ok = $this->model('ChuyenXeModel')->capNhatViTri($id, $idTaiXe, $lat, $lng, $doChinhXac);
+        echo json_encode(['ok' => $ok]);
+        exit;
+    }
+
+    /** Trang quan ly xem vi tri cac chuyen dang dinh vi tren ban do */
+    public function vitri()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+
+        $this->view('chuyenxe/vitri', [
+            'danhSach' => $this->model('ChuyenXeModel')->layDangDinhVi(),
+        ], 'Vị trí xe');
+    }
+
+    /** API cho trang vi tri tu lam moi (AJAX, khong tai lai trang) */
+    public function vitrijson()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store');
+
+        $ds = [];
+        foreach ($this->model('ChuyenXeModel')->layDangDinhVi() as $c) {
+            if ($c['vi_tri_lat'] === null || $c['vi_tri_lng'] === null) {
+                continue;
+            }
+            $ds[] = [
+                'idChuyen'   => (int)$c['id'],
+                'taiXe'      => $c['ten_tai_xe'],
+                'xe'         => trim(($c['ten_xe'] ?? '') . ' ' . ($c['bien_so'] ?? '')),
+                'hanhTrinh'  => $c['route'],
+                'lat'        => (float)$c['vi_tri_lat'],
+                'lng'        => (float)$c['vi_tri_lng'],
+                'doChinhXac' => $c['vi_tri_do_chinh_xac'] ? (int)$c['vi_tri_do_chinh_xac'] : null,
+                'capNhat'    => thoiGianTuongDoi($c['vi_tri_cap_nhat_luc']),
+                'capNhatLuc' => $c['vi_tri_cap_nhat_luc'],
+            ];
+        }
+        echo json_encode(['danhSach' => $ds], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     /** Tai xe nhap chi phi thuc te va xac nhan chuyen xe */
     public function xacNhan()
     {
