@@ -541,6 +541,18 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
 
   /* Cua so xac nhan chiem gan het man hinh */
   .modal-lg { max-width: calc(100vw - 16px); }
+
+  /*
+   * Chan Safari/Chrome tren iPhone tu dong phong to man hinh khi bam vao o nhap.
+   * Trinh duyet lam vay khi chu trong o nhap nho hon 16px - khong phai loi hien
+   * thi, day la hanh vi mac dinh cua trinh duyet. Tang len 16px la cach sua
+   * dung chuan (không tat tinh nang zoom cua nguoi dung, chi bo ly do trinh
+   * duyet tu dong zoom).
+   */
+  .form-control, .form-select, .form-control-sm, .form-select-sm,
+  textarea, input, select {
+    font-size: 16px !important;
+  }
 }
 
 @media (max-width: 576px) {
