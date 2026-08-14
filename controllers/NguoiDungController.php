@@ -56,15 +56,31 @@ class NguoiDungController extends Controller
         ];
 
         if ($id > 0) {
+            $taiKhoanCu = $nguoiDungModel->layTheoId($id);
+            $doiMatKhau = false;
+
             if ($matKhau !== '') {
                 if (mb_strlen($matKhau) < 6) {
                     datThongBao('Mật khẩu phải từ 6 ký tự trở lên.', 'danger');
                     chuyenTrang('nguoidung');
                 }
                 $duLieu['password'] = password_hash($matKhau, PASSWORD_DEFAULT);
+                $doiMatKhau = true;
             }
             $nguoiDungModel->capNhat($id, $duLieu);
-            datThongBao('Đã cập nhật tài khoản.');
+
+            // Doi mat khau hoac khoa tai khoan -> dang xuat nguoi do khoi moi thiet bi
+            $biKhoa = $duLieu['status'] === 'inactive'
+                   && ($taiKhoanCu['status'] ?? '') !== 'inactive';
+
+            if ($doiMatKhau || $biKhoa) {
+                $this->model('GhiNhoModel')->xoaTatCaCuaTaiKhoan($id);
+                datThongBao($doiMatKhau
+                    ? 'Đã cập nhật tài khoản. Người dùng này sẽ phải đăng nhập lại bằng mật khẩu mới.'
+                    : 'Đã khóa tài khoản. Người dùng này đã bị đăng xuất khỏi mọi thiết bị.');
+            } else {
+                datThongBao('Đã cập nhật tài khoản.');
+            }
         } else {
             if (mb_strlen($matKhau) < 6) {
                 datThongBao('Mật khẩu phải từ 6 ký tự trở lên.', 'danger');
@@ -89,7 +105,10 @@ class NguoiDungController extends Controller
             chuyenTrang('nguoidung');
         }
 
+        // Xoa ma ghi nho truoc de nguoi do bi dang xuat ngay khoi moi thiet bi
+        $this->model('GhiNhoModel')->xoaTatCaCuaTaiKhoan($id);
         $this->model('NguoiDungModel')->xoa($id);
+
         datThongBao('Đã xóa tài khoản.');
         chuyenTrang('nguoidung');
     }

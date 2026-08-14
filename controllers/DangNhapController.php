@@ -31,20 +31,20 @@ class DangNhapController extends Controller
         }
 
         session_regenerate_id(true);
-        $_SESSION['tai_khoan'] = [
-            'id'         => (int)$taiKhoan['id'],
-            'ten_dang_nhap' => $taiKhoan['username'],
-            'ho_ten'     => $taiKhoan['full_name'],
-            'vai_tro'    => $taiKhoan['role'],
-            'id_tai_xe'  => $taiKhoan['driver_id'] ? (int)$taiKhoan['driver_id'] : null,
-        ];
+        datPhienDangNhap($taiKhoan);
+
+        // Ghi nho thiet bi nay de lan sau khong phai dang nhap lai
+        $this->model('GhiNhoModel')->taoMa($taiKhoan['id']);
 
         chuyenTrang('tongquan');
     }
 
-    /** Dang xuat */
+    /** Dang xuat (chi thoat tren thiet bi dang dung) */
     public function thoat()
     {
+        if (taiKhoanHienTai()) {
+            $this->model('GhiNhoModel')->xoaMaHienTai();
+        }
         $_SESSION = [];
         session_destroy();
         chuyenTrang('dangnhap');
@@ -84,7 +84,13 @@ class DangNhapController extends Controller
         }
 
         $nguoiDungModel->doiMatKhau($taiKhoan['id'], $matKhauMoi);
-        datThongBao('Đã đổi mật khẩu thành công.');
+
+        // Doi mat khau -> dang xuat tat ca thiet bi khac, roi ghi nho lai thiet bi nay
+        $ghiNhoModel = $this->model('GhiNhoModel');
+        $ghiNhoModel->xoaTatCaCuaTaiKhoan($taiKhoan['id']);
+        $ghiNhoModel->taoMa($taiKhoan['id']);
+
+        datThongBao('Đã đổi mật khẩu thành công. Các thiết bị khác đã bị đăng xuất.');
         chuyenTrang('tongquan');
     }
 }

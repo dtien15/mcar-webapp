@@ -77,6 +77,10 @@ $ghiLog[] = 'Nhắc lại: ' . count($denHan) . ' thông báo · '
 $thongBaoModel->xoaThongBaoCu(90);
 $ghiLog[] = 'Đã dọn thông báo cũ hơn 90 ngày';
 
+require_once DUONG_DAN_GOC . '/models/GhiNhoModel.php';
+(new GhiNhoModel())->xoaMaHetHan();
+$ghiLog[] = 'Đã dọn mã ghi nhớ đăng nhập hết hạn';
+
 // ---------------------------------------------------------------------
 // Ket qua
 // ---------------------------------------------------------------------

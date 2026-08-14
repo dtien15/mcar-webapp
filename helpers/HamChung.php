@@ -60,10 +60,35 @@ function chuyenTrang($route)
     exit;
 }
 
+/** Ket noi hien tai co phai HTTPS khong */
+function laKetNoiBaoMat()
+{
+    if (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') {
+        return true;
+    }
+    // Truong hop hosting dung proxy / CDN dung truoc
+    if (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') {
+        return true;
+    }
+    return (int)($_SERVER['SERVER_PORT'] ?? 0) === 443;
+}
+
 /** Lay thong tin tai khoan dang dang nhap (null neu chua dang nhap) */
 function taiKhoanHienTai()
 {
     return $_SESSION['tai_khoan'] ?? null;
+}
+
+/** Ghi thong tin tai khoan vao phien lam viec (dung chung cho dang nhap va ghi nho) */
+function datPhienDangNhap(array $taiKhoan)
+{
+    $_SESSION['tai_khoan'] = [
+        'id'            => (int)$taiKhoan['id'],
+        'ten_dang_nhap' => $taiKhoan['username'],
+        'ho_ten'        => $taiKhoan['full_name'],
+        'vai_tro'       => $taiKhoan['role'],
+        'id_tai_xe'     => $taiKhoan['driver_id'] ? (int)$taiKhoan['driver_id'] : null,
+    ];
 }
 
 /** Vai tro cua tai khoan hien tai: admin | ketoan | taixe | '' */
