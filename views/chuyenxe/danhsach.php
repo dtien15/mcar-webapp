@@ -264,9 +264,9 @@
       </div>
 
       <div class="modal-body">
-        <!-- Thong tin cong ty giao: chi xem, khong sua -->
+        <!-- Thong tin chuyen di: chi xem, khong sua -->
         <fieldset class="nhom-truong">
-          <legend>Thông tin công ty giao (không sửa được)</legend>
+          <legend>Thông tin chuyến đi</legend>
           <div class="row g-2">
             <div class="col-6 col-md-3">
               <label class="form-label">Ngày chạy</label>
@@ -288,29 +288,35 @@
               <label class="form-label">Điểm đón - trả / thông tin khách</label>
               <textarea class="form-control form-control-sm" rows="2" readonly><?= h($chuyen['pickup_dropoff']) ?></textarea>
             </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Loại kèo</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['ten_loai_keo']) ?>" readonly>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Khách trả (VNĐ)</label>
-              <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['revenue_vnd']) ?>" readonly>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Tiền cuốc xe</label>
-              <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['trip_fee']) ?>" readonly>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Lưu đêm</label>
-              <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['overnight_fee']) ?>" readonly>
-            </div>
-          </div>
-          <div class="text-muted mt-2" style="font-size:12px">
-            Nếu thông tin trên chưa đúng, liên hệ công ty để sửa trước khi xác nhận.
           </div>
         </fieldset>
 
-        <!-- Phan tai xe nhap -->
+        <!-- Doanh thu & tien cuoc: tai xe sua duoc neu khac thuc te -->
+        <fieldset class="nhom-truong">
+          <legend>Doanh thu &amp; tiền tài</legend>
+          <div class="row g-2">
+            <div class="col-6 col-md-4">
+              <label class="form-label">Khách trả (VNĐ)</label>
+              <input type="number" step="1000" class="form-control form-control-sm"
+                     name="thu_vnd" value="<?= (int)$chuyen['revenue_vnd'] ?>">
+            </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label">Tiền cuốc xe</label>
+              <input type="number" step="1000" class="form-control form-control-sm"
+                     name="tien_cuoc_xe" value="<?= (int)$chuyen['trip_fee'] ?>">
+            </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label">Lưu đêm</label>
+              <input type="number" step="1000" class="form-control form-control-sm"
+                     name="luu_dem" value="<?= (int)$chuyen['overnight_fee'] ?>">
+            </div>
+          </div>
+          <div class="text-muted mt-2" style="font-size:12px">
+            Sửa lại nếu số liệu thực tế khác với công ty đã giao.
+          </div>
+        </fieldset>
+
+        <!-- Phan chi phi thuc te -->
         <fieldset class="nhom-truong">
           <legend>Chi phí thực tế bạn nhập</legend>
           <div class="row g-2">
@@ -321,10 +327,6 @@
             <div class="col-6 col-md-4">
               <label class="form-label">Người trả xăng dầu</label>
               <input class="form-control form-control-sm" name="nguoi_tra_xang_dau" placeholder="VD: VCB Nin, tiền mặt...">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">VETC</label>
-              <input type="number" step="1000" class="form-control form-control-sm" name="vetc" value="0">
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Bảo dưỡng xe</label>

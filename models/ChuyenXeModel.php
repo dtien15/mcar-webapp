@@ -8,18 +8,22 @@ class ChuyenXeModel extends Model
     protected $bang = 'trips';
     protected $sapXepMacDinh = 'trip_date DESC, id DESC';
 
-    /** Cac cot do quan ly nhap (tai xe khong duoc sua) */
+    /** Cac cot do quan ly nhap khi giao chuyen (tai xe khong sua duoc) */
     public static function cotQuanLy()
     {
         return ['trip_date', 'pickup_time', 'pickup_dropoff', 'route', 'car_id', 'driver_id',
-                'contract_type_id', 'revenue_vnd', 'revenue_usd', 'revenue_eur', 'trip_fee',
-                'overnight_fee', 'airport_fee', 'other_fee', 'driver_advance'];
+                'contract_type_id', 'revenue_usd', 'revenue_eur',
+                'airport_fee', 'other_fee', 'driver_advance'];
     }
 
-    /** Cac cot do tai xe nhap sau khi chay xong */
+    /**
+     * Cac cot tai xe duoc sua khi xac nhan chuyen (gom ca doanh thu/tien cuoc/luu dem
+     * vi tren thuc te co the khac voi luc quan ly uoc tinh khi giao chuyen).
+     */
     public static function cotTaiXe()
     {
-        return ['fuel_cost', 'fuel_payer', 'vetc', 'maintenance', 'fine',
+        return ['revenue_vnd', 'trip_fee', 'overnight_fee',
+                'fuel_cost', 'fuel_payer', 'vetc', 'maintenance', 'fine',
                 'refund_vnd', 'refund_usd', 'cash_advance', 'direct_payment', 'note'];
     }
 
@@ -130,11 +134,13 @@ class ChuyenXeModel extends Model
         }
 
         return $this->thucThi(
-            "UPDATE trips SET fuel_cost=?, fuel_payer=?, vetc=?, maintenance=?, fine=?,
+            "UPDATE trips SET revenue_vnd=?, trip_fee=?, overnight_fee=?,
+                    fuel_cost=?, fuel_payer=?, vetc=?, maintenance=?, fine=?,
                     refund_vnd=?, refund_usd=?, cash_advance=?, direct_payment=?, note=?,
                     status='tai_xe_xac_nhan', driver_confirmed_at=NOW()
              WHERE id = ?",
             [
+                $duLieu['revenue_vnd'], $duLieu['trip_fee'], $duLieu['overnight_fee'],
                 $duLieu['fuel_cost'], $duLieu['fuel_payer'], $duLieu['vetc'],
                 $duLieu['maintenance'], $duLieu['fine'], $duLieu['refund_vnd'],
                 $duLieu['refund_usd'], $duLieu['cash_advance'], $duLieu['direct_payment'],

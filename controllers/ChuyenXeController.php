@@ -154,6 +154,9 @@ class ChuyenXeController extends Controller
         }
 
         $ketQua = $this->model('ChuyenXeModel')->taiXeXacNhan($id, $idTaiXe, [
+            'revenue_vnd'    => $this->soTuForm('thu_vnd'),
+            'trip_fee'       => $this->soTuForm('tien_cuoc_xe'),
+            'overnight_fee'  => $this->soTuForm('luu_dem'),
             'fuel_cost'      => $this->soTuForm('xang_dau'),
             'fuel_payer'     => $this->chuTuForm('nguoi_tra_xang_dau'),
             'vetc'           => $this->soTuForm('vetc'),
