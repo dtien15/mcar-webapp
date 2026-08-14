@@ -11,7 +11,8 @@ class ChuyenXeModel extends Model
     /** Cac cot do quan ly nhap khi giao chuyen (tai xe khong sua duoc) */
     public static function cotQuanLy()
     {
-        return ['trip_date', 'pickup_time', 'pickup_dropoff', 'route', 'car_id', 'driver_id',
+        return ['trip_date', 'pickup_time', 'pickup_dropoff', 'pickup_location', 'dropoff_location',
+                'pickup_sign', 'passenger_count', 'route', 'car_id', 'driver_id',
                 'contract_type_id', 'revenue_usd', 'revenue_eur',
                 'airport_fee', 'other_fee', 'driver_advance',
                 'customer_name', 'customer_phone', 'customer_note', 'company_note'];
@@ -98,8 +99,9 @@ class ChuyenXeModel extends Model
             $thamSo[]   = $loc['trang_thai'];
         }
         if (!empty($loc['tu_khoa'])) {
-            $dieuKien[] = '(t.pickup_dropoff LIKE ? OR t.route LIKE ? OR t.note LIKE ?)';
+            $dieuKien[] = '(t.pickup_location LIKE ? OR t.dropoff_location LIKE ? OR t.route LIKE ? OR t.note LIKE ?)';
             $tuKhoa     = '%' . $loc['tu_khoa'] . '%';
+            $thamSo[]   = $tuKhoa;
             $thamSo[]   = $tuKhoa;
             $thamSo[]   = $tuKhoa;
             $thamSo[]   = $tuKhoa;

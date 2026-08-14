@@ -53,12 +53,8 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
           </div>
           <div class="col-6 col-md-2">
             <label class="form-label">Giờ đón khách</label>
-            <input name="gio_don" class="form-control" placeholder="VD: 11h30" <?= $chiXem ?>
+            <input type="time" name="gio_don" class="form-control" <?= $chiXem ?>
                    value="<?= h(giaTri($chuyenXe, 'pickup_time')) ?>">
-          </div>
-          <div class="col-12 col-md-4">
-            <label class="form-label">Điểm đón - Điểm trả</label>
-            <textarea name="diem_don_tra" class="form-control" rows="1" <?= $chiXem ?>><?= h(giaTri($chuyenXe, 'diem_don_tra') ?: giaTri($chuyenXe, 'pickup_dropoff')) ?></textarea>
           </div>
           <div class="col-6 col-md-2">
             <label class="form-label">Hành trình</label>
@@ -76,6 +72,27 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                 </option>
               <?php endforeach; ?>
             </select>
+          </div>
+          <div class="col-6 col-md-2">
+            <label class="form-label">Số lượng khách</label>
+            <input type="number" min="0" name="so_luong_khach" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'passenger_count')) ?>">
+          </div>
+
+          <div class="col-6 col-md-3">
+            <label class="form-label">Điểm đón</label>
+            <input name="dia_diem_don" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'pickup_location')) ?>">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label">Điểm trả</label>
+            <input name="dia_diem_tra" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'dropoff_location')) ?>">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label">Bảng đón khách <span class="text-muted">(nếu có)</span></label>
+            <input name="bang_don" class="form-control" placeholder="VD: tên khách / tên đoàn" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'pickup_sign')) ?>">
           </div>
 
           <div class="col-6 col-md-3">
@@ -136,7 +153,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
             <?php endif; ?>
           </div>
           <div class="col-12 col-md-6">
-            <label class="form-label">Gợi ý giá từ bảng giá <span class="text-muted">(chọn để tự điền tiền khách trả)</span></label>
+            <label class="form-label">Gợi ý giá từ bảng giá</label>
             <select id="oBangGia" class="form-select" <?= $chiXemSel ?>>
               <option value="">-- Không dùng gợi ý --</option>
               <?php foreach ($dsBangGia as $bg): ?>

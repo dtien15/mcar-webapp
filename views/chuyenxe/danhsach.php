@@ -347,10 +347,26 @@
               <label class="form-label">Xe</label>
               <input class="form-control form-control-sm" value="<?= h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?>" readonly>
             </div>
-            <div class="col-12">
-              <label class="form-label">Điểm đón - trả</label>
-              <textarea class="form-control form-control-sm" rows="2" readonly><?= h($chuyen['pickup_dropoff']) ?></textarea>
+            <?php if ($chuyen['passenger_count'] !== null): ?>
+            <div class="col-6 col-md-3">
+              <label class="form-label">Số lượng khách</label>
+              <input class="form-control form-control-sm" value="<?= (int)$chuyen['passenger_count'] ?>" readonly>
             </div>
+            <?php endif; ?>
+            <div class="col-6 col-md-3">
+              <label class="form-label">Điểm đón</label>
+              <input class="form-control form-control-sm" value="<?= h($chuyen['pickup_location']) ?>" readonly>
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label">Điểm trả</label>
+              <input class="form-control form-control-sm" value="<?= h($chuyen['dropoff_location']) ?>" readonly>
+            </div>
+            <?php if (!empty($chuyen['pickup_sign'])): ?>
+            <div class="col-6 col-md-3">
+              <label class="form-label">Bảng đón khách</label>
+              <input class="form-control form-control-sm" value="<?= h($chuyen['pickup_sign']) ?>" readonly>
+            </div>
+            <?php endif; ?>
             <?php if (!empty($chuyen['customer_name']) || !empty($chuyen['customer_phone'])): ?>
             <div class="col-6 col-md-3">
               <label class="form-label">Họ tên khách</label>

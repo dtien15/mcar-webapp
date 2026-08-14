@@ -107,10 +107,17 @@ class ChuyenXeController extends Controller
             }
         }
 
+        $diaDiemDon  = $this->chuTuForm('dia_diem_don');
+        $diaDiemTra  = $this->chuTuForm('dia_diem_tra');
+
         $duLieu = [
             'trip_date'        => $this->chuTuForm('ngay_chay', date('Y-m-d')),
             'pickup_time'      => $this->chuTuForm('gio_don'),
-            'pickup_dropoff'   => $this->chuTuForm('diem_don_tra'),
+            'pickup_dropoff'   => trim(implode(' - ', array_filter([$diaDiemDon, $diaDiemTra]))),
+            'pickup_location'  => $diaDiemDon,
+            'dropoff_location' => $diaDiemTra,
+            'pickup_sign'      => $this->chuTuForm('bang_don'),
+            'passenger_count'  => $this->khoaTuForm('so_luong_khach'),
             'route'            => $this->chuTuForm('hanh_trinh'),
             'car_id'           => $this->khoaTuForm('id_xe'),
             'driver_id'        => $this->khoaTuForm('id_tai_xe'),
