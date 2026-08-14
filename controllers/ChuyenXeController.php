@@ -29,7 +29,13 @@ class ChuyenXeController extends Controller
     /** Form them chuyen xe moi */
     public function them()
     {
-        $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->yeuCauQuyen(['admin', 'ketoan', 'taixe']);
+
+        if (laTaiXe() && !$this->layXeMacDinhCuaToi()) {
+            datThongBao('Bạn chưa được gán xe mặc định. Liên hệ quản trị viên để gán xe trước khi tự tạo chuyến.', 'danger');
+            chuyenTrang('chuyenxe');
+        }
+
         $this->hienForm(null);
     }
 
@@ -49,10 +55,15 @@ class ChuyenXeController extends Controller
     /** Hien thi form them/sua */
     private function hienForm($chuyenXe)
     {
+        $taiXeModel = $this->model('TaiXeModel');
+
+        // Tai xe tu tao chuyen: khoa cung xe + tai xe la chinh minh, khong cho chon nguoi/xe khac
+        $xeCuaToi = laTaiXe() ? $this->layXeMacDinhCuaToi() : null;
+
         $duLieu = [
             'chuyenXe'   => $chuyenXe,
-            'dsXe'       => $this->model('XeModel')->layTatCa(),
-            'dsTaiXe'    => $this->model('TaiXeModel')->layTatCa(),
+            'dsXe'       => laTaiXe() ? [$xeCuaToi] : $this->model('XeModel')->layTatCa(),
+            'dsTaiXe'    => laTaiXe() ? [$taiXeModel->layTheoId(taiKhoanHienTai()['id_tai_xe'])] : $taiXeModel->layTatCa(),
             'dsLoaiKeo'  => $this->model('LoaiKeoModel')->layTatCa(),
             'dsBangGia'  => $this->model('BangGiaModel')->layTatCa(),
             'giaGoiY'    => $this->model('BangGiaModel')->layDuLieuGoiY(),
@@ -60,13 +71,42 @@ class ChuyenXeController extends Controller
         $this->view('chuyenxe/form', $duLieu, $chuyenXe ? 'Sửa chuyến xe' : 'Thêm chuyến xe');
     }
 
+    /** Xe mac dinh cua tai xe dang dang nhap (null neu chua duoc gan) */
+    private function layXeMacDinhCuaToi()
+    {
+        $idTaiXe = taiKhoanHienTai()['id_tai_xe'] ?? null;
+        if (!$idTaiXe) {
+            return null;
+        }
+        $taiXe = $this->model('TaiXeModel')->layTheoId($idTaiXe);
+        if (!$taiXe || !$taiXe['car_id']) {
+            return null;
+        }
+        return $this->model('XeModel')->layTheoId($taiXe['car_id']);
+    }
+
     /** Luu chuyen xe (them moi hoac cap nhat) */
     public function luu()
     {
-        $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->yeuCauQuyen(['admin', 'ketoan', 'taixe']);
         $this->yeuCauPost();
 
-        $id     = (int)($_POST['id'] ?? 0);
+        $id = (int)($_POST['id'] ?? 0);
+
+        // Tai xe chi duoc TAO MOI cho chinh minh, khong duoc sua chuyen da co qua form nay
+        $xeMacDinh = null;
+        if (laTaiXe()) {
+            if ($id > 0) {
+                http_response_code(403);
+                die('Tài xế không được sửa chuyến xe qua form này.');
+            }
+            $xeMacDinh = $this->layXeMacDinhCuaToi();
+            if (!$xeMacDinh) {
+                datThongBao('Bạn chưa được gán xe mặc định. Liên hệ quản trị viên.', 'danger');
+                chuyenTrang('chuyenxe');
+            }
+        }
+
         $duLieu = [
             'trip_date'        => $this->chuTuForm('ngay_chay', date('Y-m-d')),
             'pickup_time'      => $this->chuTuForm('gio_don'),
@@ -102,6 +142,12 @@ class ChuyenXeController extends Controller
         ];
         $duLieu = array_merge($duLieu, $duLieuTaiXe);
 
+        // Tai xe tu tao: khoa cung xe + tai xe la chinh minh, khong tin gia tri POST gui len
+        if (laTaiXe()) {
+            $duLieu['driver_id'] = (int)taiKhoanHienTai()['id_tai_xe'];
+            $duLieu['car_id']    = (int)$xeMacDinh['id'];
+        }
+
         if ($id > 0) {
             $chuyenXeCu = $chuyenXeModel->layTheoId($id);
             $chuyenXeModel->capNhat($id, $duLieu);
@@ -115,6 +161,15 @@ class ChuyenXeController extends Controller
                 $this->baoChuyenXeThayDoi($id, $duLieu);
             }
             datThongBao('Đã cập nhật chuyến xe.');
+        } elseif (laTaiXe()) {
+            // Tai xe tu tao chuyen va tu bao cao so lieu thuc te ngay -> coi nhu da tu xac nhan,
+            // khong can qua buoc "Nhap chi phi & Xac nhan" nua rieng biet.
+            $duLieu['status']              = 'tai_xe_xac_nhan';
+            $duLieu['driver_confirmed_at'] = date('Y-m-d H:i:s');
+            $idMoi = $chuyenXeModel->them($duLieu);
+
+            $this->baoChoQuanLyChoChot($idMoi);
+            datThongBao('Đã tạo chuyến xe. Chờ công ty chốt.');
         } else {
             $duLieu['status'] = 'moi';
             $idMoi = $chuyenXeModel->them($duLieu);
@@ -245,6 +300,28 @@ class ChuyenXeController extends Controller
         exit;
     }
 
+    /** Xem chi tiet 1 chuyen xe (tai xe xem lai phieu cua minh, quan ly xem bat ky chuyen nao) */
+    public function chitiet($id = 0)
+    {
+        $this->yeuCauDangNhap();
+
+        $chuyenXeModel = $this->model('ChuyenXeModel');
+        $chuyen        = $chuyenXeModel->layChiTiet($id);
+
+        if (!$chuyen) {
+            datThongBao('Không tìm thấy chuyến xe.', 'danger');
+            chuyenTrang('chuyenxe');
+        }
+
+        $laChuTaiXe = laTaiXe() && (int)$chuyen['driver_id'] === (int)taiKhoanHienTai()['id_tai_xe'];
+        if (!laQuanLy() && !$laChuTaiXe) {
+            http_response_code(403);
+            die('Bạn không có quyền xem chuyến xe này.');
+        }
+
+        $this->view('chuyenxe/chitiet', ['chuyen' => $chuyen], 'Chi tiết chuyến xe');
+    }
+
     /** Tai xe nhap chi phi thuc te va xac nhan chuyen xe */
     public function xacNhan()
     {
@@ -281,16 +358,7 @@ class ChuyenXeController extends Controller
             // Tai xe da xu ly xong -> ngung nhac lai
             $thongBaoModel->dongTheoChuyenXe($id, 'chuyen_xe_moi');
 
-            // Bao cho ke toan / quan tri biet de vao chot
-            $chuyen = $this->model('ChuyenXeModel')->layChiTiet($id);
-            $thongBaoModel->guiChoQuanLy(
-                'Tài xế ' . ($chuyen['ten_tai_xe'] ?? '') . ' đã xác nhận chuyến xe',
-                'Ngày ' . dinhDangNgay($chuyen['trip_date'] ?? '') . ' · ' . ($chuyen['route'] ?? '')
-                    . ' · Xăng dầu ' . dinhDangTien($chuyen['fuel_cost'] ?? 0) . 'đ — chờ chốt hoàn thành',
-                'chuyenxe?trang_thai=tai_xe_xac_nhan',
-                'cho_chot',
-                $id
-            );
+            $this->baoChoQuanLyChoChot($id);
 
             datThongBao('Đã xác nhận chuyến xe. Chờ công ty chốt.');
         } else {
@@ -416,6 +484,20 @@ class ChuyenXeController extends Controller
             'chuyen_xe_moi',
             $idChuyenXe,
             true
+        );
+    }
+
+    /** Bao cho quan ly biet 1 chuyen xe dang cho chot (sau khi tai xe xac nhan hoac tu tao) */
+    private function baoChoQuanLyChoChot($idChuyen)
+    {
+        $chuyen = $this->model('ChuyenXeModel')->layChiTiet($idChuyen);
+        $this->model('ThongBaoModel')->guiChoQuanLy(
+            'Tài xế ' . ($chuyen['ten_tai_xe'] ?? '') . ' có chuyến xe chờ chốt',
+            'Ngày ' . dinhDangNgay($chuyen['trip_date'] ?? '') . ' · ' . ($chuyen['route'] ?? '')
+                . ' · Xăng dầu ' . dinhDangTien($chuyen['fuel_cost'] ?? 0) . 'đ — chờ chốt hoàn thành',
+            'chuyenxe?trang_thai=tai_xe_xac_nhan',
+            'cho_chot',
+            $idChuyen
         );
     }
 

@@ -53,6 +53,8 @@
         <?php if (laQuanLy()): ?>
           <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm ms-auto"><?= bieuTuong('plus') ?> Thêm chuyến xe</a>
           <a href="<?= duongDan('chuyenxe/xuatcsv?' . http_build_query($loc)) ?>" class="btn btn-light btn-sm"><?= bieuTuong('download') ?> Xuất Excel</a>
+        <?php elseif (laTaiXe()): ?>
+          <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm ms-auto"><?= bieuTuong('plus') ?> Tạo chuyến xe</a>
         <?php endif; ?>
       </div>
     </form>
@@ -134,26 +136,31 @@
               <button class="btn btn-sm btn-success"><?= bieuTuong('check') ?> Chốt hoàn thành</button>
             </form>
           <?php endif; ?>
-        <?php elseif ($cuaToi && $chuyen['status'] !== 'hoan_thanh'): ?>
-          <?php if (!$chuyen['dang_dinh_vi']): ?>
-            <form method="post" action="<?= duongDan('chuyenxe/batdauhanhtrinh') ?>" class="w-100">
-              <?php truongToken(); ?>
-              <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-              <button class="btn btn-outline-success w-100"><?= bieuTuong('player-play') ?> Bắt đầu hành trình</button>
-            </form>
-          <?php else: ?>
-            <form method="post" action="<?= duongDan('chuyenxe/ketthuchanhtrinh') ?>" class="w-100">
-              <?php truongToken(); ?>
-              <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-              <button class="btn btn-outline-danger w-100"><?= bieuTuong('player-stop') ?> Kết thúc hành trình</button>
-            </form>
+        <?php elseif ($cuaToi): ?>
+          <?php if ($chuyen['status'] !== 'hoan_thanh'): ?>
+            <?php if (!$chuyen['dang_dinh_vi']): ?>
+              <form method="post" action="<?= duongDan('chuyenxe/batdauhanhtrinh') ?>" class="w-100">
+                <?php truongToken(); ?>
+                <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
+                <button class="btn btn-outline-success w-100"><?= bieuTuong('player-play') ?> Bắt đầu hành trình</button>
+              </form>
+            <?php else: ?>
+              <form method="post" action="<?= duongDan('chuyenxe/ketthuchanhtrinh') ?>" class="w-100">
+                <?php truongToken(); ?>
+                <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
+                <button class="btn btn-outline-danger w-100"><?= bieuTuong('player-stop') ?> Kết thúc hành trình</button>
+              </form>
+            <?php endif; ?>
+            <?php if ($duocXacNhan): ?>
+              <button type="button" class="btn btn-primary w-100"
+                      data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">
+                <?= bieuTuong('writing') ?> Nhập chi phí &amp; Xác nhận
+              </button>
+            <?php endif; ?>
           <?php endif; ?>
-          <?php if ($duocXacNhan): ?>
-            <button type="button" class="btn btn-primary w-100"
-                    data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">
-              <?= bieuTuong('writing') ?> Nhập chi phí &amp; Xác nhận
-            </button>
-          <?php endif; ?>
+          <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-outline-secondary w-100">
+            <?= bieuTuong('file-invoice') ?> Xem chi tiết phiếu
+          </a>
         <?php endif; ?>
       </div>
     </div>
@@ -244,26 +251,31 @@
                   <button class="btn btn-sm btn-outline-danger">Xóa</button>
                 </form>
 
-              <?php elseif ($cuaToi && $chuyen['status'] !== 'hoan_thanh'): ?>
-                <?php if (!$chuyen['dang_dinh_vi']): ?>
-                  <form method="post" action="<?= duongDan('chuyenxe/batdauhanhtrinh') ?>">
-                    <?php truongToken(); ?>
-                    <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-                    <button class="btn btn-sm btn-outline-success"><?= bieuTuong('player-play') ?> Bắt đầu</button>
-                  </form>
-                <?php else: ?>
-                  <form method="post" action="<?= duongDan('chuyenxe/ketthuchanhtrinh') ?>">
-                    <?php truongToken(); ?>
-                    <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-                    <button class="btn btn-sm btn-outline-danger"><?= bieuTuong('player-stop') ?> Kết thúc</button>
-                  </form>
+              <?php elseif ($cuaToi): ?>
+                <?php if ($chuyen['status'] !== 'hoan_thanh'): ?>
+                  <?php if (!$chuyen['dang_dinh_vi']): ?>
+                    <form method="post" action="<?= duongDan('chuyenxe/batdauhanhtrinh') ?>">
+                      <?php truongToken(); ?>
+                      <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
+                      <button class="btn btn-sm btn-outline-success"><?= bieuTuong('player-play') ?> Bắt đầu</button>
+                    </form>
+                  <?php else: ?>
+                    <form method="post" action="<?= duongDan('chuyenxe/ketthuchanhtrinh') ?>">
+                      <?php truongToken(); ?>
+                      <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
+                      <button class="btn btn-sm btn-outline-danger"><?= bieuTuong('player-stop') ?> Kết thúc</button>
+                    </form>
+                  <?php endif; ?>
+                  <?php if ($duocXacNhan): ?>
+                    <button type="button" class="btn btn-sm btn-primary"
+                            data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">
+                      <?= bieuTuong('writing') ?> Nhập &amp; Xác nhận
+                    </button>
+                  <?php endif; ?>
                 <?php endif; ?>
-                <?php if ($duocXacNhan): ?>
-                  <button type="button" class="btn btn-sm btn-primary"
-                          data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">
-                    <?= bieuTuong('writing') ?> Nhập &amp; Xác nhận
-                  </button>
-                <?php endif; ?>
+                <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-sm btn-outline-secondary">
+                  <?= bieuTuong('file-invoice') ?> Chi tiết
+                </a>
               <?php endif; ?>
             </div>
           </td>
@@ -295,7 +307,8 @@
 ?>
 <div class="modal fade" id="xacNhan<?= $chuyen['id'] ?>" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <form method="post" action="<?= duongDan('chuyenxe/xacnhan') ?>" class="modal-content">
+    <form method="post" action="<?= duongDan('chuyenxe/xacnhan') ?>" class="modal-content"
+          onsubmit="return confirm('Bạn chắc chắn muốn xác nhận chuyến xe này? Sau khi xác nhận sẽ không tự sửa lại được nữa, phải liên hệ công ty nếu cần đổi.');">
       <?php truongToken(); ?>
       <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
 

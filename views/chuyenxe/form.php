@@ -35,6 +35,13 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
     </div>
 
     <div class="the-than">
+      <?php if (laTaiXe() && !$dangSua): ?>
+        <div class="alert alert-light" style="font-size:13px">
+          <?= bieuTuong('info-circle') ?> Chuyến xe này sẽ được gán cho <strong>chính bạn</strong> và
+          <strong>xe mặc định của bạn</strong>. Điền đầy đủ số liệu thực tế rồi bấm "Tạo chuyến xe" —
+          không cần xác nhận lại lần nữa, chuyến sẽ chuyển thẳng sang chờ công ty chốt.
+        </div>
+      <?php endif; ?>
       <!-- 1. Thong tin chuyen di -->
       <fieldset class="nhom-truong">
         <legend>1. Thông tin chuyến đi</legend>
@@ -212,8 +219,10 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
       </fieldset>
 
       <div class="d-flex gap-2">
-        <?php if (!$khoaSua): ?>
-          <button class="btn btn-primary"><?= $dangSua ? bieuTuong('device-floppy') . ' Cập nhật' : bieuTuong('plus') . ' Thêm & giao cho tài xế' ?></button>
+        <?php if (!$khoaSua): $nhanNut = $dangSua
+              ? (bieuTuong('device-floppy') . ' Cập nhật')
+              : (laTaiXe() ? (bieuTuong('plus') . ' Tạo chuyến xe') : (bieuTuong('plus') . ' Thêm & giao cho tài xế')); ?>
+          <button class="btn btn-primary"><?= $nhanNut ?></button>
         <?php endif; ?>
         <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light">Quay lại danh sách</a>
       </div>

@@ -44,6 +44,17 @@
             <input name="cong_ty_quan_ly" class="form-control" value="<?= h($dangSua['managing_company'] ?? '') ?>">
           </div>
           <div class="mb-2">
+            <label class="form-label">Xe mặc định <span class="text-muted">(dùng khi tài xế tự tạo chuyến)</span></label>
+            <select name="id_xe_mac_dinh" class="form-select">
+              <option value="">-- Chưa gán xe --</option>
+              <?php foreach ($dsXe as $xe): ?>
+                <option value="<?= $xe['id'] ?>" <?= ($dangSua['car_id'] ?? '') == $xe['id'] ? 'selected' : '' ?>>
+                  <?= h(trim($xe['name'] . ' ' . $xe['plate_number'])) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="mb-2">
             <label class="form-label">Trạng thái</label>
             <select name="trang_thai" class="form-select">
               <option value="active" <?= ($dangSua['status'] ?? 'active') === 'active' ? 'selected' : '' ?>>Đang làm việc</option>
@@ -68,7 +79,7 @@
       <div class="the-than the-than-khong-dem bang-cuon">
         <table class="bang">
           <thead>
-            <tr><th>Họ tên</th><th>Điện thoại</th><th>Ngân hàng</th><th class="canh-phai">Lương CB</th><th>Công ty</th><th>Trạng thái</th><th class="canh-phai">Thao tác</th></tr>
+            <tr><th>Họ tên</th><th>Điện thoại</th><th>Ngân hàng</th><th class="canh-phai">Lương CB</th><th>Công ty</th><th>Xe mặc định</th><th>Trạng thái</th><th class="canh-phai">Thao tác</th></tr>
           </thead>
           <tbody>
           <?php foreach ($danhSach as $tx): ?>
@@ -86,6 +97,7 @@
               </td>
               <td class="canh-phai"><?= dinhDangTien($tx['base_salary']) ?></td>
               <td><?= h($tx['managing_company']) ?></td>
+              <td><?= $tx['ten_xe_mac_dinh'] ? h(trim($tx['ten_xe_mac_dinh'] . ' ' . $tx['bien_so_mac_dinh'])) : '<span class="text-muted">Chưa gán</span>' ?></td>
               <td>
                 <span class="huy-hieu-trang-thai tt-<?= $tx['status'] === 'active' ? 'success' : 'secondary' ?>">
                   <?= $tx['status'] === 'active' ? 'Đang chạy' : 'Đã nghỉ' ?>

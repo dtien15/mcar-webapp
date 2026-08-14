@@ -11,8 +11,9 @@ class TaiXeController extends Controller
 
         $taiXeModel = $this->model('TaiXeModel');
         $this->view('taixe/danhsach', [
-            'danhSach' => $taiXeModel->layTatCa(),
+            'danhSach' => $taiXeModel->layDanhSachDayDu(),
             'dangSua'  => $idSua ? $taiXeModel->layTheoId($idSua) : null,
+            'dsXe'     => $this->model('XeModel')->layTatCa(),
         ], 'Danh mục Tài xế');
     }
 
@@ -36,6 +37,7 @@ class TaiXeController extends Controller
             'base_salary'      => $this->soTuForm('luong_co_ban'),
             'insurance'        => $this->soTuForm('bao_hiem'),
             'managing_company' => $this->chuTuForm('cong_ty_quan_ly'),
+            'car_id'           => $this->khoaTuForm('id_xe_mac_dinh'),
             'status'           => $this->chuTuForm('trang_thai', 'active'),
             'note'             => $this->chuTuForm('ghi_chu'),
         ];

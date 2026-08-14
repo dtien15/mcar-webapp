@@ -91,7 +91,8 @@ $namHienTai   = (int)date('Y');
   <?php endif; ?>
 </div>
 
-<!-- Bieu do doanh thu 12 thang -->
+<?php if (laQuanLy()): ?>
+<!-- Bieu do doanh thu 12 thang - chi quan ly xem duoc -->
 <div class="the">
   <div class="the-dau">
     <span><?= bieuTuong('chart-bar') ?> Doanh thu theo tháng năm <?= (int)$nam ?> (VNĐ)</span>
@@ -114,6 +115,7 @@ $namHienTai   = (int)date('Y');
     </div>
   </div>
 </div>
+<?php endif; ?>
 
 <?php if (laQuanLy()): ?>
 <div class="row g-3">
