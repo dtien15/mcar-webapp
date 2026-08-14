@@ -346,23 +346,36 @@
         </fieldset>
 
         <!-- Doanh thu & tien cuoc: tai xe sua duoc neu khac thuc te -->
+        <?php
+          $loaiPhuPhiModal = '0';
+          if ((float)$chuyen['overnight_fee'] == 200000) { $loaiPhuPhiModal = '200000'; }
+          elseif ((float)$chuyen['overnight_fee'] == 100000) { $loaiPhuPhiModal = '100000'; }
+        ?>
         <fieldset class="nhom-truong">
           <legend>Doanh thu &amp; tiền tài</legend>
           <div class="row g-2">
             <div class="col-6 col-md-4">
               <label class="form-label">Khách trả (VNĐ)</label>
-              <input type="number" step="1000" class="form-control form-control-sm"
-                     name="thu_vnd" value="<?= (int)$chuyen['revenue_vnd'] ?>">
+              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0"
+                     name="thu_vnd" value="<?= h(giaTriTienForm($chuyen, 'revenue_vnd')) ?>">
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Tiền cuốc xe</label>
-              <input type="number" step="1000" class="form-control form-control-sm"
-                     name="tien_cuoc_xe" value="<?= (int)$chuyen['trip_fee'] ?>">
+              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0"
+                     name="tien_cuoc_xe" value="<?= h(giaTriTienForm($chuyen, 'trip_fee')) ?>">
             </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Lưu đêm</label>
-              <input type="number" step="1000" class="form-control form-control-sm"
-                     name="luu_dem" value="<?= (int)$chuyen['overnight_fee'] ?>">
+            <div class="col-6 col-md-2">
+              <label class="form-label">Phụ phí</label>
+              <select class="form-select form-select-sm o-chon-phu-phi">
+                <option value="0" <?= $loaiPhuPhiModal === '0' ? 'selected' : '' ?>>Không có</option>
+                <option value="200000" <?= $loaiPhuPhiModal === '200000' ? 'selected' : '' ?>>Lưu đêm (200k)</option>
+                <option value="100000" <?= $loaiPhuPhiModal === '100000' ? 'selected' : '' ?>>Chạy khuya (100k)</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label">Số tiền</label>
+              <input type="text" class="form-control form-control-sm o-nhap-tien o-phu-phi-tien" placeholder="0"
+                     name="luu_dem" value="<?= h(giaTriTienForm($chuyen, 'overnight_fee')) ?>">
             </div>
           </div>
           <div class="text-muted mt-2" style="font-size:12px">
@@ -376,7 +389,7 @@
           <div class="row g-2">
             <div class="col-6 col-md-4">
               <label class="form-label">Tiền xăng dầu</label>
-              <input type="number" step="1000" class="form-control form-control-sm" name="xang_dau" value="0">
+              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0" name="xang_dau">
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Người trả xăng dầu</label>
@@ -384,27 +397,27 @@
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Bảo dưỡng xe</label>
-              <input type="number" step="1000" class="form-control form-control-sm" name="bao_duong" value="0">
+              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0" name="bao_duong">
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Phạt</label>
-              <input type="number" step="1000" class="form-control form-control-sm" name="phat" value="0">
+              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0" name="phat">
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Tạm ứng</label>
-              <input type="number" step="1000" class="form-control form-control-sm" name="tam_ung" value="0">
+              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0" name="tam_ung">
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Hoàn tiền VNĐ</label>
-              <input type="number" step="1000" class="form-control form-control-sm" name="hoan_tien_vnd" value="0">
+              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0" name="hoan_tien_vnd">
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Hoàn tiền USD</label>
-              <input type="number" step="0.01" class="form-control form-control-sm" name="hoan_tien_usd" value="0">
+              <input type="number" step="0.01" class="form-control form-control-sm" placeholder="0.00" name="hoan_tien_usd">
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Khách TT trực tiếp cty</label>
-              <input type="number" step="1000" class="form-control form-control-sm" name="khach_tt_truc_tiep" value="0">
+              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0" name="khach_tt_truc_tiep">
             </div>
             <div class="col-12">
               <label class="form-label">Ghi chú của tài xế</label>

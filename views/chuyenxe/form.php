@@ -133,48 +133,76 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
       </fieldset>
 
       <!-- 2. Doanh thu & tien tai (cong ty giao) -->
+      <?php
+        $coTienKhac  = ((float)giaTri($chuyenXe, 'revenue_usd', 0) > 0) || ((float)giaTri($chuyenXe, 'revenue_eur', 0) > 0);
+        $phuPhiHienTai = (float)giaTri($chuyenXe, 'overnight_fee', 0);
+        $loaiPhuPhi  = '0';
+        if ($phuPhiHienTai == 200000) { $loaiPhuPhi = '200000'; }
+        elseif ($phuPhiHienTai == 100000) { $loaiPhuPhi = '100000'; }
+      ?>
       <fieldset class="nhom-truong">
         <legend>2. Doanh thu &amp; tiền tài</legend>
         <div class="row g-2">
           <div class="col-6 col-md-3">
-            <label class="form-label">Khách trả VNĐ</label>
-            <input type="number" step="1000" name="thu_vnd" id="oThuVnd" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'revenue_vnd', 0)) ?>">
-          </div>
-          <div class="col-6 col-md-2">
-            <label class="form-label">Khách trả USD</label>
-            <input type="number" step="0.01" name="thu_usd" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'revenue_usd', 0)) ?>">
-          </div>
-          <div class="col-6 col-md-2">
-            <label class="form-label">Khách trả EUR</label>
-            <input type="number" step="0.01" name="thu_eur" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'revenue_eur', 0)) ?>">
+            <label class="form-label">Khách trả (VNĐ)</label>
+            <input type="text" name="thu_vnd" id="oThuVnd" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'revenue_vnd')) ?>">
           </div>
           <div class="col-6 col-md-3">
             <label class="form-label">Tiền cuốc xe (trả tài xế)</label>
-            <input type="number" step="1000" name="tien_cuoc_xe" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'trip_fee', 0)) ?>">
+            <input type="text" name="tien_cuoc_xe" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'trip_fee')) ?>">
           </div>
-          <div class="col-6 col-md-2">
+          <div class="col-6 col-md-3">
             <label class="form-label">Tiền tài ứng trước</label>
-            <input type="number" step="1000" name="tien_tai_ung" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'driver_advance', 0)) ?>">
+            <input type="text" name="tien_tai_ung" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'driver_advance')) ?>">
           </div>
-          <div class="col-6 col-md-2">
-            <label class="form-label">Lưu đêm</label>
-            <input type="number" step="1000" name="luu_dem" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'overnight_fee', 0)) ?>">
+          <div class="col-6 col-md-3">
+            <label class="form-label">Phụ phí</label>
+            <select class="form-select o-chon-phu-phi" <?= $chiXemSel ?>>
+              <option value="0" <?= $loaiPhuPhi === '0' ? 'selected' : '' ?>>Không có</option>
+              <option value="200000" <?= $loaiPhuPhi === '200000' ? 'selected' : '' ?>>Lưu đêm (200.000đ)</option>
+              <option value="100000" <?= $loaiPhuPhi === '100000' ? 'selected' : '' ?>>Chạy khuya (100.000đ)</option>
+            </select>
           </div>
-          <div class="col-6 col-md-2">
+          <div class="col-6 col-md-3">
+            <label class="form-label">Số tiền phụ phí</label>
+            <input type="text" name="luu_dem" class="form-control o-nhap-tien o-phu-phi-tien" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'overnight_fee')) ?>">
+          </div>
+          <div class="col-6 col-md-3">
             <label class="form-label">Phí sân bay / đậu xe</label>
-            <input type="number" step="1000" name="phi_san_bay" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'airport_fee', 0)) ?>">
+            <input type="text" name="phi_san_bay" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'airport_fee')) ?>">
           </div>
-          <div class="col-6 col-md-2">
+          <div class="col-6 col-md-3">
             <label class="form-label">Phát sinh khác</label>
-            <input type="number" step="1000" name="phat_sinh_khac" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'other_fee', 0)) ?>">
+            <input type="text" name="phat_sinh_khac" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'other_fee')) ?>">
+          </div>
+
+          <div class="col-12">
+            <?php if (!$khoaSua): ?>
+              <button type="button" class="btn btn-sm btn-outline-secondary nut-them-tien-khac"
+                      data-target="khoiTienKhac" data-nhan-mo="+ Thêm loại tiền khác (USD/EUR)">
+                <?= $coTienKhac ? '− Ẩn loại tiền khác' : '+ Thêm loại tiền khác (USD/EUR)' ?>
+              </button>
+            <?php endif; ?>
+          </div>
+          <div class="col-12" id="khoiTienKhac" <?= $coTienKhac ? '' : 'hidden' ?>>
+            <div class="row g-2 mt-1">
+              <div class="col-6 col-md-3">
+                <label class="form-label">Khách trả USD</label>
+                <input type="number" step="0.01" name="thu_usd" class="form-control" placeholder="0.00" <?= $chiXem ?>
+                       value="<?= (float)giaTri($chuyenXe, 'revenue_usd', 0) > 0 ? h(giaTri($chuyenXe, 'revenue_usd')) : '' ?>">
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Khách trả EUR</label>
+                <input type="number" step="0.01" name="thu_eur" class="form-control" placeholder="0.00" <?= $chiXem ?>
+                       value="<?= (float)giaTri($chuyenXe, 'revenue_eur', 0) > 0 ? h(giaTri($chuyenXe, 'revenue_eur')) : '' ?>">
+              </div>
+            </div>
           </div>
         </div>
       </fieldset>
@@ -185,8 +213,8 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
         <div class="row g-2">
           <div class="col-6 col-md-2">
             <label class="form-label">Xăng dầu</label>
-            <input type="number" step="1000" name="xang_dau" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'fuel_cost', 0)) ?>">
+            <input type="text" name="xang_dau" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'fuel_cost')) ?>">
           </div>
           <div class="col-6 col-md-2">
             <label class="form-label">Người trả xăng dầu</label>
@@ -196,39 +224,39 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
           <?php if (!laTaiXe()): ?>
           <div class="col-6 col-md-2">
             <label class="form-label">VETC</label>
-            <input type="number" step="1000" name="vetc" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'vetc', 0)) ?>">
+            <input type="text" name="vetc" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'vetc')) ?>">
           </div>
           <?php endif; ?>
           <div class="col-6 col-md-2">
             <label class="form-label">Bảo dưỡng xe</label>
-            <input type="number" step="1000" name="bao_duong" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'maintenance', 0)) ?>">
+            <input type="text" name="bao_duong" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'maintenance')) ?>">
           </div>
           <div class="col-6 col-md-2">
             <label class="form-label">Phạt</label>
-            <input type="number" step="1000" name="phat" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'fine', 0)) ?>">
+            <input type="text" name="phat" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'fine')) ?>">
           </div>
           <div class="col-6 col-md-2">
             <label class="form-label">Tạm ứng</label>
-            <input type="number" step="1000" name="tam_ung" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'cash_advance', 0)) ?>">
+            <input type="text" name="tam_ung" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'cash_advance')) ?>">
           </div>
           <div class="col-6 col-md-2">
             <label class="form-label">Hoàn tiền VNĐ</label>
-            <input type="number" step="1000" name="hoan_tien_vnd" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'refund_vnd', 0)) ?>">
+            <input type="text" name="hoan_tien_vnd" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'refund_vnd')) ?>">
           </div>
           <div class="col-6 col-md-2">
             <label class="form-label">Hoàn tiền USD</label>
-            <input type="number" step="0.01" name="hoan_tien_usd" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'refund_usd', 0)) ?>">
+            <input type="number" step="0.01" name="hoan_tien_usd" class="form-control" placeholder="0.00" <?= $chiXem ?>
+                   value="<?= (float)giaTri($chuyenXe, 'refund_usd', 0) > 0 ? h(giaTri($chuyenXe, 'refund_usd')) : '' ?>">
           </div>
           <div class="col-6 col-md-2">
             <label class="form-label">Khách TT trực tiếp cty</label>
-            <input type="number" step="1000" name="khach_tt_truc_tiep" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'direct_payment', 0)) ?>">
+            <input type="text" name="khach_tt_truc_tiep" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'direct_payment')) ?>">
           </div>
           <div class="col-12 col-md-6">
             <label class="form-label">Ghi chú</label>
@@ -284,7 +312,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
     var khoa = (laKeoNgoai() ? 'ngoai_' : 'cty_') + soChoXe();
     var gia  = bangGia[id][khoa] || 0;
     if (gia > 0) {
-      oThuVnd.value = gia;
+      oThuVnd.value = dinhDang(gia); // hien co dau cham phan cach hang nghin, dong bo voi o-nhap-tien
       // Chen icon bang the that, con phan chu dung textContent de an toan
       ghiChu.innerHTML = '<i class="ti ti-arrow-right"></i> ';
       var chu = document.createElement('span');

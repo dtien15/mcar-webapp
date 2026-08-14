@@ -25,6 +25,17 @@ function dinhDangTien($so, $soLeThapPhan = 0)
     return number_format((float)$so, $soLeThapPhan, ',', '.');
 }
 
+/**
+ * Gia tri hien thi cho o nhap tien tren form: rong neu chua co du lieu hoac
+ * bang 0 (de o input trong, khong hien so "0" bat nguoi dung phai xoa),
+ * co dau cham phan cach hang nghin neu da co gia tri thuc.
+ */
+function giaTriTienForm($banGhi, $cot)
+{
+    $gt = ($banGhi && isset($banGhi[$cot])) ? (float)$banGhi[$cot] : 0;
+    return $gt > 0 ? number_format($gt, 0, ',', '.') : '';
+}
+
 /** Dinh dang ngay: 2026-04-01 -> 01/04/2026 */
 function dinhDangNgay($ngay, $dinhDang = 'd/m/Y')
 {
