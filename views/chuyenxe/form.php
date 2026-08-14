@@ -213,8 +213,13 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
         <div class="row g-2">
           <div class="col-6 col-md-2">
             <label class="form-label">Xăng dầu</label>
-            <input type="text" name="xang_dau" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+            <input type="text" name="xang_dau" class="form-control o-nhap-tien o-xang-dau" placeholder="0" <?= $chiXem ?>
                    value="<?= h(giaTriTienForm($chuyenXe, 'fuel_cost')) ?>">
+          </div>
+          <div class="col-6 col-md-2">
+            <label class="form-label">VAT 10% xăng/dầu</label>
+            <input type="text" name="vat_xang_dau" class="form-control o-nhap-tien o-vat-xang-dau" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'fuel_vat')) ?>">
           </div>
           <div class="col-6 col-md-2">
             <label class="form-label">Người trả xăng dầu</label>

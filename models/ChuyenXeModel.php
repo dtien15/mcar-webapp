@@ -23,7 +23,7 @@ class ChuyenXeModel extends Model
     public static function cotTaiXe()
     {
         return ['revenue_vnd', 'trip_fee', 'overnight_fee',
-                'fuel_cost', 'fuel_payer', 'vetc', 'maintenance', 'fine',
+                'fuel_cost', 'fuel_vat', 'fuel_payer', 'vetc', 'maintenance', 'fine',
                 'refund_vnd', 'refund_usd', 'cash_advance', 'direct_payment', 'note'];
     }
 
@@ -135,13 +135,13 @@ class ChuyenXeModel extends Model
 
         return $this->thucThi(
             "UPDATE trips SET revenue_vnd=?, trip_fee=?, overnight_fee=?,
-                    fuel_cost=?, fuel_payer=?, vetc=?, maintenance=?, fine=?,
+                    fuel_cost=?, fuel_vat=?, fuel_payer=?, vetc=?, maintenance=?, fine=?,
                     refund_vnd=?, refund_usd=?, cash_advance=?, direct_payment=?, note=?,
                     status='tai_xe_xac_nhan', driver_confirmed_at=NOW()
              WHERE id = ?",
             [
                 $duLieu['revenue_vnd'], $duLieu['trip_fee'], $duLieu['overnight_fee'],
-                $duLieu['fuel_cost'], $duLieu['fuel_payer'], $duLieu['vetc'],
+                $duLieu['fuel_cost'], $duLieu['fuel_vat'], $duLieu['fuel_payer'], $duLieu['vetc'],
                 $duLieu['maintenance'], $duLieu['fine'], $duLieu['refund_vnd'],
                 $duLieu['refund_usd'], $duLieu['cash_advance'], $duLieu['direct_payment'],
                 $duLieu['note'], (int)$id,

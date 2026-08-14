@@ -130,6 +130,7 @@ class ChuyenXeController extends Controller
         // Quan ly duoc phep sua ca phan chi phi cua tai xe
         $duLieuTaiXe = [
             'fuel_cost'      => $this->soTuForm('xang_dau'),
+            'fuel_vat'       => $this->soTuForm('vat_xang_dau'),
             'fuel_payer'     => $this->chuTuForm('nguoi_tra_xang_dau'),
             'vetc'           => $this->soTuForm('vetc'),
             'maintenance'    => $this->soTuForm('bao_duong'),
@@ -341,6 +342,7 @@ class ChuyenXeController extends Controller
             'trip_fee'       => $this->soTuForm('tien_cuoc_xe'),
             'overnight_fee'  => $this->soTuForm('luu_dem'),
             'fuel_cost'      => $this->soTuForm('xang_dau'),
+            'fuel_vat'       => $this->soTuForm('vat_xang_dau'),
             'fuel_payer'     => $this->chuTuForm('nguoi_tra_xang_dau'),
             'vetc'           => $this->soTuForm('vetc'),
             'maintenance'    => $this->soTuForm('bao_duong'),

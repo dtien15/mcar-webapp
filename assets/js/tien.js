@@ -9,6 +9,8 @@
 //      tuong ung vao o co class "o-phu-phi-tien" trong CUNG 1 form.
 //   4. Nut co class "nut-them-tien-khac": bam de hien/an khoi noi dung
 //      duoc tro toi qua thuoc tinh data-target (dung cho USD/EUR...).
+//   5. O co class "o-xang-dau": go tien xang dau se tu dong tinh 10% VAT
+//      vao o co class "o-vat-xang-dau" trong CUNG 1 form (van sua tay duoc).
 // =====================================================================
 (function () {
   function chiLaySo(chuoi) {
@@ -63,6 +65,18 @@
       var oTien = form.querySelector('.o-phu-phi-tien');
       if (!oTien) return;
       oTien.value = (chon.value && chon.value !== '0') ? dinhDangHienThi(chon.value) : '';
+    });
+  });
+
+  // ---- 5: Xang dau tu dong tinh 10% VAT ----
+  document.querySelectorAll('.o-xang-dau').forEach(function (oXang) {
+    oXang.addEventListener('input', function () {
+      var form = oXang.closest('form') || document;
+      var oVat = form.querySelector('.o-vat-xang-dau');
+      if (!oVat) return;
+      var soXang = parseInt(chiLaySo(oXang.value) || '0', 10);
+      var vat = Math.round(soXang * 0.10);
+      oVat.value = vat > 0 ? dinhDangHienThi(String(vat)) : '';
     });
   });
 

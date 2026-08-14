@@ -92,6 +92,12 @@
           <label class="form-label">Xăng dầu</label>
           <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['fuel_cost']) ?>" readonly>
         </div>
+        <?php if ($chuyen['fuel_vat'] > 0): ?>
+        <div class="col-6 col-md-3">
+          <label class="form-label">VAT 10% xăng/dầu</label>
+          <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['fuel_vat']) ?>" readonly>
+        </div>
+        <?php endif; ?>
         <div class="col-6 col-md-3">
           <label class="form-label">Người trả xăng dầu</label>
           <input class="form-control form-control-sm" value="<?= h($chuyen['fuel_payer']) ?>" readonly>

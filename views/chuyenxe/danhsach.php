@@ -389,7 +389,11 @@
           <div class="row g-2">
             <div class="col-6 col-md-4">
               <label class="form-label">Tiền xăng dầu</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0" name="xang_dau">
+              <input type="text" class="form-control form-control-sm o-nhap-tien o-xang-dau" placeholder="0" name="xang_dau">
+            </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label">VAT 10% xăng/dầu</label>
+              <input type="text" class="form-control form-control-sm o-nhap-tien o-vat-xang-dau" placeholder="0" name="vat_xang_dau">
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Người trả xăng dầu</label>
