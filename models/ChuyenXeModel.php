@@ -13,7 +13,8 @@ class ChuyenXeModel extends Model
     {
         return ['trip_date', 'pickup_time', 'pickup_dropoff', 'route', 'car_id', 'driver_id',
                 'contract_type_id', 'revenue_usd', 'revenue_eur',
-                'airport_fee', 'other_fee', 'driver_advance'];
+                'airport_fee', 'other_fee', 'driver_advance',
+                'customer_name', 'customer_phone', 'customer_note', 'company_note'];
     }
 
     /**
@@ -22,7 +23,7 @@ class ChuyenXeModel extends Model
      */
     public static function cotTaiXe()
     {
-        return ['revenue_vnd', 'trip_fee', 'overnight_fee',
+        return ['revenue_vnd', 'trip_fee', 'overnight_fee', 'deposit_amount', 'customer_paid',
                 'fuel_cost', 'fuel_vat', 'fuel_payer', 'vetc', 'maintenance', 'fine',
                 'refund_vnd', 'refund_usd', 'cash_advance', 'direct_payment', 'note'];
     }
@@ -134,13 +135,14 @@ class ChuyenXeModel extends Model
         }
 
         return $this->thucThi(
-            "UPDATE trips SET revenue_vnd=?, trip_fee=?, overnight_fee=?,
+            "UPDATE trips SET revenue_vnd=?, trip_fee=?, overnight_fee=?, deposit_amount=?, customer_paid=?,
                     fuel_cost=?, fuel_vat=?, fuel_payer=?, vetc=?, maintenance=?, fine=?,
                     refund_vnd=?, refund_usd=?, cash_advance=?, direct_payment=?, note=?,
                     status='tai_xe_xac_nhan', driver_confirmed_at=NOW()
              WHERE id = ?",
             [
                 $duLieu['revenue_vnd'], $duLieu['trip_fee'], $duLieu['overnight_fee'],
+                $duLieu['deposit_amount'], $duLieu['customer_paid'],
                 $duLieu['fuel_cost'], $duLieu['fuel_vat'], $duLieu['fuel_payer'], $duLieu['vetc'],
                 $duLieu['maintenance'], $duLieu['fine'], $duLieu['refund_vnd'],
                 $duLieu['refund_usd'], $duLieu['cash_advance'], $duLieu['direct_payment'],

@@ -43,9 +43,31 @@
           <input class="form-control form-control-sm" value="<?= h($chuyen['ten_loai_keo']) ?>" readonly>
         </div>
         <div class="col-12">
-          <label class="form-label">Điểm đón - trả / thông tin khách</label>
+          <label class="form-label">Điểm đón - trả</label>
           <textarea class="form-control form-control-sm" rows="2" readonly><?= h($chuyen['pickup_dropoff']) ?></textarea>
         </div>
+        <?php if (!empty($chuyen['customer_name']) || !empty($chuyen['customer_phone'])): ?>
+        <div class="col-6 col-md-3">
+          <label class="form-label">Họ tên khách</label>
+          <input class="form-control form-control-sm" value="<?= h($chuyen['customer_name']) ?>" readonly>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label">SĐT khách</label>
+          <input class="form-control form-control-sm" value="<?= h($chuyen['customer_phone']) ?>" readonly>
+        </div>
+        <?php endif; ?>
+        <?php if (!empty($chuyen['customer_note'])): ?>
+        <div class="col-12">
+          <label class="form-label">Ghi chú khách</label>
+          <input class="form-control form-control-sm" value="<?= h($chuyen['customer_note']) ?>" readonly>
+        </div>
+        <?php endif; ?>
+        <?php if (!empty($chuyen['company_note'])): ?>
+        <div class="col-12">
+          <label class="form-label">Lưu ý từ công ty</label>
+          <input class="form-control form-control-sm text-danger" value="<?= h($chuyen['company_note']) ?>" readonly>
+        </div>
+        <?php endif; ?>
       </div>
     </fieldset>
 
@@ -54,8 +76,18 @@
       <div class="row g-2">
         <div class="col-6 col-md-3">
           <label class="form-label">Khách trả VNĐ</label>
-          <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['revenue_vnd']) ?>" readonly>
+          <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['revenue_vnd']) ?><?= $chuyen['customer_paid'] ? ' (đã TT đủ)' : '' ?>" readonly>
         </div>
+        <?php if ($chuyen['deposit_amount'] > 0): ?>
+        <div class="col-6 col-md-3">
+          <label class="form-label">Đặt cọc</label>
+          <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['deposit_amount']) ?>" readonly>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label">Còn lại</label>
+          <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['revenue_vnd'] - $chuyen['deposit_amount']) ?>" readonly>
+        </div>
+        <?php endif; ?>
         <?php if ($chuyen['revenue_usd'] > 0): ?>
         <div class="col-6 col-md-3">
           <label class="form-label">Khách trả USD</label>

@@ -101,6 +101,9 @@
         </div>
         <div class="cot-trang-thai">
           <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
+          <?php if ($chuyen['customer_paid']): ?>
+            <span class="huy-hieu-trang-thai tt-success" title="Không cần thu tiền khách"><?= bieuTuong('circle-check') ?> Đã TT</span>
+          <?php endif; ?>
           <?php if ($chuyen['dang_dinh_vi']): ?>
             <span class="huy-hieu-dinh-vi" title="Đang gửi vị trí"><span class="cham-nhap-nhay"></span> GPS</span>
           <?php endif; ?>
@@ -115,6 +118,9 @@
         <div><span class="nhan">Xe</span><span class="gt"><?= h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?></span></div>
         <?php if (!laTaiXe()): ?>
           <div><span class="nhan">Tài xế</span><span class="gt"><?= h($chuyen['ten_tai_xe']) ?></span></div>
+        <?php endif; ?>
+        <?php if (!empty($chuyen['customer_name'])): ?>
+          <div><span class="nhan">Khách</span><span class="gt"><?= h($chuyen['customer_name']) ?></span></div>
         <?php endif; ?>
         <div><span class="nhan">Loại kèo</span><span class="gt"><?= h($chuyen['ten_loai_keo']) ?></span></div>
         <div><span class="nhan">Khách trả</span><span class="gt"><?= dinhDangTien($chuyen['revenue_vnd']) ?>đ</span></div>
@@ -220,6 +226,9 @@
           <td class="canh-phai"><?= dinhDangTien($chuyen['fuel_cost']) ?></td>
           <td>
             <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
+            <?php if ($chuyen['customer_paid']): ?>
+              <span class="huy-hieu-trang-thai tt-success" title="Không cần thu tiền khách"><?= bieuTuong('circle-check') ?> Đã TT</span>
+            <?php endif; ?>
             <?php if ($chuyen['dang_dinh_vi']): ?>
               <span class="huy-hieu-dinh-vi" title="Đang gửi vị trí"><span class="cham-nhap-nhay"></span> GPS</span>
             <?php endif; ?>
@@ -339,9 +348,31 @@
               <input class="form-control form-control-sm" value="<?= h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?>" readonly>
             </div>
             <div class="col-12">
-              <label class="form-label">Điểm đón - trả / thông tin khách</label>
+              <label class="form-label">Điểm đón - trả</label>
               <textarea class="form-control form-control-sm" rows="2" readonly><?= h($chuyen['pickup_dropoff']) ?></textarea>
             </div>
+            <?php if (!empty($chuyen['customer_name']) || !empty($chuyen['customer_phone'])): ?>
+            <div class="col-6 col-md-3">
+              <label class="form-label">Họ tên khách</label>
+              <input class="form-control form-control-sm" value="<?= h($chuyen['customer_name']) ?>" readonly>
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label">SĐT khách</label>
+              <input class="form-control form-control-sm" value="<?= h($chuyen['customer_phone']) ?>" readonly>
+            </div>
+            <?php endif; ?>
+            <?php if (!empty($chuyen['customer_note'])): ?>
+            <div class="col-12">
+              <label class="form-label">Ghi chú khách</label>
+              <input class="form-control form-control-sm" value="<?= h($chuyen['customer_note']) ?>" readonly>
+            </div>
+            <?php endif; ?>
+            <?php if (!empty($chuyen['company_note'])): ?>
+            <div class="col-12">
+              <label class="form-label">Lưu ý từ công ty</label>
+              <input class="form-control form-control-sm text-danger" value="<?= h($chuyen['company_note']) ?>" readonly>
+            </div>
+            <?php endif; ?>
           </div>
         </fieldset>
 
@@ -356,8 +387,22 @@
           <div class="row g-2">
             <div class="col-6 col-md-4">
               <label class="form-label">Khách trả (VNĐ)</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0"
+              <input type="text" class="form-control form-control-sm o-nhap-tien o-khach-tra" placeholder="0"
                      name="thu_vnd" value="<?= h(giaTriTienForm($chuyen, 'revenue_vnd')) ?>">
+              <div class="form-check mt-1">
+                <input class="form-check-input" type="checkbox" name="khach_da_thanh_toan" value="1"
+                       id="oKhachDaTT<?= $chuyen['id'] ?>" <?= $chuyen['customer_paid'] ? 'checked' : '' ?>>
+                <label class="form-check-label" for="oKhachDaTT<?= $chuyen['id'] ?>" style="font-size:12px">Khách đã thanh toán đủ</label>
+              </div>
+            </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label">Đặt cọc</label>
+              <input type="text" class="form-control form-control-sm o-nhap-tien o-dat-coc" placeholder="0"
+                     name="dat_coc" value="<?= h(giaTriTienForm($chuyen, 'deposit_amount')) ?>">
+            </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label">Còn lại</label>
+              <input type="text" class="form-control form-control-sm o-con-lai" placeholder="0" readonly tabindex="-1">
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Tiền cuốc xe</label>

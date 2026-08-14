@@ -11,6 +11,8 @@
 //      duoc tro toi qua thuoc tinh data-target (dung cho USD/EUR...).
 //   5. O co class "o-xang-dau": go tien xang dau se tu dong tinh 10% VAT
 //      vao o co class "o-vat-xang-dau" trong CUNG 1 form (van sua tay duoc).
+//   6. O "o-khach-tra" / "o-dat-coc": tu dong tinh "Con lai" = Khach tra - Dat coc
+//      vao o co class "o-con-lai" (chi hien thi, khong gui len server).
 // =====================================================================
 (function () {
   function chiLaySo(chuoi) {
@@ -78,6 +80,29 @@
       var vat = Math.round(soXang * 0.10);
       oVat.value = vat > 0 ? dinhDangHienThi(String(vat)) : '';
     });
+  });
+
+  // ---- 6: Khach tra - Dat coc = Con lai ----
+  function ganTinhConLai(form) {
+    var oKhachTra = form.querySelector('.o-khach-tra');
+    var oDatCoc   = form.querySelector('.o-dat-coc');
+    var oConLai   = form.querySelector('.o-con-lai');
+    if (!oKhachTra || !oDatCoc || !oConLai) return;
+
+    function capNhat() {
+      var khachTra = parseInt(chiLaySo(oKhachTra.value) || '0', 10);
+      var datCoc   = parseInt(chiLaySo(oDatCoc.value) || '0', 10);
+      var conLai   = khachTra - datCoc;
+      oConLai.value = conLai !== 0 ? dinhDangHienThi(String(Math.abs(conLai))) : '';
+      if (conLai < 0) oConLai.value = '-' + oConLai.value;
+    }
+    oKhachTra.addEventListener('input', capNhat);
+    oDatCoc.addEventListener('input', capNhat);
+    capNhat();
+  }
+  document.querySelectorAll('.o-con-lai').forEach(function (oConLai) {
+    var form = oConLai.closest('form');
+    if (form) ganTinhConLai(form);
   });
 
   // ---- 4: Nut thu gon / mo rong khoi noi dung ----

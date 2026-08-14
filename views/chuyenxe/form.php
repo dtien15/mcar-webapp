@@ -57,7 +57,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                    value="<?= h(giaTri($chuyenXe, 'pickup_time')) ?>">
           </div>
           <div class="col-12 col-md-4">
-            <label class="form-label">Điểm đón - Điểm trả / thông tin khách</label>
+            <label class="form-label">Điểm đón - Điểm trả</label>
             <textarea name="diem_don_tra" class="form-control" rows="1" <?= $chiXem ?>><?= h(giaTri($chuyenXe, 'diem_don_tra') ?: giaTri($chuyenXe, 'pickup_dropoff')) ?></textarea>
           </div>
           <div class="col-6 col-md-2">
@@ -76,6 +76,22 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                 </option>
               <?php endforeach; ?>
             </select>
+          </div>
+
+          <div class="col-6 col-md-3">
+            <label class="form-label">Họ tên khách</label>
+            <input name="ten_khach" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'customer_name')) ?>">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label">SĐT khách</label>
+            <input name="sdt_khach" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'customer_phone')) ?>">
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">Ghi chú khách <span class="text-muted">(nếu có)</span></label>
+            <input name="ghi_chu_khach" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'customer_note')) ?>">
           </div>
 
           <div class="col-6 col-md-3">
@@ -129,6 +145,11 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
             </select>
             <div id="ghiChuGoiY" class="text-muted mt-1" style="font-size:12px"></div>
           </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">Lưu ý từ công ty <span class="text-muted">(nếu có)</span></label>
+            <input name="luu_y_cty" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'company_note')) ?>">
+          </div>
         </div>
       </fieldset>
 
@@ -145,8 +166,22 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
         <div class="row g-2">
           <div class="col-6 col-md-3">
             <label class="form-label">Khách trả (VNĐ)</label>
-            <input type="text" name="thu_vnd" id="oThuVnd" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+            <input type="text" name="thu_vnd" id="oThuVnd" class="form-control o-nhap-tien o-khach-tra" placeholder="0" <?= $chiXem ?>
                    value="<?= h(giaTriTienForm($chuyenXe, 'revenue_vnd')) ?>">
+            <div class="form-check mt-1">
+              <input class="form-check-input" type="checkbox" name="khach_da_thanh_toan" id="oKhachDaTT" value="1"
+                     <?= giaTri($chuyenXe, 'customer_paid') ? 'checked' : '' ?> <?= $khoaSua ? 'disabled' : '' ?>>
+              <label class="form-check-label" for="oKhachDaTT" style="font-size:12px">Khách đã thanh toán đủ</label>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label">Đặt cọc</label>
+            <input type="text" name="dat_coc" class="form-control o-nhap-tien o-dat-coc" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'deposit_amount')) ?>">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label">Còn lại</label>
+            <input type="text" class="form-control o-con-lai" placeholder="0" readonly tabindex="-1">
           </div>
           <div class="col-6 col-md-3">
             <label class="form-label">Tiền cuốc xe (trả tài xế)</label>
