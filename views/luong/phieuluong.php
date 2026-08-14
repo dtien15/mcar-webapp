@@ -67,7 +67,7 @@
         </tr>
         <tr>
           <td class="text-center">6</td>
-          <td>Tiền tài xế đã thu của khách</td>
+          <td>Tiền tài xế đang cầm của khách (chưa nộp lại)</td>
           <td class="text-end">− <?= dinhDangTien($bangLuong['total_collected']) ?></td>
         </tr>
         <tr>
@@ -103,7 +103,8 @@
           <tr>
             <th>Ngày</th><th>Hành trình</th><th>Xe</th><th>Loại kèo</th>
             <th class="text-end">Tiền cuốc</th><th class="text-end">Lưu đêm</th>
-            <th class="text-end">Thu khách</th><th class="text-end">Xăng dầu</th><th class="text-end">Phạt</th>
+            <th class="text-end">Thu khách</th><th>Trạng thái tiền thu</th>
+            <th class="text-end">Xăng dầu</th><th class="text-end">Phạt</th>
           </tr>
         </thead>
         <tbody>
@@ -116,12 +117,23 @@
             <td class="text-end"><?= dinhDangTien($chuyen['trip_fee']) ?></td>
             <td class="text-end"><?= dinhDangTien($chuyen['overnight_fee']) ?></td>
             <td class="text-end"><?= dinhDangTien($chuyen['revenue_vnd']) ?></td>
+            <td>
+              <?php if ($chuyen['customer_paid']): ?>
+                Khách TT thẳng cty
+              <?php elseif ($chuyen['cash_remitted']): ?>
+                Đã nộp lại
+              <?php elseif ((float)$chuyen['revenue_vnd'] > 0): ?>
+                <span class="text-danger">Chưa nộp lại</span>
+              <?php else: ?>
+                —
+              <?php endif; ?>
+            </td>
             <td class="text-end"><?= dinhDangTien($chuyen['fuel_cost']) ?></td>
             <td class="text-end"><?= dinhDangTien($chuyen['fine']) ?></td>
           </tr>
         <?php endforeach; ?>
         <?php if (!$dsChuyen): ?>
-          <tr><td colspan="9" class="text-center text-muted py-3">Không có chuyến xe nào trong kỳ</td></tr>
+          <tr><td colspan="10" class="text-center text-muted py-3">Không có chuyến xe nào trong kỳ</td></tr>
         <?php endif; ?>
         </tbody>
       </table>

@@ -423,6 +423,43 @@ class ChuyenXeController extends Controller
         chuyenTrang('chuyenxe');
     }
 
+    /**
+     * Ke toan/quan ly xac nhan tai xe da nop lai tien mat/CK thu cua khach ve cty.
+     * Chi danh cho chuyen ma tai xe la nguoi thuc su cam tien khach (customer_paid=0).
+     */
+    public function xacNhanNopLai()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->yeuCauPost();
+
+        $id        = (int)($_POST['id'] ?? 0);
+        $hinhThuc  = $this->chuTuForm('hinh_thuc_nop');
+        $idNguoiXn = taiKhoanHienTai()['id'];
+
+        if (!in_array($hinhThuc, ['tien_mat', 'chuyen_khoan'], true)) {
+            datThongBao('Vui lòng chọn hình thức nộp lại (tiền mặt / chuyển khoản).', 'danger');
+            chuyenTrang('chuyenxe');
+        }
+
+        if ($this->model('ChuyenXeModel')->xacNhanNopLai($id, $idNguoiXn, $hinhThuc)) {
+            datThongBao('Đã xác nhận tài xế nộp lại tiền cho công ty.');
+        } else {
+            datThongBao('Không xác nhận được — chuyến này khách đã thanh toán thẳng công ty, chưa có số liệu, hoặc đã xác nhận nộp lại trước đó rồi.', 'danger');
+        }
+        chuyenTrang('chuyenxe');
+    }
+
+    /** Quan tri vien huy xac nhan da nop lai (lo bam nham) */
+    public function huyXacNhanNopLai()
+    {
+        $this->yeuCauQuyen(['admin']);
+        $this->yeuCauPost();
+
+        $this->model('ChuyenXeModel')->huyXacNhanNopLai((int)($_POST['id'] ?? 0));
+        datThongBao('Đã hủy xác nhận nộp lại tiền.');
+        chuyenTrang('chuyenxe');
+    }
+
     /** Xuat danh sach chuyen xe ra file CSV (mo duoc bang Excel) */
     public function xuatCsv()
     {

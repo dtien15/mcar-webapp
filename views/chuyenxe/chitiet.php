@@ -94,6 +94,17 @@
           <label class="form-label">Khách trả VNĐ</label>
           <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['revenue_vnd']) ?><?= $chuyen['customer_paid'] ? ' (đã TT đủ)' : '' ?>" readonly>
         </div>
+        <?php if (laQuanLy() && !$chuyen['customer_paid'] && in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
+        <div class="col-12 col-md-6">
+          <label class="form-label">Tài xế nộp lại tiền cho công ty</label>
+          <?php if ($chuyen['cash_remitted']): ?>
+            <input class="form-control form-control-sm" readonly
+                   value="Đã nộp lại (<?= $chuyen['cash_remitted_method'] === 'chuyen_khoan' ? 'chuyển khoản' : 'tiền mặt' ?>) lúc <?= date('H:i d/m/Y', strtotime($chuyen['cash_remitted_at'])) ?><?= !empty($chuyen['ten_nguoi_xac_nhan_nop_lai']) ? ' bởi ' . h($chuyen['ten_nguoi_xac_nhan_nop_lai']) : '' ?>">
+          <?php else: ?>
+            <input class="form-control form-control-sm text-danger" value="Chưa nộp lại" readonly>
+          <?php endif; ?>
+        </div>
+        <?php endif; ?>
         <?php if ($chuyen['deposit_amount'] > 0): ?>
         <div class="col-6 col-md-3">
           <label class="form-label">Đặt cọc</label>

@@ -115,11 +115,13 @@ class ChuyenXeModel extends Model
     {
         return $this->motDong(
             "SELECT t.*, c.name AS ten_xe, c.plate_number AS bien_so, c.seats AS so_cho,
-                    d.full_name AS ten_tai_xe, ct.name AS ten_loai_keo
+                    d.full_name AS ten_tai_xe, ct.name AS ten_loai_keo,
+                    u.full_name AS ten_nguoi_xac_nhan_nop_lai
              FROM trips t
              LEFT JOIN cars c ON c.id = t.car_id
              LEFT JOIN drivers d ON d.id = t.driver_id
              LEFT JOIN contract_types ct ON ct.id = t.contract_type_id
+             LEFT JOIN users u ON u.id = t.cash_remitted_by
              WHERE t.id = ?",
             [(int)$id]
         );
@@ -172,6 +174,39 @@ class ChuyenXeModel extends Model
     {
         return $this->thucThi(
             "UPDATE trips SET status='tai_xe_xac_nhan', completed_at=NULL WHERE id = ?",
+            [(int)$id]
+        );
+    }
+
+    /**
+     * Ke toan/quan ly xac nhan tai xe da nop lai tien mat/CK thu cua khach ve cty.
+     * Chi ap dung cho chuyen ma khach chua thanh toan truoc (customer_paid=0,
+     * tuc tai xe la nguoi thuc su cam tien) va da co so lieu doanh thu
+     * (tai_xe_xac_nhan hoac hoan_thanh). Chua nop lai roi thi khong xac nhan lai.
+     */
+    public function xacNhanNopLai($id, $idNguoiXacNhan, $hinhThuc)
+    {
+        $chuyen = $this->motDong("SELECT * FROM trips WHERE id = ?", [(int)$id]);
+        if (!$chuyen || (int)$chuyen['customer_paid'] === 1 || (int)$chuyen['cash_remitted'] === 1
+            || !in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)) {
+            return false;
+        }
+
+        return $this->thucThi(
+            "UPDATE trips SET cash_remitted=1, cash_remitted_method=?,
+                    cash_remitted_at=NOW(), cash_remitted_by=?
+             WHERE id = ?",
+            [$hinhThuc, (int)$idNguoiXacNhan, (int)$id]
+        );
+    }
+
+    /** Huy xac nhan da nop lai (lo bam nham) - chi quan tri vien duoc dung */
+    public function huyXacNhanNopLai($id)
+    {
+        return $this->thucThi(
+            "UPDATE trips SET cash_remitted=0, cash_remitted_method=NULL,
+                    cash_remitted_at=NULL, cash_remitted_by=NULL
+             WHERE id = ?",
             [(int)$id]
         );
     }
@@ -374,7 +409,8 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(other_fee),0)     AS phat_sinh,
                     COALESCE(SUM(trip_fee),0)      AS tien_tai,
                     COALESCE(SUM(fine),0)          AS phat,
-                    COALESCE(SUM(revenue_vnd),0)   AS thu_khach,
+                    COALESCE(SUM(CASE WHEN customer_paid = 0 AND cash_remitted = 0
+                                       THEN revenue_vnd ELSE 0 END), 0) AS thu_khach,
                     COALESCE(SUM(refund_vnd),0)    AS hoan_tien,
                     COALESCE(SUM(cash_advance),0)  AS tam_ung,
                     COALESCE(SUM(fuel_cost),0)     AS xang_dau

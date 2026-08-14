@@ -147,7 +147,7 @@
             <table class="table table-sm mb-3">
               <tr><td>Tổng lương kỳ này</td><td class="text-end"><strong><?= dinhDangTien($dong['total_salary']) ?></strong></td></tr>
               <tr><td>Số dư kỳ trước</td><td class="text-end"><?= dinhDangTien($dong['prev_balance']) ?></td></tr>
-              <tr><td>Tài xế đã thu của khách</td><td class="text-end">− <?= dinhDangTien($dong['total_collected']) ?></td></tr>
+              <tr><td>Tài xế đang cầm của khách (chưa nộp lại)</td><td class="text-end">− <?= dinhDangTien($dong['total_collected']) ?></td></tr>
               <tr><td>Hoàn tiền</td><td class="text-end">+ <?= dinhDangTien($dong['total_refund']) ?></td></tr>
             </table>
 

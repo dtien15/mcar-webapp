@@ -103,6 +103,10 @@
           <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
           <?php if ($chuyen['customer_paid']): ?>
             <span class="huy-hieu-trang-thai tt-success" title="Không cần thu tiền khách"><?= bieuTuong('circle-check') ?> Đã TT</span>
+          <?php elseif ($chuyen['cash_remitted']): ?>
+            <span class="huy-hieu-trang-thai tt-success" title="Tài xế đã nộp lại tiền cho công ty"><?= bieuTuong('cash') ?> Đã nộp lại</span>
+          <?php elseif (in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
+            <span class="huy-hieu-trang-thai tt-warning" title="Tài xế đang cầm tiền của khách, chưa nộp lại"><?= bieuTuong('cash') ?> Chưa nộp lại</span>
           <?php endif; ?>
           <?php if ($chuyen['dang_dinh_vi']): ?>
             <span class="huy-hieu-dinh-vi" title="Đang gửi vị trí"><span class="cham-nhap-nhay"></span> GPS</span>
@@ -140,6 +144,19 @@
               <?php truongToken(); ?>
               <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
               <button class="btn btn-sm btn-success"><?= bieuTuong('check') ?> Chốt hoàn thành</button>
+            </form>
+          <?php endif; ?>
+          <?php if ((int)$chuyen['customer_paid'] === 0 && (int)$chuyen['cash_remitted'] === 0
+                     && in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
+            <button type="button" class="btn btn-sm btn-outline-success"
+                    data-bs-toggle="modal" data-bs-target="#nopLai<?= $chuyen['id'] ?>">
+              <?= bieuTuong('cash') ?> Đã nộp lại
+            </button>
+          <?php elseif ($chuyen['cash_remitted'] && laQuanTri()): ?>
+            <form method="post" action="<?= duongDan('chuyenxe/huyxacnhannoplai') ?>" onsubmit="return confirm('Hủy xác nhận đã nộp lại tiền?');">
+              <?php truongToken(); ?>
+              <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
+              <button class="btn btn-sm btn-outline-secondary"><?= bieuTuong('arrow-back-up') ?> Hủy xác nhận nộp lại</button>
             </form>
           <?php endif; ?>
         <?php elseif ($cuaToi): ?>
@@ -228,6 +245,10 @@
             <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
             <?php if ($chuyen['customer_paid']): ?>
               <span class="huy-hieu-trang-thai tt-success" title="Không cần thu tiền khách"><?= bieuTuong('circle-check') ?> Đã TT</span>
+            <?php elseif ($chuyen['cash_remitted']): ?>
+              <span class="huy-hieu-trang-thai tt-success" title="Tài xế đã nộp lại tiền cho công ty"><?= bieuTuong('cash') ?> Đã nộp lại</span>
+            <?php elseif (in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
+              <span class="huy-hieu-trang-thai tt-warning" title="Tài xế đang cầm tiền của khách, chưa nộp lại"><?= bieuTuong('cash') ?> Chưa nộp lại</span>
             <?php endif; ?>
             <?php if ($chuyen['dang_dinh_vi']): ?>
               <span class="huy-hieu-dinh-vi" title="Đang gửi vị trí"><span class="cham-nhap-nhay"></span> GPS</span>
@@ -251,6 +272,20 @@
                     <?php truongToken(); ?>
                     <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
                     <button class="btn btn-sm btn-outline-secondary"><?= bieuTuong('arrow-back-up') ?> Mở lại</button>
+                  </form>
+                <?php endif; ?>
+
+                <?php if ((int)$chuyen['customer_paid'] === 0 && (int)$chuyen['cash_remitted'] === 0
+                           && in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
+                  <button type="button" class="btn btn-sm btn-outline-success"
+                          data-bs-toggle="modal" data-bs-target="#nopLai<?= $chuyen['id'] ?>">
+                    <?= bieuTuong('cash') ?> Đã nộp lại
+                  </button>
+                <?php elseif ($chuyen['cash_remitted'] && laQuanTri()): ?>
+                  <form method="post" action="<?= duongDan('chuyenxe/huyxacnhannoplai') ?>" onsubmit="return confirm('Hủy xác nhận đã nộp lại tiền?');">
+                    <?php truongToken(); ?>
+                    <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
+                    <button class="btn btn-sm btn-outline-secondary"><?= bieuTuong('arrow-back-up') ?> Hủy nộp lại</button>
                   </form>
                 <?php endif; ?>
 
@@ -495,6 +530,40 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
         <button class="btn btn-primary"><?= bieuTuong('check') ?> Xác nhận chuyến xe</button>
+      </div>
+    </form>
+  </div>
+</div>
+<?php endforeach; ?>
+
+<!-- Hop thoai ke toan/quan ly xac nhan tai xe da nop lai tien -->
+<?php foreach ($danhSach as $chuyen):
+  if (!(laQuanLy() && (int)$chuyen['customer_paid'] === 0 && (int)$chuyen['cash_remitted'] === 0
+        && in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true))) continue;
+?>
+<div class="modal fade" id="nopLai<?= $chuyen['id'] ?>" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="post" action="<?= duongDan('chuyenxe/xacnhannoplai') ?>" class="modal-content"
+          onsubmit="return confirm('Xác nhận tài xế đã nộp lại tiền cho công ty? Sau khi xác nhận sẽ không tính khoản này vào nợ tài xế nữa.');">
+      <?php truongToken(); ?>
+      <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
+      <div class="modal-header">
+        <h5 class="modal-title"><?= bieuTuong('cash') ?> Xác nhận nộp lại tiền</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Chuyến <strong><?= h($chuyen['route']) ?></strong> ngày <?= dinhDangNgay($chuyen['trip_date']) ?>
+          — tài xế <strong><?= h($chuyen['ten_tai_xe']) ?></strong> đã thu của khách
+          <strong><?= dinhDangTien($chuyen['revenue_vnd']) ?>đ</strong>.</p>
+        <label class="form-label">Hình thức nộp lại</label>
+        <select name="hinh_thuc_nop" class="form-select" required>
+          <option value="tien_mat">Tiền mặt</option>
+          <option value="chuyen_khoan">Chuyển khoản</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+        <button class="btn btn-success"><?= bieuTuong('check') ?> Xác nhận đã nộp lại</button>
       </div>
     </form>
   </div>
