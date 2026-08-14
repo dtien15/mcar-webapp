@@ -109,7 +109,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
 
       <!-- 2. Doanh thu & tien tai (cong ty giao) -->
       <fieldset class="nhom-truong">
-        <legend>2. Doanh thu &amp; tiền tài (công ty giao cho tài xế)</legend>
+        <legend>2. Doanh thu &amp; tiền tài</legend>
         <div class="row g-2">
           <div class="col-6 col-md-3">
             <label class="form-label">Khách trả VNĐ</label>
@@ -156,7 +156,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
 
       <!-- 3. Chi phi thuc te (tai xe nhap) -->
       <fieldset class="nhom-truong">
-        <legend>3. Chi phí thực tế (tài xế nhập khi xác nhận — công ty có thể sửa)</legend>
+        <legend>3. Chi phí thực tế</legend>
         <div class="row g-2">
           <div class="col-6 col-md-2">
             <label class="form-label">Xăng dầu</label>
