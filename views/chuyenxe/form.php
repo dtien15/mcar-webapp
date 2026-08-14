@@ -46,22 +46,66 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
       <fieldset class="nhom-truong">
         <legend>1. Thông tin chuyến đi</legend>
         <div class="row g-2">
-          <div class="col-6 col-md-2">
+          <div class="col-6 col-md-3">
             <label class="form-label">Ngày chạy xe *</label>
             <input type="date" name="ngay_chay" class="form-control" required <?= $chiXem ?>
                    value="<?= h(giaTri($chuyenXe, 'trip_date', date('Y-m-d'))) ?>">
           </div>
-          <div class="col-6 col-md-2">
+          <div class="col-6 col-md-3">
             <label class="form-label">Giờ đón khách</label>
             <input type="time" name="gio_don" class="form-control" <?= $chiXem ?>
                    value="<?= h(giaTri($chuyenXe, 'pickup_time')) ?>">
           </div>
-          <div class="col-6 col-md-2">
+          <div class="col-6 col-md-3">
             <label class="form-label">Hành trình</label>
             <input name="hanh_trinh" class="form-control" placeholder="VD: SG-MN" <?= $chiXem ?>
                    value="<?= h(giaTri($chuyenXe, 'route')) ?>">
           </div>
-          <div class="col-6 col-md-2">
+          <div class="col-6 col-md-3">
+            <label class="form-label">Số lượng khách</label>
+            <input type="number" min="0" name="so_luong_khach" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'passenger_count')) ?>">
+          </div>
+
+          <div class="col-6 col-md-4">
+            <label class="form-label">Điểm đón</label>
+            <input name="dia_diem_don" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'pickup_location')) ?>">
+          </div>
+          <div class="col-6 col-md-4">
+            <label class="form-label">Điểm trả</label>
+            <input name="dia_diem_tra" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'dropoff_location')) ?>">
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">Bảng đón khách <span class="text-muted">(nếu có)</span></label>
+            <input name="bang_don" class="form-control" placeholder="VD: tên khách / tên đoàn" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'pickup_sign')) ?>">
+          </div>
+
+          <div class="col-6 col-md-4">
+            <label class="form-label">Họ tên khách</label>
+            <input name="ten_khach" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'customer_name')) ?>">
+          </div>
+          <div class="col-6 col-md-4">
+            <label class="form-label">SĐT khách</label>
+            <input name="sdt_khach" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'customer_phone')) ?>">
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">Ghi chú khách <span class="text-muted">(nếu có)</span></label>
+            <input name="ghi_chu_khach" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'customer_note')) ?>">
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- 1b. Phan cong xe/tai xe & gia goi y -->
+      <fieldset class="nhom-truong">
+        <legend>2. Phân công xe &amp; giá</legend>
+        <div class="row g-2">
+          <div class="col-6 col-md-4">
             <label class="form-label">Loại kèo</label>
             <select name="id_loai_keo" id="oLoaiKeo" class="form-select" <?= $chiXemSel ?>>
               <option value="">-- Chọn --</option>
@@ -73,45 +117,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               <?php endforeach; ?>
             </select>
           </div>
-          <div class="col-6 col-md-2">
-            <label class="form-label">Số lượng khách</label>
-            <input type="number" min="0" name="so_luong_khach" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'passenger_count')) ?>">
-          </div>
-
-          <div class="col-6 col-md-3">
-            <label class="form-label">Điểm đón</label>
-            <input name="dia_diem_don" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'pickup_location')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Điểm trả</label>
-            <input name="dia_diem_tra" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'dropoff_location')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Bảng đón khách <span class="text-muted">(nếu có)</span></label>
-            <input name="bang_don" class="form-control" placeholder="VD: tên khách / tên đoàn" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'pickup_sign')) ?>">
-          </div>
-
-          <div class="col-6 col-md-3">
-            <label class="form-label">Họ tên khách</label>
-            <input name="ten_khach" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'customer_name')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">SĐT khách</label>
-            <input name="sdt_khach" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'customer_phone')) ?>">
-          </div>
-          <div class="col-12 col-md-6">
-            <label class="form-label">Ghi chú khách <span class="text-muted">(nếu có)</span></label>
-            <input name="ghi_chu_khach" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'customer_note')) ?>">
-          </div>
-
-          <div class="col-6 col-md-3">
+          <div class="col-6 col-md-4">
             <label class="form-label">Xe</label>
             <?php if (laTaiXe()): $xeCuaToi = $dsXe[0] ?? null; ?>
               <!-- Tai xe tu tao: khoa cung xe cua minh, khong chon duoc xe khac -->
@@ -135,7 +141,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               </select>
             <?php endif; ?>
           </div>
-          <div class="col-6 col-md-3">
+          <div class="col-6 col-md-4">
             <label class="form-label">Tài xế</label>
             <?php if (laTaiXe()): $txCuaToi = $dsTaiXe[0] ?? null; ?>
               <!-- Tai xe tu tao: khoa cung la chinh minh -->
@@ -152,6 +158,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               </select>
             <?php endif; ?>
           </div>
+
           <div class="col-12 col-md-6">
             <label class="form-label">Gợi ý giá từ bảng giá</label>
             <select id="oBangGia" class="form-select" <?= $chiXemSel ?>>
@@ -179,7 +186,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
         elseif ($phuPhiHienTai == 100000) { $loaiPhuPhi = '100000'; }
       ?>
       <fieldset class="nhom-truong">
-        <legend>2. Doanh thu &amp; tiền tài</legend>
+        <legend>3. Doanh thu &amp; tiền tài</legend>
         <div class="row g-2">
           <div class="col-6 col-md-3">
             <label class="form-label">Khách trả (VNĐ)</label>
@@ -261,7 +268,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
 
       <!-- 3. Chi phi thuc te (tai xe nhap) -->
       <fieldset class="nhom-truong">
-        <legend>3. Chi phí thực tế</legend>
+        <legend>4. Chi phí thực tế</legend>
         <div class="row g-2">
           <div class="col-6 col-md-2">
             <label class="form-label">Xăng dầu</label>
