@@ -6,7 +6,6 @@
 <div class="the">
   <div class="the-than phieu-luong">
     <div class="text-center mb-4">
-      <div style="font-size:13px; font-weight:600"><?= defined('TEN_CONG_TY') ? h(TEN_CONG_TY) : 'CÔNG TY VẬN TẢI' ?></div>
       <h2 class="mt-2 mb-1">Phiếu lương tài xế</h2>
       <div style="font-size:13px">
         Tháng <?= (int)$thang ?>/<?= (int)$nam ?>
