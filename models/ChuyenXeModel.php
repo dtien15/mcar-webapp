@@ -443,4 +443,30 @@ class ChuyenXeModel extends Model
             [(int)$idTaiXe, $tuNgay, $denNgay]
         );
     }
+
+    /**
+     * Danh sach phieu da gui qua link cong khai /chuyen-xe (khong dang nhap),
+     * moi nhat truoc - dung cho nguoi quan ly xem lai da gui chuyen nao roi.
+     */
+    public function layPhieuCongKhaiGanDay($gioiHan = 30)
+    {
+        return $this->truyVan(
+            "SELECT t.id, t.trip_date, t.route, t.created_at, d.full_name AS ten_tai_xe
+             FROM trips t
+             LEFT JOIN drivers d ON d.id = t.driver_id
+             WHERE t.public_submitted = 1
+             ORDER BY t.id DESC
+             LIMIT " . (int)$gioiHan
+        );
+    }
+
+    /** Dem so phieu da gui qua link cong khai trong 1 thang (theo ngay tao, khong phai ngay chay xe) */
+    public function demPhieuCongKhaiTheoThang($thang, $nam)
+    {
+        return (int)$this->motGiaTri(
+            "SELECT COUNT(*) FROM trips
+             WHERE public_submitted = 1 AND MONTH(created_at) = ? AND YEAR(created_at) = ?",
+            [(int)$thang, (int)$nam]
+        );
+    }
 }

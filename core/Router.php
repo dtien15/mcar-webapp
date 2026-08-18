@@ -20,6 +20,7 @@ class Router
         'baocao'    => 'BaoCaoController',
         'nguoidung' => 'NguoiDungController',
         'thongbao'  => 'ThongBaoController',
+        'chuyen-xe' => 'GuiChuyenController',
     ];
 
     public function chay()
