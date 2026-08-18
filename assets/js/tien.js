@@ -5,14 +5,12 @@
 //      mac dinh (chi dat qua thuoc tinh placeholder).
 //   2. Truoc khi form gui di, tu dong bo dau cham de may chu nhan dung
 //      con so (server luon chi thay chuoi so thuan, khong co dau cham).
-//   3. O co class "o-chon-phu-phi": khi doi lua chon se tu dien so tien
-//      tuong ung vao o co class "o-phu-phi-tien" trong CUNG 1 form.
-//   4. Nut co class "nut-them-tien-khac": bam de hien/an khoi noi dung
-//      duoc tro toi qua thuoc tinh data-target (dung cho USD/EUR...).
-//   5. O co class "o-xang-dau": go tien xang dau se tu dong tinh 10% VAT
+//   3. O co class "o-xang-dau": go tien xang dau se tu dong tinh 10% VAT
 //      vao o co class "o-vat-xang-dau" trong CUNG 1 form (van sua tay duoc).
-//   6. O "o-khach-tra" / "o-chi-phi-ngoai": tu dong tinh "Minh nhan" = Khach
+//   4. O "o-khach-tra" / "o-chi-phi-ngoai": tu dong tinh "Minh nhan" = Khach
 //      tra - Chi phi keo ngoai vao o co class "o-minh-nhan" (chi hien thi).
+//   5. Nut co class "nut-them-tien-khac": bam de hien/an khoi noi dung
+//      duoc tro toi qua thuoc tinh data-target (dung cho USD/EUR...).
 // =====================================================================
 (function () {
   function chiLaySo(chuoi) {
@@ -60,17 +58,7 @@
     });
   });
 
-  // ---- 3: Chon phu phi (Luu dem / Chay khuya) tu dien so tien ----
-  document.querySelectorAll('.o-chon-phu-phi').forEach(function (chon) {
-    chon.addEventListener('change', function () {
-      var form = chon.closest('form') || document;
-      var oTien = form.querySelector('.o-phu-phi-tien');
-      if (!oTien) return;
-      oTien.value = (chon.value && chon.value !== '0') ? dinhDangHienThi(chon.value) : '';
-    });
-  });
-
-  // ---- 5: Xang dau tu dong tinh 10% VAT ----
+  // ---- 3: Xang dau tu dong tinh 10% VAT ----
   document.querySelectorAll('.o-xang-dau').forEach(function (oXang) {
     oXang.addEventListener('input', function () {
       var form = oXang.closest('form') || document;
@@ -82,7 +70,7 @@
     });
   });
 
-  // ---- 6: O bi tru - o bi tru = o ket qua (chi hien thi) ----
+  // ---- 4: O bi tru - o bi tru = o ket qua (chi hien thi) ----
   function ganTinhHieu(form, lopBiTru, lopSoTru, lopKetQua) {
     var oBiTru = form.querySelector(lopBiTru);
     var oSoTru = form.querySelector(lopSoTru);
@@ -105,7 +93,7 @@
     if (form) ganTinhHieu(form, '.o-khach-tra', '.o-chi-phi-ngoai', '.o-minh-nhan');
   });
 
-  // ---- 4: Nut thu gon / mo rong khoi noi dung ----
+  // ---- 5: Nut thu gon / mo rong khoi noi dung ----
   document.querySelectorAll('.nut-them-tien-khac').forEach(function (nut) {
     nut.addEventListener('click', function () {
       var idKhoi = nut.getAttribute('data-target');

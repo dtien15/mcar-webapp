@@ -232,16 +232,11 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
           </div>
           <div class="col-6 col-md-3">
             <label class="form-label">Phụ phí</label>
-            <select class="form-select o-chon-phu-phi" <?= $chiXemSel ?>>
+            <select name="luu_dem" class="form-select" <?= $chiXemSel ?>>
               <option value="0" <?= $loaiPhuPhi === '0' ? 'selected' : '' ?>>Không có</option>
               <option value="200000" <?= $loaiPhuPhi === '200000' ? 'selected' : '' ?>>Lưu đêm (200.000đ)</option>
               <option value="100000" <?= $loaiPhuPhi === '100000' ? 'selected' : '' ?>>Chạy khuya (100.000đ)</option>
             </select>
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Số tiền phụ phí</label>
-            <input type="text" name="luu_dem" class="form-control o-nhap-tien o-phu-phi-tien" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'overnight_fee')) ?>">
           </div>
           <div class="col-6 col-md-3">
             <label class="form-label">Phí sân bay / đậu xe</label>

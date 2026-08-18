@@ -150,13 +150,13 @@ class ChuyenXeModel extends Model
         }
 
         return $this->thucThi(
-            "UPDATE trips SET revenue_vnd=?, trip_fee=?, overnight_fee=?, deposit_amount=?, customer_paid=?,
+            "UPDATE trips SET revenue_vnd=?, trip_fee=?, overnight_fee=?, outsource_cost=?, deposit_amount=?, customer_paid=?,
                     fuel_cost=?, fuel_vat=?, fuel_payer=?, vetc=?, maintenance=?, fine=?,
                     refund_vnd=?, refund_usd=?, cash_advance=?, direct_payment=?, note=?,
                     status='tai_xe_xac_nhan', driver_confirmed_at=NOW()
              WHERE id = ?",
             [
-                $duLieu['revenue_vnd'], $duLieu['trip_fee'], $duLieu['overnight_fee'],
+                $duLieu['revenue_vnd'], $duLieu['trip_fee'], $duLieu['overnight_fee'], $duLieu['outsource_cost'],
                 $duLieu['deposit_amount'], $duLieu['customer_paid'],
                 $duLieu['fuel_cost'], $duLieu['fuel_vat'], $duLieu['fuel_payer'], $duLieu['vetc'],
                 $duLieu['maintenance'], $duLieu['fine'], $duLieu['refund_vnd'],

@@ -419,6 +419,7 @@ class ChuyenXeController extends Controller
             'revenue_vnd'    => $this->soTuForm('thu_vnd'),
             'trip_fee'       => $this->soTuForm('tien_cuoc_xe'),
             'overnight_fee'  => $this->soTuForm('luu_dem'),
+            'outsource_cost' => $this->soTuForm('chi_phi_keo_ngoai'),
             'deposit_amount' => $this->soTuForm('dat_coc'),
             'customer_paid'  => !empty($_POST['khach_da_thanh_toan']) ? 1 : 0,
             'fuel_cost'      => $this->soTuForm('xang_dau'),
