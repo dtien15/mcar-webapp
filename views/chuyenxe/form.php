@@ -217,7 +217,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                    value="<?= h(giaTriTienForm($chuyenXe, 'trip_fee')) ?>">
           </div>
           <div class="col-6 col-md-3">
-            <label class="form-label">Chi phí kèo ngoài <span class="text-muted">(trả cty/xe ngoài)</span></label>
+            <label class="form-label">Chi phí kèo ngoài</label>
             <input type="text" name="chi_phi_keo_ngoai" class="form-control o-nhap-tien o-chi-phi-ngoai" placeholder="0" <?= $chiXem ?>
                    value="<?= h(giaTriTienForm($chuyenXe, 'outsource_cost')) ?>">
           </div>
@@ -232,11 +232,13 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
           </div>
           <div class="col-6 col-md-3">
             <label class="form-label">Phụ phí</label>
-            <select name="luu_dem" class="form-select" <?= $chiXemSel ?>>
-              <option value="0" <?= $loaiPhuPhi === '0' ? 'selected' : '' ?>>Không có</option>
-              <option value="200000" <?= $loaiPhuPhi === '200000' ? 'selected' : '' ?>>Lưu đêm</option>
-              <option value="100000" <?= $loaiPhuPhi === '100000' ? 'selected' : '' ?>>Chạy khuya</option>
-            </select>
+            <input type="text" name="luu_dem" class="form-control o-nhap-tien o-phu-phi" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'overnight_fee')) ?>">
+            <div class="btn-group btn-group-sm mt-1 o-phu-phi-nhanh" role="group">
+              <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhi === '0' ? 'active' : '' ?>" data-tien="0" <?= $chiXemSel ?>>Không có</button>
+              <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhi === '200000' ? 'active' : '' ?>" data-tien="200000" <?= $chiXemSel ?>>Lưu đêm</button>
+              <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhi === '100000' ? 'active' : '' ?>" data-tien="100000" <?= $chiXemSel ?>>Chạy khuya</button>
+            </div>
           </div>
           <div class="col-6 col-md-3">
             <label class="form-label">Phí sân bay / đậu xe</label>

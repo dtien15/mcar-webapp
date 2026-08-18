@@ -43,20 +43,18 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Phụ phí</label>
-              <select name="luu_dem" class="form-select form-select-sm">
-                <option value="0" <?= $loaiPhuPhiModal === '0' ? 'selected' : '' ?>>Không có</option>
-                <option value="200000" <?= $loaiPhuPhiModal === '200000' ? 'selected' : '' ?>>Lưu đêm</option>
-                <option value="100000" <?= $loaiPhuPhiModal === '100000' ? 'selected' : '' ?>>Chạy khuya</option>
-              </select>
+              <input type="text" name="luu_dem" class="form-control form-control-sm o-nhap-tien o-phu-phi" placeholder="0"
+                     value="<?= h(giaTriTienForm($chuyen, 'overnight_fee')) ?>">
+              <div class="btn-group btn-group-sm mt-1 o-phu-phi-nhanh" role="group">
+                <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhiModal === '0' ? 'active' : '' ?>" data-tien="0">Không có</button>
+                <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhiModal === '200000' ? 'active' : '' ?>" data-tien="200000">Lưu đêm</button>
+                <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhiModal === '100000' ? 'active' : '' ?>" data-tien="100000">Chạy khuya</button>
+              </div>
             </div>
             <div class="col-6 col-md-4">
-              <label class="form-label">Chi phí kèo ngoài (trả cty/xe ngoài)</label>
+              <label class="form-label">Chi phí kèo ngoài</label>
               <input type="text" class="form-control form-control-sm o-nhap-tien o-chi-phi-ngoai" placeholder="0"
                      name="chi_phi_keo_ngoai" value="<?= h(giaTriTienForm($chuyen, 'outsource_cost')) ?>">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Mình nhận (khách trả − kèo ngoài)</label>
-              <input type="text" class="form-control form-control-sm o-minh-nhan" placeholder="0" readonly tabindex="-1">
             </div>
           </div>
           <div class="text-muted mt-2" style="font-size:12px">

@@ -11,6 +11,9 @@
 //      tra - Chi phi keo ngoai vao o co class "o-minh-nhan" (chi hien thi).
 //   5. Nut co class "nut-them-tien-khac": bam de hien/an khoi noi dung
 //      duoc tro toi qua thuoc tinh data-target (dung cho USD/EUR...).
+//   6. Nhom nut ".o-phu-phi-nhanh" (Khong co/Luu dem/Chay khuya): bam nut
+//      la dien thang so tien tuong ung vao o "o-phu-phi" trong CUNG 1 form
+//      (van sua tay duoc binh thuong, khong bat buoc bam nut).
 // =====================================================================
 (function () {
   function chiLaySo(chuoi) {
@@ -108,6 +111,21 @@
         khoi.setAttribute('hidden', '');
         nut.textContent = nut.getAttribute('data-nhan-mo') || '+ Thêm loại tiền khác (USD/EUR)';
       }
+    });
+  });
+
+  // ---- 6: Nhom nut chon nhanh Phu phi dien thang so tien ----
+  document.querySelectorAll('.o-phu-phi-nhanh').forEach(function (nhom) {
+    var form = nhom.closest('form') || document;
+    var oTien = form.querySelector('.o-phu-phi');
+    if (!oTien) return;
+    nhom.querySelectorAll('button').forEach(function (nut) {
+      nut.addEventListener('click', function () {
+        var tien = nut.getAttribute('data-tien') || '0';
+        oTien.value = tien !== '0' ? dinhDangHienThi(tien) : '';
+        nhom.querySelectorAll('button').forEach(function (n) { n.classList.remove('active'); });
+        nut.classList.add('active');
+      });
     });
   });
 })();
