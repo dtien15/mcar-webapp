@@ -13,6 +13,8 @@
 //      vao o co class "o-vat-xang-dau" trong CUNG 1 form (van sua tay duoc).
 //   6. O "o-khach-tra" / "o-dat-coc": tu dong tinh "Con lai" = Khach tra - Dat coc
 //      vao o co class "o-con-lai" (chi hien thi, khong gui len server).
+//   7. O "o-khach-tra" / "o-chi-phi-ngoai": tu dong tinh "Minh nhan" = Khach
+//      tra - Chi phi keo ngoai vao o co class "o-minh-nhan" (chi hien thi).
 // =====================================================================
 (function () {
   function chiLaySo(chuoi) {
@@ -82,27 +84,31 @@
     });
   });
 
-  // ---- 6: Khach tra - Dat coc = Con lai ----
-  function ganTinhConLai(form) {
-    var oKhachTra = form.querySelector('.o-khach-tra');
-    var oDatCoc   = form.querySelector('.o-dat-coc');
-    var oConLai   = form.querySelector('.o-con-lai');
-    if (!oKhachTra || !oDatCoc || !oConLai) return;
+  // ---- 6 & 7: O bi tru - o bi tru = o ket qua (chi hien thi) ----
+  function ganTinhHieu(form, lopBiTru, lopSoTru, lopKetQua) {
+    var oBiTru = form.querySelector(lopBiTru);
+    var oSoTru = form.querySelector(lopSoTru);
+    var oKetQua = form.querySelector(lopKetQua);
+    if (!oBiTru || !oSoTru || !oKetQua) return;
 
     function capNhat() {
-      var khachTra = parseInt(chiLaySo(oKhachTra.value) || '0', 10);
-      var datCoc   = parseInt(chiLaySo(oDatCoc.value) || '0', 10);
-      var conLai   = khachTra - datCoc;
-      oConLai.value = conLai !== 0 ? dinhDangHienThi(String(Math.abs(conLai))) : '';
-      if (conLai < 0) oConLai.value = '-' + oConLai.value;
+      var biTru = parseInt(chiLaySo(oBiTru.value) || '0', 10);
+      var soTru = parseInt(chiLaySo(oSoTru.value) || '0', 10);
+      var ketQua = biTru - soTru;
+      oKetQua.value = ketQua !== 0 ? dinhDangHienThi(String(Math.abs(ketQua))) : '';
+      if (ketQua < 0) oKetQua.value = '-' + oKetQua.value;
     }
-    oKhachTra.addEventListener('input', capNhat);
-    oDatCoc.addEventListener('input', capNhat);
+    oBiTru.addEventListener('input', capNhat);
+    oSoTru.addEventListener('input', capNhat);
     capNhat();
   }
   document.querySelectorAll('.o-con-lai').forEach(function (oConLai) {
     var form = oConLai.closest('form');
-    if (form) ganTinhConLai(form);
+    if (form) ganTinhHieu(form, '.o-khach-tra', '.o-dat-coc', '.o-con-lai');
+  });
+  document.querySelectorAll('.o-minh-nhan').forEach(function (oMinhNhan) {
+    var form = oMinhNhan.closest('form');
+    if (form) ganTinhHieu(form, '.o-khach-tra', '.o-chi-phi-ngoai', '.o-minh-nhan');
   });
 
   // ---- 4: Nut thu gon / mo rong khoi noi dung ----

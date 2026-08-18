@@ -13,7 +13,7 @@ class ChuyenXeModel extends Model
     {
         return ['trip_date', 'pickup_time', 'pickup_dropoff', 'pickup_location', 'dropoff_location',
                 'pickup_sign', 'passenger_count', 'route', 'car_id', 'driver_id',
-                'contract_type_id', 'revenue_usd', 'revenue_eur',
+                'contract_type_id', 'revenue_usd', 'revenue_eur', 'outsource_cost',
                 'airport_fee', 'other_fee', 'driver_advance',
                 'customer_name', 'customer_phone', 'customer_note', 'company_note'];
     }

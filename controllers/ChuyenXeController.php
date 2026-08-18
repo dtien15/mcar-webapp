@@ -193,6 +193,7 @@ class ChuyenXeController extends Controller
             'revenue_vnd'      => $this->soTuForm('thu_vnd'),
             'revenue_usd'      => $this->soTuForm('thu_usd'),
             'revenue_eur'      => $this->soTuForm('thu_eur'),
+            'outsource_cost'   => $this->soTuForm('chi_phi_keo_ngoai'),
             'trip_fee'         => $this->soTuForm('tien_cuoc_xe'),
             'overnight_fee'    => $this->soTuForm('luu_dem'),
             'deposit_amount'   => $this->soTuForm('dat_coc'),

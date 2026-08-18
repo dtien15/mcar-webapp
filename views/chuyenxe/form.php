@@ -45,6 +45,22 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
       <!-- 1. Thong tin chuyen di -->
       <fieldset class="nhom-truong">
         <legend>1. Thông tin chuyến đi</legend>
+
+        <?php if (!$khoaSua): ?>
+        <div class="row g-2 mb-3">
+          <div class="col-12">
+            <label class="form-label">
+              <?= bieuTuong('clipboard-text') ?> Dán tin nhắn Zalo <span class="text-muted">(tự động điền các trường bên dưới - nhớ kiểm tra lại)</span>
+            </label>
+            <textarea id="oDanNhanh" class="form-control" rows="3"
+                      placeholder="Dán nguyên đoạn tin nhắn giao chuyến vào đây rồi bấm Phân tích..."></textarea>
+            <button type="button" id="nutPhanTich" class="btn btn-sm btn-outline-primary mt-1">
+              <?= bieuTuong('wand') ?> Phân tích &amp; điền tự động
+            </button>
+          </div>
+        </div>
+        <?php endif; ?>
+
         <div class="row g-2">
           <div class="col-6 col-md-3">
             <label class="form-label">Ngày chạy xe *</label>
@@ -213,6 +229,15 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
             <label class="form-label">Tiền cuốc xe (trả tài xế)</label>
             <input type="text" name="tien_cuoc_xe" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
                    value="<?= h(giaTriTienForm($chuyenXe, 'trip_fee')) ?>">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label">Chi phí kèo ngoài <span class="text-muted">(trả cty/xe ngoài)</span></label>
+            <input type="text" name="chi_phi_keo_ngoai" class="form-control o-nhap-tien o-chi-phi-ngoai" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'outsource_cost')) ?>">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label">Mình nhận <span class="text-muted">(khách trả − kèo ngoài)</span></label>
+            <input type="text" class="form-control o-minh-nhan" placeholder="0" readonly tabindex="-1">
           </div>
           <div class="col-6 col-md-3">
             <label class="form-label">Tiền tài ứng trước</label>

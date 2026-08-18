@@ -115,6 +115,16 @@
           <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['revenue_vnd'] - $chuyen['deposit_amount']) ?>" readonly>
         </div>
         <?php endif; ?>
+        <?php if ($chuyen['outsource_cost'] > 0): ?>
+        <div class="col-6 col-md-3">
+          <label class="form-label">Chi phí kèo ngoài</label>
+          <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['outsource_cost']) ?>" readonly>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label">Mình nhận</label>
+          <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['revenue_vnd'] - $chuyen['outsource_cost']) ?>" readonly>
+        </div>
+        <?php endif; ?>
         <?php if ($chuyen['revenue_usd'] > 0): ?>
         <div class="col-6 col-md-3">
           <label class="form-label">Khách trả USD</label>
