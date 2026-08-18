@@ -45,8 +45,8 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
               <label class="form-label">Phụ phí</label>
               <select name="luu_dem" class="form-select form-select-sm">
                 <option value="0" <?= $loaiPhuPhiModal === '0' ? 'selected' : '' ?>>Không có</option>
-                <option value="200000" <?= $loaiPhuPhiModal === '200000' ? 'selected' : '' ?>>Lưu đêm (200.000đ)</option>
-                <option value="100000" <?= $loaiPhuPhiModal === '100000' ? 'selected' : '' ?>>Chạy khuya (100.000đ)</option>
+                <option value="200000" <?= $loaiPhuPhiModal === '200000' ? 'selected' : '' ?>>Lưu đêm</option>
+                <option value="100000" <?= $loaiPhuPhiModal === '100000' ? 'selected' : '' ?>>Chạy khuya</option>
               </select>
             </div>
             <div class="col-6 col-md-4">
