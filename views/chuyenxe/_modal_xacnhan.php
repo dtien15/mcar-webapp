@@ -74,7 +74,7 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Người trả xăng dầu</label>
-              <input class="form-control form-control-sm" name="nguoi_tra_xang_dau" placeholder="VD: VCB Nin, tiền mặt...">
+              <input class="form-control form-control-sm" name="nguoi_tra_xang_dau">
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Bảo dưỡng xe</label>
