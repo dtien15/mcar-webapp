@@ -15,7 +15,49 @@ $dsTab = [
 ];
 ?>
 
-<!-- Bo loc -->
+<?php if (laTaiXe()): ?>
+<!-- Bo loc (tai xe): gon lai, mac dinh gap, chi con nut Tao chuyen xe hien san -->
+<div class="the">
+  <div class="the-than d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#khoiBoLocTaiXe">
+      <?= bieuTuong('filter') ?> Lọc / Tìm kiếm
+    </button>
+    <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm"><?= bieuTuong('plus') ?> Tạo chuyến xe</a>
+  </div>
+  <div class="collapse" id="khoiBoLocTaiXe">
+    <div class="the-than pt-0">
+      <form class="row g-2 align-items-end" method="get" action="<?= duongDan('chuyenxe') ?>">
+        <input type="hidden" name="trang_thai" value="<?= h($loc['trang_thai']) ?>">
+        <div class="col-6 col-md-3">
+          <label class="form-label">Từ ngày</label>
+          <input type="date" name="tu_ngay" class="form-control form-control-sm" value="<?= h($loc['tu_ngay']) ?>">
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label">Đến ngày</label>
+          <input type="date" name="den_ngay" class="form-control form-control-sm" value="<?= h($loc['den_ngay']) ?>">
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label">Số dòng/trang</label>
+          <select name="so_dong" class="form-select form-select-sm">
+            <?php foreach ([20, 50, 100] as $sd): ?>
+              <option value="<?= $sd ?>" <?= $soDong === $sd ? 'selected' : '' ?>><?= $sd ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label">Tìm kiếm</label>
+          <input type="text" name="tu_khoa" class="form-control form-control-sm" placeholder="Điểm đón, ghi chú..." value="<?= h($loc['tu_khoa']) ?>">
+        </div>
+        <div class="col-12 d-flex gap-2">
+          <button class="btn btn-primary btn-sm"><?= bieuTuong('search') ?> Lọc</button>
+          <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light btn-sm">Bỏ lọc</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<?php else: ?>
+<!-- Bo loc (quan ly) -->
 <div class="the">
   <div class="the-than">
     <form class="row g-2 align-items-end" method="get" action="<?= duongDan('chuyenxe') ?>">
@@ -28,7 +70,6 @@ $dsTab = [
         <label class="form-label">Đến ngày</label>
         <input type="date" name="den_ngay" class="form-control form-control-sm" value="<?= h($loc['den_ngay']) ?>">
       </div>
-      <?php if (!laTaiXe()): ?>
       <div class="col-6 col-md-2">
         <label class="form-label">Tài xế</label>
         <select name="id_tai_xe" class="form-select form-select-sm">
@@ -38,7 +79,6 @@ $dsTab = [
           <?php endforeach; ?>
         </select>
       </div>
-      <?php endif; ?>
       <div class="col-6 col-md-2">
         <label class="form-label">Xe</label>
         <select name="id_xe" class="form-select form-select-sm">
@@ -65,16 +105,13 @@ $dsTab = [
       <div class="col-12 d-flex gap-2">
         <button class="btn btn-primary btn-sm"><?= bieuTuong('search') ?> Lọc</button>
         <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light btn-sm">Bỏ lọc</a>
-        <?php if (laQuanLy()): ?>
-          <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm ms-auto"><?= bieuTuong('plus') ?> Thêm chuyến xe</a>
-          <a href="<?= duongDan('chuyenxe/xuatcsv?' . http_build_query($loc)) ?>" class="btn btn-light btn-sm"><?= bieuTuong('download') ?> Xuất Excel</a>
-        <?php elseif (laTaiXe()): ?>
-          <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm ms-auto"><?= bieuTuong('plus') ?> Tạo chuyến xe</a>
-        <?php endif; ?>
+        <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm ms-auto"><?= bieuTuong('plus') ?> Thêm chuyến xe</a>
+        <a href="<?= duongDan('chuyenxe/xuatcsv?' . http_build_query($loc)) ?>" class="btn btn-light btn-sm"><?= bieuTuong('download') ?> Xuất Excel</a>
       </div>
     </form>
   </div>
 </div>
+<?php endif; ?>
 
 <!-- Tab trang thai -->
 <ul class="nav nav-tabs nhan-tab-trang-thai">

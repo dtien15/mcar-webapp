@@ -21,71 +21,7 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
       </div>
 
       <div class="modal-body">
-        <!-- Thong tin chuyen di: chi xem, khong sua -->
-        <fieldset class="nhom-truong">
-          <legend>Thông tin chuyến đi</legend>
-          <div class="row g-2">
-            <div class="col-6 col-md-3">
-              <label class="form-label">Ngày chạy</label>
-              <input class="form-control form-control-sm" value="<?= dinhDangNgay($chuyen['trip_date']) ?>" readonly>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Giờ đón</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['pickup_time']) ?>" readonly>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Hành trình</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['route']) ?>" readonly>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Xe</label>
-              <input class="form-control form-control-sm" value="<?= h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?>" readonly>
-            </div>
-            <?php if ($chuyen['passenger_count'] !== null): ?>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Số lượng khách</label>
-              <input class="form-control form-control-sm" value="<?= (int)$chuyen['passenger_count'] ?>" readonly>
-            </div>
-            <?php endif; ?>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Điểm đón</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['pickup_location']) ?>" readonly>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Điểm trả</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['dropoff_location']) ?>" readonly>
-            </div>
-            <?php if (!empty($chuyen['pickup_sign'])): ?>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Bảng đón khách</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['pickup_sign']) ?>" readonly>
-            </div>
-            <?php endif; ?>
-            <?php if (!empty($chuyen['customer_name']) || !empty($chuyen['customer_phone'])): ?>
-            <div class="col-6 col-md-3">
-              <label class="form-label">Họ tên khách</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['customer_name']) ?>" readonly>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label">SĐT khách</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['customer_phone']) ?>" readonly>
-            </div>
-            <?php endif; ?>
-            <?php if (!empty($chuyen['customer_note'])): ?>
-            <div class="col-12">
-              <label class="form-label">Ghi chú khách</label>
-              <input class="form-control form-control-sm" value="<?= h($chuyen['customer_note']) ?>" readonly>
-            </div>
-            <?php endif; ?>
-            <?php if (!empty($chuyen['company_note'])): ?>
-            <div class="col-12">
-              <label class="form-label">Lưu ý từ công ty</label>
-              <input class="form-control form-control-sm text-danger" value="<?= h($chuyen['company_note']) ?>" readonly>
-            </div>
-            <?php endif; ?>
-          </div>
-        </fieldset>
-
+        <!-- Vao la thay ngay cac o can nhap, thong tin chuyen di (chi xem) de xuong duoi -->
         <!-- Doanh thu & tien cuoc: tai xe sua duoc neu khac thuc te -->
         <?php
           $loaiPhuPhiModal = '0';
@@ -170,6 +106,77 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
             </div>
           </div>
         </fieldset>
+
+        <!-- Thong tin chuyen di: chi xem, khong sua - de xuong duoi, gap lai vi khong can nhap gi ca -->
+        <button type="button" class="btn btn-sm btn-outline-secondary w-100" data-bs-toggle="collapse"
+                data-bs-target="#thongTinChuyenDi<?= $chuyen['id'] ?>">
+          <?= bieuTuong('info-circle') ?> Xem thông tin chuyến đi (ngày giờ, hành trình, điểm đón/trả...)
+        </button>
+        <div class="collapse mt-2" id="thongTinChuyenDi<?= $chuyen['id'] ?>">
+          <fieldset class="nhom-truong">
+            <legend>Thông tin chuyến đi</legend>
+            <div class="row g-2">
+              <div class="col-6 col-md-3">
+                <label class="form-label">Ngày chạy</label>
+                <input class="form-control form-control-sm" value="<?= dinhDangNgay($chuyen['trip_date']) ?>" readonly>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Giờ đón</label>
+                <input class="form-control form-control-sm" value="<?= h($chuyen['pickup_time']) ?>" readonly>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Hành trình</label>
+                <input class="form-control form-control-sm" value="<?= h($chuyen['route']) ?>" readonly>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Xe</label>
+                <input class="form-control form-control-sm" value="<?= h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?>" readonly>
+              </div>
+              <?php if ($chuyen['passenger_count'] !== null): ?>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Số lượng khách</label>
+                <input class="form-control form-control-sm" value="<?= (int)$chuyen['passenger_count'] ?>" readonly>
+              </div>
+              <?php endif; ?>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Điểm đón</label>
+                <input class="form-control form-control-sm" value="<?= h($chuyen['pickup_location']) ?>" readonly>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Điểm trả</label>
+                <input class="form-control form-control-sm" value="<?= h($chuyen['dropoff_location']) ?>" readonly>
+              </div>
+              <?php if (!empty($chuyen['pickup_sign'])): ?>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Bảng đón khách</label>
+                <input class="form-control form-control-sm" value="<?= h($chuyen['pickup_sign']) ?>" readonly>
+              </div>
+              <?php endif; ?>
+              <?php if (!empty($chuyen['customer_name']) || !empty($chuyen['customer_phone'])): ?>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Họ tên khách</label>
+                <input class="form-control form-control-sm" value="<?= h($chuyen['customer_name']) ?>" readonly>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">SĐT khách</label>
+                <input class="form-control form-control-sm" value="<?= h($chuyen['customer_phone']) ?>" readonly>
+              </div>
+              <?php endif; ?>
+              <?php if (!empty($chuyen['customer_note'])): ?>
+              <div class="col-12">
+                <label class="form-label">Ghi chú khách</label>
+                <input class="form-control form-control-sm" value="<?= h($chuyen['customer_note']) ?>" readonly>
+              </div>
+              <?php endif; ?>
+              <?php if (!empty($chuyen['company_note'])): ?>
+              <div class="col-12">
+                <label class="form-label">Lưu ý từ công ty</label>
+                <input class="form-control form-control-sm text-danger" value="<?= h($chuyen['company_note']) ?>" readonly>
+              </div>
+              <?php endif; ?>
+            </div>
+          </fieldset>
+        </div>
       </div>
 
       <div class="modal-footer">
