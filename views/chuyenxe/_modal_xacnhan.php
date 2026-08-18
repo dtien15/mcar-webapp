@@ -99,20 +99,6 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
               <label class="form-label">Khách trả (VNĐ)</label>
               <input type="text" class="form-control form-control-sm o-nhap-tien o-khach-tra" placeholder="0"
                      name="thu_vnd" value="<?= h(giaTriTienForm($chuyen, 'revenue_vnd')) ?>">
-              <div class="form-check mt-1">
-                <input class="form-check-input" type="checkbox" name="khach_da_thanh_toan" value="1"
-                       id="oKhachDaTT<?= $chuyen['id'] ?>" <?= $chuyen['customer_paid'] ? 'checked' : '' ?>>
-                <label class="form-check-label" for="oKhachDaTT<?= $chuyen['id'] ?>" style="font-size:12px">Khách đã thanh toán đủ</label>
-              </div>
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Đặt cọc</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien o-dat-coc" placeholder="0"
-                     name="dat_coc" value="<?= h(giaTriTienForm($chuyen, 'deposit_amount')) ?>">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Còn lại</label>
-              <input type="text" class="form-control form-control-sm o-con-lai" placeholder="0" readonly tabindex="-1">
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Tiền cuốc xe</label>

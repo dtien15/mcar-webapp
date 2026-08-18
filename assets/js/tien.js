@@ -11,9 +11,7 @@
 //      duoc tro toi qua thuoc tinh data-target (dung cho USD/EUR...).
 //   5. O co class "o-xang-dau": go tien xang dau se tu dong tinh 10% VAT
 //      vao o co class "o-vat-xang-dau" trong CUNG 1 form (van sua tay duoc).
-//   6. O "o-khach-tra" / "o-dat-coc": tu dong tinh "Con lai" = Khach tra - Dat coc
-//      vao o co class "o-con-lai" (chi hien thi, khong gui len server).
-//   7. O "o-khach-tra" / "o-chi-phi-ngoai": tu dong tinh "Minh nhan" = Khach
+//   6. O "o-khach-tra" / "o-chi-phi-ngoai": tu dong tinh "Minh nhan" = Khach
 //      tra - Chi phi keo ngoai vao o co class "o-minh-nhan" (chi hien thi).
 // =====================================================================
 (function () {
@@ -84,7 +82,7 @@
     });
   });
 
-  // ---- 6 & 7: O bi tru - o bi tru = o ket qua (chi hien thi) ----
+  // ---- 6: O bi tru - o bi tru = o ket qua (chi hien thi) ----
   function ganTinhHieu(form, lopBiTru, lopSoTru, lopKetQua) {
     var oBiTru = form.querySelector(lopBiTru);
     var oSoTru = form.querySelector(lopSoTru);
@@ -102,10 +100,6 @@
     oSoTru.addEventListener('input', capNhat);
     capNhat();
   }
-  document.querySelectorAll('.o-con-lai').forEach(function (oConLai) {
-    var form = oConLai.closest('form');
-    if (form) ganTinhHieu(form, '.o-khach-tra', '.o-dat-coc', '.o-con-lai');
-  });
   document.querySelectorAll('.o-minh-nhan').forEach(function (oMinhNhan) {
     var form = oMinhNhan.closest('form');
     if (form) ganTinhHieu(form, '.o-khach-tra', '.o-chi-phi-ngoai', '.o-minh-nhan');

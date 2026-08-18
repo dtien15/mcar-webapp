@@ -20,9 +20,7 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
     </div>
     <div class="cot-trang-thai">
       <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
-      <?php if ($chuyen['customer_paid']): ?>
-        <span class="huy-hieu-trang-thai tt-success" title="Không cần thu tiền khách"><?= bieuTuong('circle-check') ?> Đã TT</span>
-      <?php elseif ($chuyen['cash_remitted']): ?>
+      <?php if ($chuyen['cash_remitted']): ?>
         <span class="huy-hieu-trang-thai tt-success" title="Tài xế đã nộp lại tiền cho công ty"><?= bieuTuong('cash') ?> Đã nộp lại</span>
       <?php elseif (in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
         <span class="huy-hieu-trang-thai tt-warning" title="Tài xế đang cầm tiền của khách, chưa nộp lại"><?= bieuTuong('cash') ?> Chưa nộp lại</span>

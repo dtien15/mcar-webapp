@@ -210,20 +210,6 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
             <label class="form-label">Khách trả (VNĐ)</label>
             <input type="text" name="thu_vnd" id="oThuVnd" class="form-control o-nhap-tien o-khach-tra" placeholder="0" <?= $chiXem ?>
                    value="<?= h(giaTriTienForm($chuyenXe, 'revenue_vnd')) ?>">
-            <div class="form-check mt-1">
-              <input class="form-check-input" type="checkbox" name="khach_da_thanh_toan" id="oKhachDaTT" value="1"
-                     <?= giaTri($chuyenXe, 'customer_paid') ? 'checked' : '' ?> <?= $khoaSua ? 'disabled' : '' ?>>
-              <label class="form-check-label" for="oKhachDaTT" style="font-size:12px">Khách đã thanh toán đủ</label>
-            </div>
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Đặt cọc</label>
-            <input type="text" name="dat_coc" class="form-control o-nhap-tien o-dat-coc" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'deposit_amount')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Còn lại</label>
-            <input type="text" class="form-control o-con-lai" placeholder="0" readonly tabindex="-1">
           </div>
           <div class="col-6 col-md-3">
             <label class="form-label">Tiền cuốc xe (trả tài xế)</label>

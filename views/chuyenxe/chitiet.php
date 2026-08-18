@@ -92,7 +92,7 @@
       <div class="row g-2">
         <div class="col-6 col-md-3">
           <label class="form-label">Khách trả VNĐ</label>
-          <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['revenue_vnd']) ?><?= $chuyen['customer_paid'] ? ' (đã TT đủ)' : '' ?>" readonly>
+          <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['revenue_vnd']) ?>" readonly>
         </div>
         <?php if (laQuanLy() && !$chuyen['customer_paid'] && in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
         <div class="col-12 col-md-6">
@@ -103,16 +103,6 @@
           <?php else: ?>
             <input class="form-control form-control-sm text-danger" value="Chưa nộp lại" readonly>
           <?php endif; ?>
-        </div>
-        <?php endif; ?>
-        <?php if ($chuyen['deposit_amount'] > 0): ?>
-        <div class="col-6 col-md-3">
-          <label class="form-label">Đặt cọc</label>
-          <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['deposit_amount']) ?>" readonly>
-        </div>
-        <div class="col-6 col-md-3">
-          <label class="form-label">Còn lại</label>
-          <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['revenue_vnd'] - $chuyen['deposit_amount']) ?>" readonly>
         </div>
         <?php endif; ?>
         <?php if ($chuyen['outsource_cost'] > 0): ?>
