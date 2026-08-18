@@ -87,6 +87,15 @@
             <label class="form-label">Ghi chú khách <span class="text-muted">(nếu có)</span></label>
             <input name="ghi_chu_khach" class="form-control">
           </div>
+
+          <div class="col-6 col-md-6">
+            <label class="form-label">Khách trả (VNĐ)</label>
+            <input type="text" name="thu_vnd" class="form-control o-nhap-tien" placeholder="0">
+          </div>
+          <div class="col-6 col-md-6">
+            <label class="form-label">Chi phí kèo ngoài <span class="text-muted">(trả cty/xe ngoài)</span></label>
+            <input type="text" name="chi_phi_keo_ngoai" class="form-control o-nhap-tien" placeholder="0">
+          </div>
         </div>
 
         <hr class="my-3">
@@ -154,6 +163,7 @@ var oGoiYXe = <?= json_encode(array_column($dsXe, null, 'id'), JSON_UNESCAPED_UN
   });
 })();
 </script>
+<script src="<?= duongDan('assets/js/tien.js') ?>"></script>
 <script src="<?= duongDan('assets/js/dan-nhanh.js') ?>"></script>
 </body>
 </html>

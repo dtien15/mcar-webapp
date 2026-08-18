@@ -56,6 +56,8 @@ class GuiChuyenController extends Controller
             'customer_name'    => $this->chuTuForm('ten_khach'),
             'customer_phone'   => $this->chuTuForm('sdt_khach'),
             'customer_note'    => $this->chuTuForm('ghi_chu_khach'),
+            'revenue_vnd'      => $this->soTuForm('thu_vnd'),
+            'outsource_cost'   => $this->soTuForm('chi_phi_keo_ngoai'),
             'status'           => 'moi',
             'public_submitted' => 1,
         ];
@@ -82,6 +84,9 @@ class GuiChuyenController extends Controller
             if ($xe) {
                 $phan[] = 'Xe ' . trim($xe['name'] . ' ' . $xe['plate_number']);
             }
+        }
+        if (!empty($duLieu['revenue_vnd'])) {
+            $phan[] = 'Khách trả ' . dinhDangTien($duLieu['revenue_vnd']) . 'đ';
         }
 
         $this->model('ThongBaoModel')->guiChoTaiXe(
