@@ -22,10 +22,10 @@ try {
 }
 
 $menu = [
-    ['route' => 'tongquan',  'nhan' => 'Tổng quan',           'icon' => 'layout-dashboard', 'quyen' => ['admin','ketoan','taixe']],
+    ['route' => 'tongquan',  'nhan' => 'Tổng quan',           'icon' => 'layout-dashboard', 'quyen' => ['admin','ketoan']],
     ['route' => 'chuyenxe',  'nhan' => 'Chuyến xe',           'icon' => 'route',            'quyen' => ['admin','ketoan','taixe'], 'huyHieu' => $soChoXuLy],
     ['route' => 'chuyenxe/vitri', 'active' => 'vitri', 'nhan' => 'Vị trí xe', 'icon' => 'map-2', 'quyen' => ['admin','ketoan']],
-    ['route' => 'luong',     'nhan' => 'Bảng lương',          'icon' => 'report-money',     'quyen' => ['admin','ketoan','taixe']],
+    ['route' => 'luong',     'nhan' => 'Bảng lương',          'icon' => 'report-money',     'quyen' => ['admin','ketoan']],
     ['route' => 'thanhtoan', 'nhan' => 'Thanh toán & công nợ','icon' => 'receipt',          'quyen' => ['admin','ketoan']],
     ['route' => 'baocao',    'nhan' => 'Báo cáo doanh thu',   'icon' => 'chart-bar',        'quyen' => ['admin','ketoan']],
     ['nhom'  => 'DANH MỤC',  'quyen' => ['admin','ketoan']],
@@ -63,7 +63,7 @@ $menu = [
 
 <!-- Thanh ben -->
 <aside class="thanh-ben" id="thanhBen">
-  <a class="thanh-ben-dau" href="<?= duongDan('tongquan') ?>">
+  <a class="thanh-ben-dau" href="<?= duongDan(laTaiXe() ? 'chuyenxe' : 'tongquan') ?>">
     <img class="logo" src="<?= duongDan('assets/img/logo-mcar-88.png') ?>"
          alt="<?= h($tenHeThong) ?>" width="44" height="44">
     <div>

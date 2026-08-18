@@ -127,6 +127,13 @@ function laTaiXe()
     return vaiTroHienTai() === 'taixe';
 }
 
+/** Trang chinh sau khi dang nhap: tai xe vao thang Chuyen xe (giao dien gon,
+ *  khong co Tong quan/Bang luong), quan ly vao Tong quan nhu binh thuong */
+function trangChinh()
+{
+    return laTaiXe() ? 'chuyenxe' : 'tongquan';
+}
+
 /** Luu thong bao hien thi o lan tai trang ke tiep */
 function datThongBao($noiDung, $loai = 'success')
 {

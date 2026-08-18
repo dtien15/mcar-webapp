@@ -5,29 +5,16 @@
 
 class LuongController extends Controller
 {
-    /** Bang luong cua mot ky */
+    /** Bang luong cua mot ky (chi quan ly - tai xe dung giao dien gon, khong co Bang luong) */
     public function danhSach()
     {
-        $this->yeuCauDangNhap();
+        $this->yeuCauQuyen(['admin', 'ketoan']);
 
         $thang = max(1, min(12, (int)layGet('thang', date('n'))));
         $nam   = (int)layGet('nam', date('Y'));
 
         $luongModel = $this->model('LuongModel');
-
-        // Tai xe chi xem duoc bang luong cua chinh minh
-        if (laTaiXe()) {
-            $idTaiXe = taiKhoanHienTai()['id_tai_xe'];
-            $bangLuong = [];
-            if ($idTaiXe) {
-                $cuaToi = $luongModel->layCuaTaiXe($idTaiXe, $thang, $nam);
-                if ($cuaToi) {
-                    $bangLuong[] = $cuaToi;
-                }
-            }
-        } else {
-            $bangLuong = $luongModel->layTheoKy($thang, $nam);
-        }
+        $bangLuong  = $luongModel->layTheoKy($thang, $nam);
 
         $this->view('luong/danhsach', [
             'thang'     => $thang,
@@ -71,20 +58,14 @@ class LuongController extends Controller
         chuyenTrang("luong?thang={$thang}&nam={$nam}");
     }
 
-    /** Phieu luong chi tiet cua 1 tai xe trong 1 ky (in duoc) */
+    /** Phieu luong chi tiet cua 1 tai xe trong 1 ky (in duoc) - chi quan ly */
     public function phieu($idTaiXe = 0, $thang = 0, $nam = 0)
     {
-        $this->yeuCauDangNhap();
+        $this->yeuCauQuyen(['admin', 'ketoan']);
 
         $idTaiXe = (int)$idTaiXe;
         $thang   = (int)$thang ?: (int)date('n');
         $nam     = (int)$nam ?: (int)date('Y');
-
-        // Tai xe chi duoc xem phieu luong cua chinh minh
-        if (laTaiXe() && taiKhoanHienTai()['id_tai_xe'] != $idTaiXe) {
-            http_response_code(403);
-            die('Bạn chỉ được xem phiếu lương của chính mình.');
-        }
 
         $luongModel    = $this->model('LuongModel');
         $chuyenXeModel = $this->model('ChuyenXeModel');

@@ -86,7 +86,8 @@ $dsTab = [
   <?php endforeach; ?>
 </ul>
 
-<!-- Tong hop nhanh -->
+<!-- Tong hop nhanh: chi hien cho quan ly, tai xe dung giao dien gon khong xem so lieu tong hop -->
+<?php if (!laTaiXe()): ?>
 <div class="luoi-thong-ke">
   <div class="o-thong-ke">
     <div class="bieu-tuong nen-xanh"><?= bieuTuong('route') ?></div>
@@ -105,6 +106,7 @@ $dsTab = [
     <div><div class="nhan">Xăng dầu</div><div class="gia-tri"><?= dinhDangTien($tongHop['xang_dau']) ?> <span class="don-vi">₫</span></div></div>
   </div>
 </div>
+<?php endif; ?>
 
 <!-- Danh sach dang the - danh cho dien thoai -->
 <div class="ds-the-dien-thoai" id="dsTheDienThoai">

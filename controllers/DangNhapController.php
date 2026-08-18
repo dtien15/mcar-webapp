@@ -9,7 +9,7 @@ class DangNhapController extends Controller
     public function danhSach()
     {
         if (taiKhoanHienTai()) {
-            chuyenTrang('tongquan');
+            chuyenTrang(trangChinh());
         }
         $this->viewTrong('dangnhap/form', ['loi' => layThongBao()]);
     }
@@ -36,7 +36,7 @@ class DangNhapController extends Controller
         // Ghi nho thiet bi nay de lan sau khong phai dang nhap lai
         $this->model('GhiNhoModel')->taoMa($taiKhoan['id']);
 
-        chuyenTrang('tongquan');
+        chuyenTrang(trangChinh());
     }
 
     /** Dang xuat (chi thoat tren thiet bi dang dung) */
@@ -91,6 +91,6 @@ class DangNhapController extends Controller
         $ghiNhoModel->taoMa($taiKhoan['id']);
 
         datThongBao('Đã đổi mật khẩu thành công. Các thiết bị khác đã bị đăng xuất.');
-        chuyenTrang('tongquan');
+        chuyenTrang(trangChinh());
     }
 }

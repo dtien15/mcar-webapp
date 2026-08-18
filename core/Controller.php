@@ -64,7 +64,7 @@ class Controller
     protected function yeuCauPost()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            chuyenTrang('tongquan');
+            chuyenTrang(trangChinh());
         }
         if (!kiemTraToken($_POST['token'] ?? '')) {
             http_response_code(400);

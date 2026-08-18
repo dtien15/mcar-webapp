@@ -9,6 +9,11 @@ class TongQuanController extends Controller
     {
         $this->yeuCauDangNhap();
 
+        // Tai xe dung giao dien gon: chi con man hinh Chuyen xe, khong co Tong quan
+        if (laTaiXe()) {
+            chuyenTrang('chuyenxe');
+        }
+
         $thang = (int)layGet('thang', date('n'));
         $nam   = (int)layGet('nam', date('Y'));
         $thang = max(1, min(12, $thang));
