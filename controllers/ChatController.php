@@ -1,0 +1,109 @@
+<?php
+// =====================================================================
+// ChatController - Chat gan lien voi 1 chuyen xe cu the (quan ly <-> tai xe)
+// =====================================================================
+
+class ChatController extends Controller
+{
+    /** Lay toan bo tin nhan cua 1 chuyen xe (JSON) - vua load trang vua dung cho realtime tai lai */
+    public function lay($idChuyen = 0)
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $chuyen = $this->kiemTraQuyenTrenChuyen((int)$idChuyen);
+        if (!$chuyen) {
+            http_response_code(403);
+            echo json_encode(['ok' => false, 'loi' => 'Không có quyền xem chuyến xe này.']);
+            exit;
+        }
+
+        $chatModel = $this->model('ChatModel');
+        $chatModel->danhDauDaXem($idChuyen, taiKhoanHienTai()['id']);
+
+        $dsTinNhan = array_map(function ($tn) {
+            return [
+                'id'          => (int)$tn['id'],
+                'noi_dung'    => $tn['content'],
+                'cua_toi'     => (int)$tn['sender_id'] === (int)taiKhoanHienTai()['id'],
+                'ten_nguoi_gui' => $tn['ten_nguoi_gui'],
+                'thoi_gian'   => thoiGianTuongDoi($tn['created_at']),
+            ];
+        }, $chatModel->layTinNhanTheoChuyen($idChuyen));
+
+        echo json_encode(['ok' => true, 'tin_nhan' => $dsTinNhan]);
+        exit;
+    }
+
+    /** Gui 1 tin nhan moi trong chuyen xe */
+    public function gui()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $this->yeuCauDangNhap();
+
+        if (!kiemTraToken($_POST['token'] ?? '')) {
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'loi' => 'Phiên làm việc đã hết hạn, tải lại trang.']);
+            exit;
+        }
+
+        $idChuyen = (int)($_POST['id_chuyen'] ?? 0);
+        $noiDung  = trim($_POST['noi_dung'] ?? '');
+
+        $chuyen = $this->kiemTraQuyenTrenChuyen($idChuyen);
+        if (!$chuyen) {
+            http_response_code(403);
+            echo json_encode(['ok' => false, 'loi' => 'Không có quyền nhắn tin trong chuyến xe này.']);
+            exit;
+        }
+        if ($noiDung === '') {
+            echo json_encode(['ok' => false, 'loi' => 'Vui lòng nhập nội dung tin nhắn.']);
+            exit;
+        }
+        if (mb_strlen($noiDung) > 2000) {
+            echo json_encode(['ok' => false, 'loi' => 'Tin nhắn quá dài (tối đa 2000 ký tự).']);
+            exit;
+        }
+
+        $idNguoiGui = taiKhoanHienTai()['id'];
+        $this->model('ChatModel')->guiTinNhan($idChuyen, $idNguoiGui, $noiDung);
+
+        // Bao realtime cho phia con lai: neu nguoi gui la tai xe -> bao tat ca quan
+        // ly; neu nguoi gui la quan ly -> bao dung tai khoan cua tai xe chuyen nay.
+        if (laQuanLy()) {
+            if ($chuyen['driver_id']) {
+                $taiKhoanTaiXe = $this->model('NguoiDungModel')->layTheoDriverId($chuyen['driver_id']);
+                if ($taiKhoanTaiXe) {
+                    baoThucRealtime($taiKhoanTaiXe['id']);
+                }
+            }
+        } else {
+            baoThucRealtimeQuanLy();
+        }
+
+        echo json_encode(['ok' => true]);
+        exit;
+    }
+
+    /**
+     * Kiem tra tai khoan dang nhap co duoc xem/nhan tin trong chuyen xe $idChuyen
+     * khong: quan ly (admin/ke toan) xem duoc moi chuyen; tai xe chi xem duoc
+     * chuyen cua chinh minh. Tra ve ban ghi chuyen neu hop le, null neu khong.
+     */
+    private function kiemTraQuyenTrenChuyen($idChuyen)
+    {
+        if (!taiKhoanHienTai() || !$idChuyen) {
+            return null;
+        }
+        $chuyen = $this->model('ChuyenXeModel')->layTheoId($idChuyen);
+        if (!$chuyen) {
+            return null;
+        }
+        if (laQuanLy()) {
+            return $chuyen;
+        }
+        if (laTaiXe() && (int)$chuyen['driver_id'] === (int)(taiKhoanHienTai()['id_tai_xe'] ?? 0)) {
+            return $chuyen;
+        }
+        return null;
+    }
+}

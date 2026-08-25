@@ -1,17 +1,17 @@
 // =====================================================================
-// MCAR - Realtime server (WebSocket "nudge")
+// MCAR - Realtime server (WebSocket)
 //
-// Server nay KHONG chua logic nghiep vu, KHONG dung database. Viec duy
-// nhat no lam:
+// Server nay KHONG dung database, KHONG chua logic nghiep vu tai chinh.
+// No lam 3 viec:
 //   1. Giu ket noi WebSocket voi trinh duyet cua nguoi dang dang nhap web.
-//   2. Nhan 1 yeu cau POST /broadcast tu PHP (khi PHP vua tao thong bao
-//      moi), roi "nhac" (nudge) dung nguoi lien quan qua WebSocket.
-//   3. Trinh duyet nhan duoc nhac thi tu goi lai API /thongbao/kiemtra
-//      nhu cu de lay du lieu that - moi logic hien thi/gop nhac lai/
-//      danh dau da xem... van nam het ben PHP, khong lap lai o day.
-//
-// Nho vay server nay rat nho, rat de bao tri, hong cung khong lam mat
-// du lieu gi (PHP van con polling moi ~90s lam luoi an toan du phong).
+//   2. Nhan yeu cau POST /broadcast tu PHP (khi PHP vua tao thong bao moi,
+//      chot 1 chuyen xe...), roi "nhac" (nudge) dung nguoi lien quan qua
+//      WebSocket. Trinh duyet nhan nhac thi tu goi lai API PHP that de
+//      lay du lieu - moi logic hien thi van nam het ben PHP.
+//   3. Rieng 2 viec KHONG can PHP lam trung gian (vi chi la trang thai
+//      tam thoi, khong luu database): ai dang "online", va ai dang mo
+//      form sua 1 chuyen xe nao - xu ly thang giua cac trinh duyet qua
+//      day cho nhanh.
 // =====================================================================
 
 'use strict';
@@ -20,9 +20,10 @@ const http = require('http');
 const crypto = require('crypto');
 const { WebSocketServer } = require('ws');
 
-const CONG          = process.env.PORT || 3000;
-const BI_MAT        = process.env.WS_SHARED_SECRET || '';
-const GIAY_HET_HAN_AUTH = 5; // giay cho client gui token sau khi ket noi
+const CONG              = process.env.PORT || 3000;
+const BI_MAT            = process.env.WS_SHARED_SECRET || '';
+const GIAY_HET_HAN_AUTH = 5;       // giay cho client gui token sau khi ket noi
+const GIAY_HET_HAN_KHOA_SUA = 20 * 60; // khoa "dang sua" tu het han sau 20 phut neu quen dong tab
 
 if (!BI_MAT) {
   console.error('[mcar-realtime] THIEU bien moi truong WS_SHARED_SECRET - dung lai.');
@@ -31,44 +32,62 @@ if (!BI_MAT) {
 
 /** ketNoiTheoNguoiDung: Map<idTaiKhoan, Set<ws>> - 1 nguoi co the mo nhieu tab/thiet bi */
 const ketNoiTheoNguoiDung = new Map();
-/** ketNoiQuanLy: Set<ws> - rieng cho admin/ketoan, dung khi bao "co ai vua tao chuyen" */
+/** ketNoiQuanLy: Set<ws> - rieng cho admin/ke toan */
 const ketNoiQuanLy = new Set();
+/** ketNoiTheoTaiXe: Map<idTaiXe, Set<ws>> - dung xac dinh tai xe nao dang online */
+const ketNoiTheoTaiXe = new Map();
+/** khoaSuaChuyen: Map<idChuyen, {idTaiKhoan, ten, luc}> - ai dang mo form sua chuyen nao */
+const khoaSuaChuyen = new Map();
 
-/** Kiem tra token client gui len co hop le khong. Tra ve {id, vaiTro} hoac null. */
+/** Kiem tra token client gui len co hop le khong. Tra ve {id, vaiTro, idTaiXe, ten} hoac null. */
 function kiemTraToken(token) {
   try {
     const giaiMa = Buffer.from(String(token), 'base64').toString('utf8');
     const phan = giaiMa.split('|');
-    if (phan.length !== 4) return null;
-    const [id, vaiTro, hetHan, chuKyNhan] = phan;
+    if (phan.length !== 6) return null;
+    const [id, vaiTro, idTaiXe, tenB64, hetHan, chuKyNhan] = phan;
 
     if (Number(hetHan) < Math.floor(Date.now() / 1000)) return null;
 
-    const duLieuKy = `${id}|${vaiTro}|${hetHan}`;
+    const duLieuKy = `${id}|${vaiTro}|${idTaiXe}|${tenB64}|${hetHan}`;
     const chuKyDung = crypto.createHmac('sha256', BI_MAT).update(duLieuKy).digest('hex');
 
     const a = Buffer.from(chuKyNhan);
     const b = Buffer.from(chuKyDung);
     if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
 
-    return { id: Number(id), vaiTro };
+    return {
+      id: Number(id),
+      vaiTro,
+      idTaiXe: Number(idTaiXe) || 0,
+      ten: Buffer.from(tenB64, 'base64').toString('utf8') || 'Người dùng',
+    };
   } catch (e) {
     return null;
   }
 }
 
-function themKetNoi(ws, thongTin) {
-  ws.idTaiKhoan = thongTin.id;
-  ws.vaiTro = thongTin.vaiTro;
+function themKetNoi(ws, tt) {
+  ws.idTaiKhoan = tt.id;
+  ws.vaiTro = tt.vaiTro;
+  ws.idTaiXe = tt.idTaiXe;
+  ws.ten = tt.ten;
 
-  if (!ketNoiTheoNguoiDung.has(thongTin.id)) {
-    ketNoiTheoNguoiDung.set(thongTin.id, new Set());
-  }
-  ketNoiTheoNguoiDung.get(thongTin.id).add(ws);
+  if (!ketNoiTheoNguoiDung.has(tt.id)) ketNoiTheoNguoiDung.set(tt.id, new Set());
+  ketNoiTheoNguoiDung.get(tt.id).add(ws);
 
-  if (thongTin.vaiTro === 'quanly') {
-    ketNoiQuanLy.add(ws);
+  if (tt.vaiTro === 'quanly') ketNoiQuanLy.add(ws);
+
+  if (tt.idTaiXe) {
+    if (!ketNoiTheoTaiXe.has(tt.idTaiXe)) ketNoiTheoTaiXe.set(tt.idTaiXe, new Set());
+    ketNoiTheoTaiXe.get(tt.idTaiXe).add(ws);
+    baoQuanLyDoiOnline();
   }
+}
+
+/** Bao cho quan ly biet danh sach tai xe online vua thay doi (co nguoi vao/ra) */
+function baoQuanLyDoiOnline() {
+  ketNoiQuanLy.forEach((ws) => guiAn(ws, { type: 'taixe_online_thaydoi' }));
 }
 
 function boKetNoi(ws) {
@@ -78,16 +97,30 @@ function boKetNoi(ws) {
     if (bo.size === 0) ketNoiTheoNguoiDung.delete(ws.idTaiKhoan);
   }
   ketNoiQuanLy.delete(ws);
+
+  if (ws.idTaiXe && ketNoiTheoTaiXe.has(ws.idTaiXe)) {
+    const bo = ketNoiTheoTaiXe.get(ws.idTaiXe);
+    bo.delete(ws);
+    if (bo.size === 0) {
+      ketNoiTheoTaiXe.delete(ws.idTaiXe);
+      baoQuanLyDoiOnline();
+    }
+  }
+
+  // Nha het cac khoa "dang sua chuyen xe" ma nguoi nay dang giu (mat mang/dong tab)
+  khoaSuaChuyen.forEach((giuBoi, idChuyen) => {
+    if (giuBoi.idTaiKhoan === ws.idTaiKhoan) khoaSuaChuyen.delete(idChuyen);
+  });
 }
 
-function guiNhac(ws) {
-  try {
-    ws.send(JSON.stringify({ type: 'nudge' }));
-  } catch (e) { /* ket noi co the vua dong, bo qua */ }
+function guiAn(ws, obj) {
+  try { ws.send(JSON.stringify(obj)); } catch (e) { /* ket noi co the vua dong, bo qua */ }
 }
+
+function guiNhac(ws) { guiAn(ws, { type: 'nudge' }); }
 
 // -----------------------------------------------------------------
-// HTTP server: trang kiem tra song + API noi bo /broadcast cho PHP goi
+// HTTP server: health check + API noi bo (/broadcast, /online-status)
 // -----------------------------------------------------------------
 const mayChu = http.createServer((req, res) => {
   // cPanel Node.js Selector (Passenger) mount app o 1 duong dan con (vd
@@ -103,13 +136,20 @@ const mayChu = http.createServer((req, res) => {
     return;
   }
 
-  if (req.method === 'POST' && duongDan.endsWith('/broadcast')) {
-    if (req.headers['x-ws-secret'] !== BI_MAT) {
-      res.writeHead(401, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ ok: false, loi: 'Sai khoa bi mat' }));
-      return;
-    }
+  if (req.headers['x-ws-secret'] !== BI_MAT
+      && (duongDan.endsWith('/broadcast') || duongDan.endsWith('/online-status'))) {
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: false, loi: 'Sai khoa bi mat' }));
+    return;
+  }
 
+  if (req.method === 'GET' && duongDan.endsWith('/online-status')) {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, tai_xe_online: Array.from(ketNoiTheoTaiXe.keys()) }));
+    return;
+  }
+
+  if (req.method === 'POST' && duongDan.endsWith('/broadcast')) {
     let than = '';
     req.on('data', (doan) => { than += doan; if (than.length > 4096) req.destroy(); });
     req.on('end', () => {
@@ -147,6 +187,30 @@ mayChu.on('upgrade', (req, socket, dau) => {
   });
 });
 
+/** Xu ly 1 goi tin SAU KHI da xac thuc - rieng cho "dang sua / ngung sua 1 chuyen xe" */
+function xuLyGoiTinSauXacThuc(ws, goi) {
+  if (goi.type === 'dang_sua' && goi.trip_id) {
+    const idChuyen = Number(goi.trip_id);
+    const dangGiu = khoaSuaChuyen.get(idChuyen);
+    const conHan = dangGiu && (Date.now() - dangGiu.luc) < GIAY_HET_HAN_KHOA_SUA * 1000;
+
+    if (conHan && dangGiu.idTaiKhoan !== ws.idTaiKhoan) {
+      guiAn(ws, { type: 'dang_bi_sua', trip_id: idChuyen, ten: dangGiu.ten });
+      return;
+    }
+    khoaSuaChuyen.set(idChuyen, { idTaiKhoan: ws.idTaiKhoan, ten: ws.ten, ws, luc: Date.now() });
+    guiAn(ws, { type: 'sua_ok', trip_id: idChuyen });
+    return;
+  }
+
+  if (goi.type === 'ngung_sua' && goi.trip_id) {
+    const idChuyen = Number(goi.trip_id);
+    const dangGiu = khoaSuaChuyen.get(idChuyen);
+    if (dangGiu && dangGiu.idTaiKhoan === ws.idTaiKhoan) khoaSuaChuyen.delete(idChuyen);
+    return;
+  }
+}
+
 wss.on('connection', (ws) => {
   ws.daXacThuc = false;
   ws.conSong = true;
@@ -158,22 +222,26 @@ wss.on('connection', (ws) => {
   ws.on('pong', () => { ws.conSong = true; });
 
   ws.on('message', (raw) => {
-    if (ws.daXacThuc) return; // sau khi xac thuc, khong can nhan them gi tu client
     let goi;
     try { goi = JSON.parse(raw); } catch (e) { return; }
-    if (!goi || goi.type !== 'auth') return;
+    if (!goi || !goi.type) return;
 
-    const ketQua = kiemTraToken(goi.token);
-    if (!ketQua) {
-      ws.send(JSON.stringify({ type: 'auth_fail' }));
-      ws.close(4002, 'Token khong hop le');
+    if (!ws.daXacThuc) {
+      if (goi.type !== 'auth') return;
+      const ketQua = kiemTraToken(goi.token);
+      if (!ketQua) {
+        guiAn(ws, { type: 'auth_fail' });
+        ws.close(4002, 'Token khong hop le');
+        return;
+      }
+      clearTimeout(henGioDong);
+      ws.daXacThuc = true;
+      themKetNoi(ws, ketQua);
+      guiAn(ws, { type: 'auth_ok' });
       return;
     }
 
-    clearTimeout(henGioDong);
-    ws.daXacThuc = true;
-    themKetNoi(ws, ketQua);
-    ws.send(JSON.stringify({ type: 'auth_ok' }));
+    xuLyGoiTinSauXacThuc(ws, goi);
   });
 
   ws.on('close', () => { clearTimeout(henGioDong); boKetNoi(ws); });

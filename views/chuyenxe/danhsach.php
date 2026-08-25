@@ -283,5 +283,40 @@ $dsTab = [
         nutXemThem.textContent = 'Xem thêm (thử lại)';
       });
   });
+
+  // ---------------------------------------------------------------
+  // Realtime: co ai vua tao/sua/xac nhan/chot chuyen xe -> tai lai dung
+  // so dong dang hien de thay ngay trang thai moi, khong can bam F5.
+  // ---------------------------------------------------------------
+  function taiLaiTheoRealtime() {
+    if (dangTai) return;
+    var thamSo = new URLSearchParams(window.location.search);
+    thamSo.set('bo_qua', 0);
+    thamSo.set('lam_moi', 1);
+    thamSo.set('so_dong_hien', boQua || <?= (int)count($danhSach) ?> || 20);
+
+    fetch('<?= duongDan('chuyenxe/taithem') ?>?' + thamSo.toString(), { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (kq) {
+        if (!kq.ok) return;
+        document.getElementById('dsTheDienThoai').innerHTML = kq.the_html;
+        document.getElementById('dsDongBang').innerHTML = kq.dong_html;
+        document.getElementById('khoiModalXacNhan').innerHTML = kq.modal_xacnhan_html;
+        document.getElementById('khoiModalNopLai').innerHTML = kq.modal_noplai_html;
+        document.getElementById('khoiModalSuaPhuPhi').innerHTML = kq.modal_suaphuphi_html;
+        document.getElementById('khoiModalNhoTaiKhac').innerHTML = kq.modal_nhotaikhac_html;
+
+        if (kq.con_them) {
+          document.getElementById('khoiXemThem').removeAttribute('hidden');
+        } else {
+          document.getElementById('khoiXemThem').setAttribute('hidden', '');
+        }
+      })
+      .catch(function () { /* mat mang thi bo qua, lan realtime sau thu lai */ });
+  }
+
+  if (window.mcarRealtime) {
+    window.mcarRealtime.dangKy('nudge', taiLaiTheoRealtime);
+  }
 })();
 </script>

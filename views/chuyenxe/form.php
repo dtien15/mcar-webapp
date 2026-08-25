@@ -22,6 +22,37 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
   </div>
 <?php endif; ?>
 
+<?php if ($dangSua): ?>
+  <div class="alert alert-danger d-none" id="canhBaoDangSua">
+    <?= bieuTuong('users') ?> <strong id="tenNguoiDangSua"></strong> đang mở sửa chuyến xe này cùng lúc với bạn —
+    lưu đè có thể mất dữ liệu người đó vừa nhập. Nên trao đổi trước khi lưu.
+  </div>
+  <script>
+  (function () {
+    var idChuyen = <?= (int)$chuyenXe['id'] ?>;
+    if (!window.mcarRealtime) return;
+
+    window.mcarRealtime.dangKy('auth_ok', function () {
+      window.mcarRealtime.gui({ type: 'dang_sua', trip_id: idChuyen });
+    });
+    window.mcarRealtime.dangKy('dang_bi_sua', function (goi) {
+      if (goi.trip_id !== idChuyen) return;
+      document.getElementById('tenNguoiDangSua').textContent = goi.ten;
+      document.getElementById('canhBaoDangSua').classList.remove('d-none');
+    });
+
+    // Neu ket noi da san sang tu truoc (vd F5 nhanh), gui ngay khong can cho auth_ok
+    if (window.mcarRealtime.socket && window.mcarRealtime.socket.readyState === WebSocket.OPEN) {
+      window.mcarRealtime.gui({ type: 'dang_sua', trip_id: idChuyen });
+    }
+
+    window.addEventListener('beforeunload', function () {
+      window.mcarRealtime.gui({ type: 'ngung_sua', trip_id: idChuyen });
+    });
+  })();
+  </script>
+<?php endif; ?>
+
 <form method="post" action="<?= duongDan('chuyenxe/luu') ?>" enctype="multipart/form-data">
   <?php truongToken(); ?>
   <input type="hidden" name="id" value="<?= h(giaTri($chuyenXe, 'id')) ?>">

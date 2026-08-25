@@ -56,28 +56,28 @@ $mauLoai = [
     <div class="bieu-tuong nen-xanh"><?= bieuTuong('route') ?></div>
     <div>
       <div class="nhan">Số cuốc xe (tháng <?= (int)$thang ?>)</div>
-      <div class="gia-tri"><?= (int)$tongHop['so_chuyen'] ?></div>
+      <div class="gia-tri" id="soLieuSoChuyen"><?= (int)$tongHop['so_chuyen'] ?></div>
     </div>
   </div>
   <div class="o-thong-ke">
     <div class="bieu-tuong nen-cam"><?= bieuTuong('gas-station') ?></div>
     <div>
       <div class="nhan">Chi phí xăng dầu</div>
-      <div class="gia-tri"><?= dinhDangTien($tongHop['xang_dau']) ?> <span class="don-vi">₫</span></div>
+      <div class="gia-tri"><span id="soLieuXangDau"><?= dinhDangTien($tongHop['xang_dau']) ?></span> <span class="don-vi">₫</span></div>
     </div>
   </div>
   <div class="o-thong-ke">
     <div class="bieu-tuong nen-vang"><?= bieuTuong('tool') ?></div>
     <div>
       <div class="nhan">Bảo dưỡng + phạt</div>
-      <div class="gia-tri"><?= dinhDangTien($tongHop['bao_duong'] + $tongHop['phat']) ?> <span class="don-vi">₫</span></div>
+      <div class="gia-tri"><span id="soLieuBaoDuongPhat"><?= dinhDangTien($tongHop['bao_duong'] + $tongHop['phat']) ?></span> <span class="don-vi">₫</span></div>
     </div>
   </div>
   <div class="o-thong-ke">
-    <div class="bieu-tuong <?= $tongCongNo < 0 ? 'nen-do' : 'nen-luc' ?>"><?= bieuTuong('scale') ?></div>
+    <div class="bieu-tuong <?= $tongCongNo < 0 ? 'nen-do' : 'nen-luc' ?>" id="bieuTuongCongNo"><?= bieuTuong('scale') ?></div>
     <div>
       <div class="nhan">Tổng công nợ tài xế hiện tại</div>
-      <div class="gia-tri <?= $tongCongNo < 0 ? 'so-am' : 'so-duong' ?>"><?= dinhDangTien($tongCongNo) ?> <span class="don-vi">₫</span></div>
+      <div class="gia-tri <?= $tongCongNo < 0 ? 'so-am' : 'so-duong' ?>" id="soLieuCongNo"><?= dinhDangTien($tongCongNo) ?> <span class="don-vi">₫</span></div>
     </div>
   </div>
 </div>
@@ -129,22 +129,48 @@ $mauLoai = [
           <thead>
             <tr><th>Ngày</th><th>Hành trình</th><th>Xe</th><th>Tài xế</th><th>Trạng thái</th></tr>
           </thead>
-          <tbody>
-          <?php foreach ($chuyenGanDay as $chuyen): $tt = nhanTrangThaiChuyen($chuyen['status']); ?>
-            <tr>
-              <td><?= dinhDangNgay($chuyen['trip_date']) ?></td>
-              <td><?= h($chuyen['route']) ?></td>
-              <td><?= h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?></td>
-              <td><?= h($chuyen['ten_tai_xe']) ?></td>
-              <td><span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span></td>
-            </tr>
-          <?php endforeach; ?>
-          <?php if (!$chuyenGanDay): ?>
-            <tr><td colspan="5" class="khong-co-du-lieu">Chưa có chuyến xe nào trong kỳ này</td></tr>
-          <?php endif; ?>
+          <tbody id="tbodyChuyenGanDay">
+          <?php require __DIR__ . '/_bang_chuyen_gan_day.php'; ?>
           </tbody>
         </table>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+// Realtime: co chuyen xe moi/xac nhan/chot -> cac o thong ke va bang "Chuyen
+// xe gan day" tu cap nhat ngay, khong can F5.
+(function () {
+  function capNhat() {
+    var thamSo = new URLSearchParams(window.location.search);
+    fetch('<?= duongDan('tongquan/solieumoi') ?>?' + thamSo.toString(), { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (kq) {
+        if (!kq.ok) return;
+        document.getElementById('soLieuSoChuyen').textContent = kq.so_chuyen;
+        document.getElementById('soLieuXangDau').textContent = Math.round(kq.xang_dau).toLocaleString('vi-VN');
+        document.getElementById('soLieuBaoDuongPhat').textContent = Math.round(kq.bao_duong_phat).toLocaleString('vi-VN');
+
+        var oCongNo = document.getElementById('soLieuCongNo');
+        var donVi = oCongNo.querySelector('.don-vi');
+        oCongNo.textContent = Math.round(kq.tong_cong_no).toLocaleString('vi-VN') + ' ';
+        if (donVi) oCongNo.appendChild(donVi);
+        oCongNo.classList.toggle('so-am', kq.tong_cong_no < 0);
+        oCongNo.classList.toggle('so-duong', kq.tong_cong_no >= 0);
+
+        var bt = document.getElementById('bieuTuongCongNo');
+        if (bt) {
+          bt.classList.toggle('nen-do', kq.tong_cong_no < 0);
+          bt.classList.toggle('nen-luc', kq.tong_cong_no >= 0);
+        }
+
+        document.getElementById('tbodyChuyenGanDay').innerHTML = kq.bang_chuyen_gan_day_html;
+      })
+      .catch(function () {});
+  }
+  if (window.mcarRealtime) {
+    window.mcarRealtime.dangKy('nudge', capNhat);
+  }
+})();
+</script>

@@ -236,6 +236,18 @@ legend .ti { font-size: 15px; vertical-align: -2px; }
   flex-shrink: 0;
   margin-top: 6px;
 }
+.cham-online-taixe {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.cham-online-taixe.dang-online {
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, .18);
+}
 .nut-xoa-thong-bao {
   flex-shrink: 0;
   border: none;

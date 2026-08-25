@@ -11,10 +11,20 @@ class TaiXeController extends Controller
 
         $taiXeModel = $this->model('TaiXeModel');
         $this->view('taixe/danhsach', [
-            'danhSach' => $taiXeModel->layDanhSachDayDu(),
-            'dangSua'  => $idSua ? $taiXeModel->layTheoId($idSua) : null,
-            'dsXe'     => $this->model('XeModel')->layTatCa(),
+            'danhSach'      => $taiXeModel->layDanhSachDayDu(),
+            'dangSua'       => $idSua ? $taiXeModel->layTheoId($idSua) : null,
+            'dsXe'          => $this->model('XeModel')->layTatCa(),
+            'dsTaiXeOnline' => layTaiXeDangOnline(),
         ], 'Danh mục Tài xế');
+    }
+
+    /** API nho: tra ve id cac tai xe dang mo web (realtime), dung de cham dot online tu cap nhat */
+    public function trangThaiOnline()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => true, 'tai_xe_online' => layTaiXeDangOnline()]);
+        exit;
     }
 
     public function sua($id = 0)

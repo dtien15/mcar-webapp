@@ -83,8 +83,10 @@
           </thead>
           <tbody>
           <?php foreach ($danhSach as $tx): ?>
-            <tr>
+            <tr data-tai-xe-id="<?= (int)$tx['id'] ?>">
               <td>
+                <span class="cham-online-taixe <?= in_array($tx['id'], $dsTaiXeOnline, true) ? 'dang-online' : '' ?>"
+                      title="<?= in_array($tx['id'], $dsTaiXeOnline, true) ? 'Đang mở web' : 'Không hoạt động' ?>"></span>
                 <strong><?= h($tx['full_name']) ?></strong>
                 <?php if ($tx['short_name']): ?><span class="text-muted">(<?= h($tx['short_name']) ?>)</span><?php endif; ?>
               </td>
@@ -124,3 +126,28 @@
     </div>
   </div>
 </div>
+
+<script>
+// Cham "dang online" tu cap nhat khi co tai xe vao/ra web - khong can F5.
+(function () {
+  function capNhat() {
+    fetch('<?= duongDan('taixe/trangthaionline') ?>', { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (kq) {
+        if (!kq.ok) return;
+        document.querySelectorAll('tr[data-tai-xe-id]').forEach(function (dong) {
+          var id = parseInt(dong.getAttribute('data-tai-xe-id'), 10);
+          var cham = dong.querySelector('.cham-online-taixe');
+          if (!cham) return;
+          var dangOnline = kq.tai_xe_online.indexOf(id) !== -1;
+          cham.classList.toggle('dang-online', dangOnline);
+          cham.title = dangOnline ? 'Đang mở web' : 'Không hoạt động';
+        });
+      })
+      .catch(function () {});
+  }
+  if (window.mcarRealtime) {
+    window.mcarRealtime.dangKy('taixe_online_thaydoi', capNhat);
+  }
+})();
+</script>

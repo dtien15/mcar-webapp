@@ -17,9 +17,14 @@ function coRealtime()
 
 /**
  * Tao token ngan han cho trinh duyet dung de xac thuc khi mo ket noi
- * WebSocket. Dinh dang: id|vaiTro|hetHan|chuKy (ma hoa base64).
- * Vai tro chi con 'quanly' hoac 'taixe' - dung de ws-server biet gui
- * "nhac" theo vai tro (vd bao tat ca quan ly) hay theo dung 1 nguoi.
+ * WebSocket. Dinh dang: id|vaiTro|idTaiXe|ten|hetHan|chuKy (ma hoa base64).
+ * - vaiTro: 'quanly' hoac 'taixe' - de ws-server biet gui "nhac" theo vai
+ *   tro (vd bao tat ca quan ly) hay theo dung 1 nguoi.
+ * - idTaiXe: id trong bang drivers (0 neu la quan ly, khong gan tai xe) -
+ *   de ws-server biet tai xe nao dang "online" (mo web), dung cho den
+ *   trang thai online o trang Tai xe.
+ * - ten: ho ten hien thi (khong dau "|") - ws-server khong dung database
+ *   nen can ten san day de tra loi cac tinh huong "ai dang sua chuyen nay".
  */
 function taoTokenWebSocket()
 {
@@ -31,10 +36,12 @@ function taoTokenWebSocket()
         return '';
     }
 
-    $vaiTro = laQuanLy() ? 'quanly' : 'taixe';
-    $hetHan = time() + 6 * 3600; // 6 tieng - du cho 1 ca lam viec, tab mo lau se tu xin token moi khi ket noi lai
-    $duLieuKy = $taiKhoan['id'] . '|' . $vaiTro . '|' . $hetHan;
-    $chuKy = hash_hmac('sha256', $duLieuKy, WS_SHARED_SECRET);
+    $vaiTro   = laQuanLy() ? 'quanly' : 'taixe';
+    $idTaiXe  = (int)($taiKhoan['id_tai_xe'] ?? 0);
+    $ten      = str_replace('|', '', $taiKhoan['ho_ten'] ?? $taiKhoan['ten_dang_nhap'] ?? '');
+    $hetHan   = time() + 6 * 3600; // 6 tieng - du cho 1 ca lam viec, tab mo lau se tu xin token moi khi ket noi lai
+    $duLieuKy = $taiKhoan['id'] . '|' . $vaiTro . '|' . $idTaiXe . '|' . base64_encode($ten) . '|' . $hetHan;
+    $chuKy    = hash_hmac('sha256', $duLieuKy, WS_SHARED_SECRET);
 
     return base64_encode($duLieuKy . '|' . $chuKy);
 }
@@ -61,6 +68,41 @@ function baoThucRealtimeQuanLy()
         return;
     }
     guiBroadcastNoiBo(['role' => 'quanly']);
+}
+
+/**
+ * Danh sach id tai xe (bang drivers) dang mo web (co ket noi WebSocket con
+ * song). Tra ve mang rong neu chua cau hinh realtime hoac ws-server dang
+ * tat - luc do trang Tai xe chi don gian khong hien den online, khong loi.
+ */
+function layTaiXeDangOnline()
+{
+    if (!coRealtime()) {
+        return [];
+    }
+    try {
+        $ch = curl_init(layGocUrlRealtime() . '/online-status');
+        curl_setopt_array($ch, [
+            CURLOPT_HTTPGET        => true,
+            CURLOPT_HTTPHEADER     => ['X-WS-Secret: ' . WS_SHARED_SECRET],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT_MS => 500,
+            CURLOPT_TIMEOUT_MS     => 1200,
+        ]);
+        $ketQua = curl_exec($ch);
+        curl_close($ch);
+
+        $duLieu = json_decode((string)$ketQua, true);
+        return $duLieu['ok'] ?? false ? array_map('intval', $duLieu['tai_xe_online']) : [];
+    } catch (Exception $e) {
+        return [];
+    }
+}
+
+/** Lay lai "goc" cua WS_BROADCAST_URL (bo /broadcast o cuoi) de ghep them /online-status */
+function layGocUrlRealtime()
+{
+    return preg_replace('#/broadcast/?$#', '', WS_BROADCAST_URL);
 }
 
 /** Goi noi bo sang ws-server, thoi gian cho rat ngan, loi thi bo qua lang le */

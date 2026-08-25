@@ -17,6 +17,15 @@ class NguoiDungModel extends Model
         );
     }
 
+    /** Tim tai khoan dang hoat dong gan voi 1 tai xe (dung khi can bao/nhan tin cho dung tai xe do) */
+    public function layTheoDriverId($idTaiXe)
+    {
+        return $this->motDong(
+            "SELECT * FROM users WHERE driver_id = ? AND status = 'active' LIMIT 1",
+            [(int)$idTaiXe]
+        );
+    }
+
     /** Kiem tra ten dang nhap da ton tai chua (bo qua 1 id khi sua) */
     public function tenDangNhapDaTonTai($tenDangNhap, $boQuaId = 0)
     {

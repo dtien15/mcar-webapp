@@ -43,9 +43,12 @@ class ChuyenXeController extends Controller
         $this->yeuCauDangNhap();
         header('Content-Type: application/json; charset=utf-8');
 
-        $loc           = $this->layBoLoc();
-        $soDong        = $this->soDongMoiTrang();
-        $boQua         = max(0, (int)layGet('bo_qua', 0));
+        $loc    = $this->layBoLoc();
+        $boQua  = max(0, (int)layGet('bo_qua', 0));
+        // "lam_moi=1": dung khi realtime tai lai DUNG so dong dang hien (co the
+        // le, vd 27 sau khi bam "Xem them" vai lan) - khac voi "Xem them" binh
+        // thuong chi cho phep 20/50/100 moi lan tai.
+        $soDong = layGet('lam_moi') ? min(500, max(1, (int)layGet('so_dong_hien', 20))) : $this->soDongMoiTrang();
         $idTaiXeHienTai = laTaiXe() ? taiKhoanHienTai()['id_tai_xe'] : null;
 
         $chuyenXeModel   = $this->model('ChuyenXeModel');
@@ -260,6 +263,23 @@ class ChuyenXeController extends Controller
             } elseif ($taiXeMoi && $chuyenXeCu && $chuyenXeCu['status'] === 'moi') {
                 $this->baoChuyenXeThayDoi($id, $duLieu);
             }
+
+            // Sua truc tiep 1 chuyen DA CHOT (khong qua "Mo lai" truoc) - van co
+            // the xay ra vi form khong khoa cung. Tinh lai luong ngay de khong
+            // bi lech so voi du lieu vua sua.
+            if ($chuyenXeCu && $chuyenXeCu['status'] === 'hoan_thanh') {
+                if ($taiXeMoi) {
+                    $this->tinhLaiLuongTheoChuyen(['driver_id' => $taiXeMoi, 'trip_date' => $duLieu['trip_date']]);
+                }
+                // Doi sang tai xe khac hoac doi ngay sang thang khac -> tai xe/ky CU
+                // cung phai tinh lai de rut chuyen nay ra, khong con tinh nham nua.
+                $ngayThangCu = date('Y-m', strtotime($chuyenXeCu['trip_date']));
+                $ngayThangMoi = date('Y-m', strtotime($duLieu['trip_date']));
+                if ($taiXeCu && ($taiXeCu !== $taiXeMoi || $ngayThangCu !== $ngayThangMoi)) {
+                    $this->tinhLaiLuongTheoChuyen(['driver_id' => $taiXeCu, 'trip_date' => $chuyenXeCu['trip_date']]);
+                }
+            }
+
             datThongBao('Đã cập nhật chuyến xe.');
         } elseif (laTaiXe()) {
             // Tai xe tu tao chuyen va tu bao cao so lieu thuc te ngay -> coi nhu da tu xac nhan,
@@ -280,6 +300,10 @@ class ChuyenXeController extends Controller
             datThongBao('Đã thêm chuyến xe mới và giao cho tài xế.');
         }
 
+        // Bao cho cac quan ly khac dang mo trang Chuyen xe biet co thay doi,
+        // de danh sach cua ho tu cap nhat ngay khong can F5.
+        baoThucRealtimeQuanLy();
+
         chuyenTrang('chuyenxe');
     }
 
@@ -291,6 +315,7 @@ class ChuyenXeController extends Controller
 
         $this->model('ChuyenXeModel')->xoa((int)($_POST['id'] ?? 0));
         datThongBao('Đã xóa chuyến xe.');
+        baoThucRealtimeQuanLy();
         chuyenTrang('chuyenxe');
     }
 
@@ -498,6 +523,7 @@ class ChuyenXeController extends Controller
 
         if ($ketQua) {
             datThongBao('Đã cập nhật phụ phí. Công ty sẽ thấy số liệu mới khi chốt.');
+            baoThucRealtimeQuanLy();
         } else {
             datThongBao('Không sửa được — chuyến xe chưa xác nhận, đã bị chốt, hoặc không phải của bạn.', 'danger');
         }
@@ -562,6 +588,8 @@ class ChuyenXeController extends Controller
                 'chuyen_da_chot',
                 $id
             );
+            // Chuyen vua chot -> tinh la vao cong no ngay, khong can bam "Tinh lai luong" nua
+            $this->tinhLaiLuongTheoChuyen($chuyen);
         }
 
         datThongBao('Đã chốt hoàn thành chuyến xe.');
@@ -574,9 +602,35 @@ class ChuyenXeController extends Controller
         $this->yeuCauQuyen(['admin']);
         $this->yeuCauPost();
 
-        $this->model('ChuyenXeModel')->moLai((int)($_POST['id'] ?? 0));
+        $id     = (int)($_POST['id'] ?? 0);
+        $chuyen = $this->model('ChuyenXeModel')->layChiTiet($id);
+
+        $this->model('ChuyenXeModel')->moLai($id);
+
+        // Chuyen khong con la "Hoan thanh" nua -> lo luong ky do khong con dung,
+        // tinh lai ngay de rut chuyen nay ra khoi cong no cua tai xe.
+        if ($chuyen && $chuyen['driver_id']) {
+            $this->tinhLaiLuongTheoChuyen($chuyen);
+        }
+
         datThongBao('Đã mở lại chuyến xe.');
         chuyenTrang('chuyenxe');
+    }
+
+    /**
+     * Tinh lai luong cua dung 1 tai xe, dung ky (thang/nam) chua trip_date cua
+     * chuyen vua doi - goi ngay sau khi mot chuyen chuyen trang thai Hoan thanh
+     * (hoac roi khoi Hoan thanh), thay cho viec phai bam nut "Tinh lai luong"
+     * thu cong (da bo nut do). Luon tinh (ke ca ky do chua tung co ban ghi
+     * luong nao) - tinhLai() tu INSERT hoac UPDATE dung nhu khi bam nut cu.
+     */
+    private function tinhLaiLuongTheoChuyen(array $chuyen)
+    {
+        $thang = (int)date('n', strtotime($chuyen['trip_date']));
+        $nam   = (int)date('Y', strtotime($chuyen['trip_date']));
+
+        $this->model('LuongModel')->tinhLai($chuyen['driver_id'], $thang, $nam);
+        baoThucRealtimeQuanLy();
     }
 
     /**
@@ -597,7 +651,12 @@ class ChuyenXeController extends Controller
             chuyenTrang('chuyenxe');
         }
 
-        if ($this->model('ChuyenXeModel')->xacNhanNopLai($id, $idNguoiXn, $hinhThuc)) {
+        $chuyenXeModel = $this->model('ChuyenXeModel');
+        if ($chuyenXeModel->xacNhanNopLai($id, $idNguoiXn, $hinhThuc)) {
+            $chuyen = $chuyenXeModel->layTheoId($id);
+            if ($chuyen && $chuyen['status'] === 'hoan_thanh' && $chuyen['driver_id']) {
+                $this->tinhLaiLuongTheoChuyen($chuyen);
+            }
             datThongBao('Đã xác nhận tài xế nộp lại tiền cho công ty.');
         } else {
             datThongBao('Không xác nhận được — chuyến này khách đã thanh toán thẳng công ty, chưa có số liệu, hoặc đã xác nhận nộp lại trước đó rồi.', 'danger');
@@ -611,7 +670,15 @@ class ChuyenXeController extends Controller
         $this->yeuCauQuyen(['admin']);
         $this->yeuCauPost();
 
-        $this->model('ChuyenXeModel')->huyXacNhanNopLai((int)($_POST['id'] ?? 0));
+        $id            = (int)($_POST['id'] ?? 0);
+        $chuyenXeModel = $this->model('ChuyenXeModel');
+        $chuyenXeModel->huyXacNhanNopLai($id);
+
+        $chuyen = $chuyenXeModel->layTheoId($id);
+        if ($chuyen && $chuyen['status'] === 'hoan_thanh' && $chuyen['driver_id']) {
+            $this->tinhLaiLuongTheoChuyen($chuyen);
+        }
+
         datThongBao('Đã hủy xác nhận nộp lại tiền.');
         chuyenTrang('chuyenxe');
     }

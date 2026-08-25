@@ -58,6 +58,24 @@ $menu = [
 </head>
 <body>
 
+<script>
+// Dinh nghia som (truoc noi dung trang) de cac trang con nhu form sua chuyen
+// xe co the dang ky nghe/gui tin ngay khi trang vua tai, khong can cho toi
+// khoi script cuoi trang. Ket noi WebSocket that su van duoc mo ben duoi.
+window.mcarRealtime = {
+  socket: null,
+  _dsXuLy: {},
+  dangKy: function (loai, fn) {
+    (this._dsXuLy[loai] = this._dsXuLy[loai] || []).push(fn);
+  },
+  gui: function (obj) {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify(obj));
+    }
+  },
+};
+</script>
+
 <!-- Thanh ben -->
 <aside class="thanh-ben" id="thanhBen">
   <a class="thanh-ben-dau" href="<?= duongDan(laTaiXe() ? 'chuyenxe' : 'tongquan') ?>">
@@ -343,6 +361,8 @@ $menu = [
   // vong lap kiemTra() dinh ky ben tren van chay du phong.
   // ---------------------------------------------------------------
   var giayChoKetNoiLai = 3;
+  // window.mcarRealtime (dangKy/gui) da dinh nghia o dau trang (truoc noi
+  // dung), o day chi can gan .socket vao khi ket noi duoc.
 
   function moKetNoiRealtime() {
     fetch(URL_TOKEN_REALTIME, { credentials: 'same-origin' })
@@ -352,18 +372,22 @@ $menu = [
 
         var ws;
         try { ws = new WebSocket(kq.url); } catch (e) { return; }
+        window.mcarRealtime.socket = ws;
 
         ws.onopen = function () {
           giayChoKetNoiLai = 3; // ket noi duoc -> reset thoi gian cho lan sau neu rot
           ws.send(JSON.stringify({ type: 'auth', token: kq.token }));
         };
         ws.onmessage = function (ev) {
-          try {
-            var goi = JSON.parse(ev.data);
-            if (goi.type === 'nudge') kiemTra();
-          } catch (e) { /* bo qua goi tin la */ }
+          var goi;
+          try { goi = JSON.parse(ev.data); } catch (e) { return; }
+          if (goi.type === 'nudge') kiemTra();
+
+          var dsXuLy = window.mcarRealtime._dsXuLy[goi.type];
+          if (dsXuLy) dsXuLy.forEach(function (fn) { fn(goi); });
         };
         ws.onclose = function () {
+          window.mcarRealtime.socket = null;
           // Rot ket noi (mat mang, ws-server restart...) -> thu lai, gian cach tang dan toi da 60s
           setTimeout(moKetNoiRealtime, giayChoKetNoiLai * 1000);
           giayChoKetNoiLai = Math.min(giayChoKetNoiLai * 2, 60);
