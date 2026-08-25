@@ -31,7 +31,7 @@ $menu = [
     ['route' => 'banggia',   'nhan' => 'Bảng giá',            'icon' => 'tag',              'quyen' => ['admin','ketoan']],
     ['nhom'  => 'HỆ THỐNG',  'quyen' => ['admin']],
     ['route' => 'nguoidung', 'nhan' => 'Người dùng',          'icon' => 'users',            'quyen' => ['admin']],
-    ['route' => 'caidat',    'nhan' => 'Cài đặt AI',          'icon' => 'sparkles',         'quyen' => ['admin']],
+    ['route' => 'caidat',    'nhan' => 'Cài đặt',             'icon' => 'settings',         'quyen' => ['admin']],
 ];
 
 ?>

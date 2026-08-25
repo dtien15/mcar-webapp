@@ -1,6 +1,33 @@
 <?php $modelGoiY = in_array($model, $dsModel, true); ?>
 
 <div class="the">
+  <div class="the-dau"><?= bieuTuong('coin') ?> Tỷ giá ngoại tệ</div>
+  <div class="the-than">
+    <div class="alert alert-light" style="font-size:13px">
+      <?= bieuTuong('info-circle') ?> Dùng để quy đổi khách trả/hoàn tiền bằng USD, EUR sang VNĐ khi tính
+      <strong>Bảng lương</strong>. Chưa cấu hình thì hệ thống coi như tỷ giá = 0 (số ngoại tệ sẽ không được
+      quy đổi vào lương) — nhớ cập nhật khi tỷ giá thay đổi rồi bấm "Tính lại lương" ở trang Bảng lương.
+    </div>
+    <form method="post" action="<?= duongDan('caidat/luutygia') ?>">
+      <?php truongToken(); ?>
+      <div class="row g-2">
+        <div class="col-6 col-md-4">
+          <label class="form-label">1 USD = ? VNĐ</label>
+          <input type="number" step="1" min="0" name="ty_gia_usd" class="form-control form-control-sm"
+                 value="<?= $tyGiaUsd > 0 ? h($tyGiaUsd) : '' ?>" placeholder="VD: 25000">
+        </div>
+        <div class="col-6 col-md-4">
+          <label class="form-label">1 EUR = ? VNĐ</label>
+          <input type="number" step="1" min="0" name="ty_gia_eur" class="form-control form-control-sm"
+                 value="<?= $tyGiaEur > 0 ? h($tyGiaEur) : '' ?>" placeholder="VD: 27000">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm mt-3"><?= bieuTuong('device-floppy') ?> Lưu tỷ giá</button>
+    </form>
+  </div>
+</div>
+
+<div class="the">
   <div class="the-dau"><?= bieuTuong('sparkles') ?> Cài đặt AI (OpenAI)</div>
   <div class="the-than">
     <div class="alert alert-light" style="font-size:13px">

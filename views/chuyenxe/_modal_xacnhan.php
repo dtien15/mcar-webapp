@@ -127,7 +127,11 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Người trả xăng dầu</label>
-              <input class="form-control form-control-sm" name="nguoi_tra_xang_dau">
+              <select name="nguoi_tra_xang_dau" class="form-select form-select-sm">
+                <option value="">-- Chọn --</option>
+                <option value="tai_xe" <?= ($chuyen['fuel_payer'] ?? '') === 'tai_xe' ? 'selected' : '' ?>>Bạn trả (cty hoàn lại)</option>
+                <option value="cong_ty" <?= ($chuyen['fuel_payer'] ?? '') === 'cong_ty' ? 'selected' : '' ?>>Công ty trả trực tiếp</option>
+              </select>
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Bảo dưỡng xe</label>

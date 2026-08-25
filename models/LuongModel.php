@@ -58,62 +58,101 @@ class LuongModel extends Model
     }
 
     /**
-     * Tinh lai bang luong cua 1 tai xe trong 1 ky.
-     * Cong thuc:
-     *   Tong luong  = Luong co ban + Luu dem + Tien tai + Phi san bay + Phat sinh - Phat
-     *   Con lai     = Tong luong + So du ky truoc - Tien thu khach + Hoan tien - Cty da tra
+     * Tinh lai bang luong cua 1 tai xe trong 1 ky. KHONG con tinh Luong co ban
+     * nua - luong tai xe hoan toan theo san luong cuoc xe + phu cap thuc te.
+     *
+     * I. Tai xe nhan  = Luu dem + (Phat sinh + Phi san bay + Phu phi khac tai
+     *                   xe tra + Xang dau tai xe tra) + Tien cuoc xe
+     *    + So du ky truoc (co the am/duong)
+     * II. Tai xe tra  = Thu khach VND + (Thu khach USD, EUR quy doi theo ty
+     *                   gia cau hinh) + Phat + Tam ung + Bao hiem (BHXH/BHTN/BHYT)
+     * III. Hoan tien  = Hoan tien VND + (Hoan tien USD quy doi)
+     * Con lai (IV)    = (I) - (II) + (III) - Cty da tra
      */
     public function tinhLai($idTaiXe, $thang, $nam)
     {
         require_once DUONG_DAN_GOC . '/models/ChuyenXeModel.php';
         require_once DUONG_DAN_GOC . '/models/TaiXeModel.php';
+        require_once DUONG_DAN_GOC . '/models/CaiDatModel.php';
 
         $chuyenXeModel = new ChuyenXeModel();
         $taiXeModel    = new TaiXeModel();
+        $caiDatModel   = new CaiDatModel();
 
         $tuNgay  = layNgayDauThang($thang, $nam);
         $denNgay = layNgayCuoiThang($thang, $nam);
 
-        $tongHop    = $chuyenXeModel->tongHopTaiXeTheoKy($idTaiXe, $tuNgay, $denNgay);
-        $luongCoBan = $taiXeModel->layLuongCoBan($idTaiXe);
-        $soDuTruoc  = $this->laySoDuKyTruoc($idTaiXe, $thang, $nam);
+        $tongHop   = $chuyenXeModel->tongHopTaiXeTheoKy($idTaiXe, $tuNgay, $denNgay);
+        $baoHiem   = $taiXeModel->layBaoHiem($idTaiXe);
+        $soDuTruoc = $this->laySoDuKyTruoc($idTaiXe, $thang, $nam);
+        $tyGiaUsd  = $caiDatModel->layTyGiaUsd();
+        $tyGiaEur  = $caiDatModel->layTyGiaEur();
 
         // Giu lai so tien cong ty da thanh toan neu ky nay da ton tai
         $banGhiCu = $this->layCuaTaiXe($idTaiXe, $thang, $nam);
         $ctyDaTra = $banGhiCu ? (float)$banGhiCu['company_paid'] : 0;
         $ghiChu   = $banGhiCu ? $banGhiCu['note'] : null;
 
-        $tongLuong = $luongCoBan
-            + (float)$tongHop['luu_dem']
+        // I. Tai xe nhan (khong con Luong co ban)
+        $tongLuong = (float)$tongHop['luu_dem']
             + (float)$tongHop['tien_tai']
             + (float)$tongHop['phi_san_bay']
             + (float)$tongHop['phat_sinh']
             + (float)$tongHop['phu_phi_khac']
-            - (float)$tongHop['phat'];
+            + (float)$tongHop['xang_dau_hoan'];
 
-        $conLai = $tongLuong + $soDuTruoc - (float)$tongHop['thu_khach'] + (float)$tongHop['hoan_tien'] - $ctyDaTra;
+        // II. Tai xe tra - quy doi het ra VND
+        $thuKhachConverted = (float)$tongHop['thu_khach']
+            + (float)$tongHop['thu_khach_usd'] * $tyGiaUsd
+            + (float)$tongHop['thu_khach_eur'] * $tyGiaEur
+            + (float)$tongHop['phat']
+            + (float)$tongHop['tam_ung']
+            + $baoHiem;
+
+        // III. Hoan tien thu cua khach - quy doi het ra VND
+        $hoanTienConverted = (float)$tongHop['hoan_tien']
+            + (float)$tongHop['hoan_tien_usd'] * $tyGiaUsd;
+
+        $conLai = $tongLuong + $soDuTruoc - $thuKhachConverted + $hoanTienConverted - $ctyDaTra;
 
         $trangThai = $this->tinhTrangThai($tongLuong, $soDuTruoc, $tongHop['so_chuyen'], $conLai);
 
         $this->thucThi(
             "INSERT INTO payroll
-                (driver_id, month, year, from_date, to_date, trip_count, total_overnight,
-                 total_fee, total_extra_surcharge, total_fine, total_collected, total_refund, prev_balance,
-                 total_salary, company_paid, remaining, status, note)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                (driver_id, month, year, from_date, to_date, trip_count,
+                 total_overnight, total_airport_fee, total_other_fee, total_fuel_reimbursed,
+                 total_fee, total_extra_surcharge, total_fine, total_cash_advance, total_insurance,
+                 total_collected, total_collected_usd, total_collected_eur,
+                 total_refund, total_refund_usd, exchange_rate_usd, exchange_rate_eur,
+                 total_collected_converted, total_refund_converted,
+                 prev_balance, total_salary, company_paid, remaining, status, note)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
              ON DUPLICATE KEY UPDATE
                 from_date=VALUES(from_date), to_date=VALUES(to_date),
-                trip_count=VALUES(trip_count), total_overnight=VALUES(total_overnight),
+                trip_count=VALUES(trip_count),
+                total_overnight=VALUES(total_overnight), total_airport_fee=VALUES(total_airport_fee),
+                total_other_fee=VALUES(total_other_fee), total_fuel_reimbursed=VALUES(total_fuel_reimbursed),
                 total_fee=VALUES(total_fee), total_extra_surcharge=VALUES(total_extra_surcharge),
-                total_fine=VALUES(total_fine),
-                total_collected=VALUES(total_collected), total_refund=VALUES(total_refund),
+                total_fine=VALUES(total_fine), total_cash_advance=VALUES(total_cash_advance),
+                total_insurance=VALUES(total_insurance),
+                total_collected=VALUES(total_collected), total_collected_usd=VALUES(total_collected_usd),
+                total_collected_eur=VALUES(total_collected_eur),
+                total_refund=VALUES(total_refund), total_refund_usd=VALUES(total_refund_usd),
+                exchange_rate_usd=VALUES(exchange_rate_usd), exchange_rate_eur=VALUES(exchange_rate_eur),
+                total_collected_converted=VALUES(total_collected_converted),
+                total_refund_converted=VALUES(total_refund_converted),
                 prev_balance=VALUES(prev_balance), total_salary=VALUES(total_salary),
                 remaining=VALUES(remaining), status=VALUES(status)",
             [
                 (int)$idTaiXe, (int)$thang, (int)$nam, $tuNgay, $denNgay,
-                (int)$tongHop['so_chuyen'], (float)$tongHop['luu_dem'],
-                (float)$tongHop['tien_tai'], (float)$tongHop['phu_phi_khac'], (float)$tongHop['phat'],
-                (float)$tongHop['thu_khach'], (float)$tongHop['hoan_tien'],
+                (int)$tongHop['so_chuyen'],
+                (float)$tongHop['luu_dem'], (float)$tongHop['phi_san_bay'],
+                (float)$tongHop['phat_sinh'], (float)$tongHop['xang_dau_hoan'],
+                (float)$tongHop['tien_tai'], (float)$tongHop['phu_phi_khac'],
+                (float)$tongHop['phat'], (float)$tongHop['tam_ung'], $baoHiem,
+                (float)$tongHop['thu_khach'], (float)$tongHop['thu_khach_usd'], (float)$tongHop['thu_khach_eur'],
+                (float)$tongHop['hoan_tien'], (float)$tongHop['hoan_tien_usd'], $tyGiaUsd, $tyGiaEur,
+                $thuKhachConverted, $hoanTienConverted,
                 $soDuTruoc, $tongLuong, $ctyDaTra, $conLai, $trangThai, $ghiChu,
             ]
         );
@@ -143,7 +182,7 @@ class LuongModel extends Model
         }
 
         $conLai = (float)$banGhi['total_salary'] + (float)$banGhi['prev_balance']
-                - (float)$banGhi['total_collected'] + (float)$banGhi['total_refund']
+                - (float)$banGhi['total_collected_converted'] + (float)$banGhi['total_refund_converted']
                 - (float)$ctyDaTra;
 
         $trangThai = $this->tinhTrangThai($banGhi['total_salary'], $banGhi['prev_balance'], $banGhi['trip_count'], $conLai);

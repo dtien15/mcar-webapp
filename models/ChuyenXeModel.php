@@ -415,11 +415,18 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(other_fee),0)     AS phat_sinh,
                     COALESCE(SUM(CASE WHEN extra_surcharge_payer = 'tai_xe'
                                        THEN extra_surcharge ELSE 0 END), 0) AS phu_phi_khac,
+                    COALESCE(SUM(CASE WHEN fuel_payer = 'tai_xe'
+                                       THEN fuel_cost ELSE 0 END), 0) AS xang_dau_hoan,
                     COALESCE(SUM(trip_fee),0)      AS tien_tai,
                     COALESCE(SUM(fine),0)          AS phat,
                     COALESCE(SUM(CASE WHEN customer_paid = 0 AND cash_remitted = 0
                                        THEN revenue_vnd ELSE 0 END), 0) AS thu_khach,
+                    COALESCE(SUM(CASE WHEN customer_paid = 0 AND cash_remitted = 0
+                                       THEN revenue_usd ELSE 0 END), 0) AS thu_khach_usd,
+                    COALESCE(SUM(CASE WHEN customer_paid = 0 AND cash_remitted = 0
+                                       THEN revenue_eur ELSE 0 END), 0) AS thu_khach_eur,
                     COALESCE(SUM(refund_vnd),0)    AS hoan_tien,
+                    COALESCE(SUM(refund_usd),0)    AS hoan_tien_usd,
                     COALESCE(SUM(cash_advance),0)  AS tam_ung,
                     COALESCE(SUM(fuel_cost),0)     AS xang_dau
              FROM trips WHERE driver_id = ? AND trip_date BETWEEN ? AND ?",

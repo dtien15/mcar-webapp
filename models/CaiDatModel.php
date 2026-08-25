@@ -34,4 +34,16 @@ class CaiDatModel extends Model
     {
         return $this->layCaiDat('openai_model') ?: 'gpt-4o-mini';
     }
+
+    /** Ty gia USD/VND dung de quy doi tien khach tra/hoan bang USD khi tinh luong (0 neu chua cau hinh) */
+    public function layTyGiaUsd()
+    {
+        return (float)($this->layCaiDat('ty_gia_usd') ?: 0);
+    }
+
+    /** Ty gia EUR/VND dung de quy doi tien khach tra bang EUR khi tinh luong (0 neu chua cau hinh) */
+    public function layTyGiaEur()
+    {
+        return (float)($this->layCaiDat('ty_gia_eur') ?: 0);
+    }
 }

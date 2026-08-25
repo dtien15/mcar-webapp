@@ -375,8 +375,11 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               </div>
               <div class="col-6 col-md-2">
                 <label class="form-label">Người trả xăng dầu</label>
-                <input name="nguoi_tra_xang_dau" class="form-control" <?= $chiXem ?>
-                       value="<?= h(giaTri($chuyenXe, 'fuel_payer')) ?>">
+                <select name="nguoi_tra_xang_dau" class="form-select" <?= $chiXemSel ?>>
+                  <option value="">-- Chọn --</option>
+                  <option value="tai_xe" <?= giaTri($chuyenXe, 'fuel_payer') === 'tai_xe' ? 'selected' : '' ?>>Tài xế trả (cty hoàn lại)</option>
+                  <option value="cong_ty" <?= giaTri($chuyenXe, 'fuel_payer') === 'cong_ty' ? 'selected' : '' ?>>Công ty trả trực tiếp</option>
+                </select>
               </div>
               <?php if (!laTaiXe()): ?>
               <div class="col-6 col-md-2">

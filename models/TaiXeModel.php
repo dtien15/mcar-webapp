@@ -26,6 +26,12 @@ class TaiXeModel extends Model
         return (float)$this->motGiaTri("SELECT base_salary FROM drivers WHERE id = ?", [(int)$idTaiXe]);
     }
 
+    /** Lay muc BHXH/BHTN/BHYT tru vao luong moi ky */
+    public function layBaoHiem($idTaiXe)
+    {
+        return (float)$this->motGiaTri("SELECT insurance FROM drivers WHERE id = ?", [(int)$idTaiXe]);
+    }
+
     /** Lay 1 tai xe kem thong tin xe mac dinh */
     public function layChiTiet($idTaiXe)
     {

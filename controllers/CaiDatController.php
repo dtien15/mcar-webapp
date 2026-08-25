@@ -1,8 +1,8 @@
 <?php
 // =====================================================================
-// CaiDatController - Cai dat AI (OpenAI): nhap API key, chon model,
-// kiem tra ket noi. Chi quan tri vien (chua khoa bi mat nen khong cho
-// ke toan xem).
+// CaiDatController - Cai dat he thong: AI (OpenAI) va ty gia ngoai te
+// dung khi tinh luong. Chi quan tri vien (co API key + anh huong den
+// cong thuc luong nen khong cho ke toan sua).
 // =====================================================================
 
 class CaiDatController extends Controller
@@ -10,7 +10,7 @@ class CaiDatController extends Controller
     /** Danh sach 1 model OpenAI goi y san (nguoi dung van nhap tay duoc model khac) */
     const DS_MODEL_GOI_Y = ['gpt-4o-mini', 'gpt-4.1-mini', 'gpt-4o'];
 
-    /** Trang cai dat AI */
+    /** Trang cai dat */
     public function danhSach()
     {
         $this->yeuCauQuyen(['admin']);
@@ -22,7 +22,9 @@ class CaiDatController extends Controller
             'coApiKey'  => $apiKey !== '',
             'model'     => $caiDatModel->layOpenAiModel(),
             'dsModel'   => self::DS_MODEL_GOI_Y,
-        ], 'Cài đặt AI');
+            'tyGiaUsd'  => $caiDatModel->layTyGiaUsd(),
+            'tyGiaEur'  => $caiDatModel->layTyGiaEur(),
+        ], 'Cài đặt');
     }
 
     /** Luu cai dat AI */
@@ -44,6 +46,20 @@ class CaiDatController extends Controller
         $caiDatModel->luuCaiDat('openai_model', $model !== '' ? $model : 'gpt-4o-mini');
 
         datThongBao('Đã lưu cài đặt AI.');
+        chuyenTrang('caidat');
+    }
+
+    /** Luu ty gia ngoai te dung khi tinh luong */
+    public function luutygia()
+    {
+        $this->yeuCauQuyen(['admin']);
+        $this->yeuCauPost();
+
+        $caiDatModel = $this->model('CaiDatModel');
+        $caiDatModel->luuCaiDat('ty_gia_usd', $this->soTuForm('ty_gia_usd'));
+        $caiDatModel->luuCaiDat('ty_gia_eur', $this->soTuForm('ty_gia_eur'));
+
+        datThongBao('Đã lưu tỷ giá. Bấm "Tính lại lương" ở trang Bảng lương để áp dụng tỷ giá mới cho kỳ hiện tại.');
         chuyenTrang('caidat');
     }
 

@@ -224,7 +224,7 @@ class ChuyenXeController extends Controller
             'extra_surcharge_note'  => $this->chuTuForm('ghi_chu_phu_phi_khac'),
             'fuel_cost'      => $this->soTuForm('xang_dau'),
             'fuel_vat'       => $this->soTuForm('vat_xang_dau'),
-            'fuel_payer'     => $this->chuTuForm('nguoi_tra_xang_dau'),
+            'fuel_payer'     => $this->layNguoiTraXangDau(),
             'vetc'           => $this->soTuForm('vetc'),
             'maintenance'    => $this->soTuForm('bao_duong'),
             'fine'           => $this->soTuForm('phat'),
@@ -450,7 +450,7 @@ class ChuyenXeController extends Controller
             'extra_surcharge_note'   => $this->chuTuForm('ghi_chu_phu_phi_khac'),
             'fuel_cost'      => $this->soTuForm('xang_dau'),
             'fuel_vat'       => $this->soTuForm('vat_xang_dau'),
-            'fuel_payer'     => $this->chuTuForm('nguoi_tra_xang_dau'),
+            'fuel_payer'     => $this->layNguoiTraXangDau(),
             'vetc'           => $this->soTuForm('vetc'),
             'maintenance'    => $this->soTuForm('bao_duong'),
             'fine'           => $this->soTuForm('phat'),
@@ -736,7 +736,19 @@ class ChuyenXeController extends Controller
     /** Doc "ai tra phu phi khac" tu form, chi nhan 2 gia tri hop le */
     private function layNguoiTraPhuPhi()
     {
-        $gt = $this->chuTuForm('nguoi_tra_phu_phi_khac');
+        return $this->layTuHaiLuaChon('nguoi_tra_phu_phi_khac');
+    }
+
+    /** Doc "ai tra xang dau" tu form (tai_xe hoac cong_ty) - dung de biet co hoan lai vao luong khong */
+    private function layNguoiTraXangDau()
+    {
+        return $this->layTuHaiLuaChon('nguoi_tra_xang_dau');
+    }
+
+    /** Doc 1 truong dang chon "tai_xe"/"cong_ty" tu form, chi nhan 2 gia tri hop le */
+    private function layTuHaiLuaChon($ten)
+    {
+        $gt = $this->chuTuForm($ten);
         return in_array($gt, ['tai_xe', 'cong_ty'], true) ? $gt : null;
     }
 

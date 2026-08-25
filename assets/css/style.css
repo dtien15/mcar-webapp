@@ -583,6 +583,37 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
 /* ---------- Phieu luong / in an ---------- */
 .phieu-luong { background: #fff; padding: 24px; }
 .phieu-luong h2 { font-size: 18px; text-align: center; text-transform: uppercase; }
+.phieu-luong-muc {
+  background: var(--mau-chinh);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 7px 12px;
+  border-radius: 6px 6px 0 0;
+  margin-top: 18px;
+}
+.phieu-luong-muc:first-of-type { margin-top: 0; }
+.phieu-luong table.table { margin-bottom: 0; border-top: none; }
+.phieu-luong table.table:has(+ .phieu-luong-muc) { margin-bottom: 0; }
+.phieu-luong-tong td { background: #eff6ff; font-weight: 700; }
+.phieu-luong-tong.mau-luc td { background: #f0fdf4; }
+.phieu-luong-phu td { color: var(--mau-chu-nhat); font-size: 12px; }
+.phieu-luong-cuoi {
+  background: #0f172a;
+  color: #fff;
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.phieu-luong-cuoi .nhan { font-size: 13px; opacity: .85; }
+.phieu-luong-cuoi .gt { font-size: 24px; font-weight: 700; }
+.phieu-luong-cuoi .gt.so-am { color: #fca5a5; }
+.phieu-luong-cuoi .gt.so-duong { color: #86efac; }
 
 @media print {
   .thanh-ben, .thanh-tren, .khong-in { display: none !important; }
