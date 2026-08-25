@@ -67,6 +67,10 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
           </form>
         <?php endif; ?>
 
+        <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-sm btn-outline-secondary">
+          <?= bieuTuong('file-invoice') ?> Chi tiết
+        </a>
+
         <form method="post" action="<?= duongDan('chuyenxe/xoa') ?>" onsubmit="return confirm('Xóa chuyến xe này? Không khôi phục được.');">
           <?php truongToken(); ?>
           <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">

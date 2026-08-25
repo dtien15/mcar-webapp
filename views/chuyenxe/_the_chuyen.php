@@ -72,6 +72,9 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
           <button class="btn btn-sm btn-outline-secondary"><?= bieuTuong('arrow-back-up') ?> Hủy xác nhận nộp lại</button>
         </form>
       <?php endif; ?>
+      <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-sm btn-outline-secondary w-100">
+        <?= bieuTuong('file-invoice') ?> Xem chi tiết phiếu
+      </a>
     <?php elseif ($cuaToi): ?>
       <?php if ($chuyen['status'] !== 'hoan_thanh'): ?>
         <?php if ($duocXacNhan): ?>
