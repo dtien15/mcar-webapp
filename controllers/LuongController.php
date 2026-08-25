@@ -67,6 +67,12 @@ class LuongController extends Controller
         );
 
         datThongBao('Đã cập nhật thanh toán lương.');
+
+        // Goi tu tab Cong no ben trang Thanh toan thi quay lai dung trang do,
+        // khong nhay sang Bang luong khien nguoi dung mat dau dang lam.
+        if ($this->chuTuForm('tu_trang') === 'thanhtoan') {
+            chuyenTrang('thanhtoan#tabNo');
+        }
         chuyenTrang("luong?thang={$thang}&nam={$nam}");
     }
 

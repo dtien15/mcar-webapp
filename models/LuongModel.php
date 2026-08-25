@@ -214,14 +214,25 @@ class LuongModel extends Model
         return $conLai > 0 ? 'Công ty còn thiếu' : 'Tài xế còn thiếu';
     }
 
-    /** Cong no moi nhat cua tat ca tai xe */
+    /**
+     * Cong no moi nhat cua tat ca tai xe - lay ky (nam, thang) GAN NHAT theo LICH
+     * cua tung tai xe, KHONG dung MAX(id): id chi tang theo thu tu lan dau tinh
+     * luong cua tung ky, neu quan ly tinh lai 1 ky cu sau khi da co ky moi hon thi
+     * MAX(id) se chon nham ky cu do (vi ban ghi ky cu duoc INSERT truoc, id nho hon
+     * chi khi ky do CHUA TUNG duoc tinh - con neu tinh lai ky da co thi UPDATE, id
+     * giu nguyen; nhung neu quan ly tinh 1 ky moi cho tai xe A truoc, tai xe B sau,
+     * roi quay lai tinh bo sung mot ky cu hon cho tai xe A thi ban ghi ky cu do lai
+     * co id lon hon ky moi cua A, khien MAX(id) tra ve nham ky cu).
+     */
     public function congNoMoiNhat()
     {
         return $this->truyVan(
             "SELECT p.*, d.full_name AS ten_tai_xe
              FROM payroll p
              JOIN drivers d ON d.id = p.driver_id
-             WHERE p.id IN (SELECT MAX(id) FROM payroll GROUP BY driver_id)
+             WHERE (p.year * 12 + p.month) = (
+                 SELECT MAX(p2.year * 12 + p2.month) FROM payroll p2 WHERE p2.driver_id = p.driver_id
+             )
              ORDER BY p.remaining ASC"
         );
     }
