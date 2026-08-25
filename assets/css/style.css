@@ -588,15 +588,14 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
   font-size: 13px;
   padding: 6px 2px;
   margin-top: 16px;
-  border-bottom: 2px solid #333;
+  border-bottom: 1px solid var(--mau-vien);
 }
 .phieu-luong-muc:first-of-type { margin-top: 0; }
 .phieu-luong table.table { margin-bottom: 0; border-top: none; }
 .phieu-luong-tong td { background: #f1f5f9; font-weight: 700; }
 .phieu-luong-phu td { color: var(--mau-chu-nhat); font-size: 12px; }
 .phieu-luong-cuoi {
-  border: 1px solid #333;
-  border-top: 2px solid #333;
+  border: 1px solid var(--mau-vien);
   padding: 10px 12px;
   display: flex;
   justify-content: space-between;
