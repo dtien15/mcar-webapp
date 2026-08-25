@@ -18,15 +18,16 @@ class ChuyenXeController extends Controller
         $tongSo        = $chuyenXeModel->demTheoLoc($loc);
 
         $duLieu = [
-            'loc'          => $loc,
-            'danhSach'     => $danhSach,
-            'tongSo'       => $tongSo,
-            'soDong'       => $soDong,
-            'conThem'      => $tongSo > count($danhSach),
-            'tongHop'      => $chuyenXeModel->tongHopTheoLoc($loc),
-            'dsXe'         => $this->model('XeModel')->layTatCa(),
-            'dsTaiXe'      => $this->model('TaiXeModel')->layTatCa(),
-            'dsLoaiKeo'    => $this->model('LoaiKeoModel')->layTatCa(),
+            'loc'             => $loc,
+            'danhSach'        => $danhSach,
+            'tongSo'          => $tongSo,
+            'soDong'          => $soDong,
+            'conThem'         => $tongSo > count($danhSach),
+            'tongHop'         => $chuyenXeModel->tongHopTheoLoc($loc),
+            'dsXe'            => $this->model('XeModel')->layTatCa(),
+            'dsTaiXe'         => $this->model('TaiXeModel')->layTatCa(),
+            'dsTaiXeDangChay' => $this->model('TaiXeModel')->layTaiXeDangChay(),
+            'dsLoaiKeo'       => $this->model('LoaiKeoModel')->layTatCa(),
         ];
 
         $this->view('chuyenxe/danhsach', $duLieu, 'Chuyến xe');
@@ -47,32 +48,37 @@ class ChuyenXeController extends Controller
         $boQua         = max(0, (int)layGet('bo_qua', 0));
         $idTaiXeHienTai = laTaiXe() ? taiKhoanHienTai()['id_tai_xe'] : null;
 
-        $chuyenXeModel = $this->model('ChuyenXeModel');
-        $danhSach      = $chuyenXeModel->locDanhSach($loc, $soDong, $boQua);
-        $tongSo        = $chuyenXeModel->demTheoLoc($loc);
+        $chuyenXeModel   = $this->model('ChuyenXeModel');
+        $danhSach        = $chuyenXeModel->locDanhSach($loc, $soDong, $boQua);
+        $tongSo          = $chuyenXeModel->demTheoLoc($loc);
+        $dsTaiXeDangChay = $this->model('TaiXeModel')->layTaiXeDangChay();
 
         $theHtml          = '';
         $dongHtml         = '';
         $modalXacNhanHtml = '';
         $modalNopLaiHtml  = '';
         $modalSuaPhuPhiHtml = '';
+        $modalNhoTaiKhacHtml = '';
         foreach ($danhSach as $chuyen) {
-            $theHtml            .= $this->renderPhanView('chuyenxe/_the_chuyen', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
-            $dongHtml           .= $this->renderPhanView('chuyenxe/_dong_bang', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
-            $modalXacNhanHtml   .= $this->renderPhanView('chuyenxe/_modal_xacnhan', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
-            $modalNopLaiHtml    .= $this->renderPhanView('chuyenxe/_modal_noplai', ['chuyen' => $chuyen]);
-            $modalSuaPhuPhiHtml .= $this->renderPhanView('chuyenxe/_modal_suaphuphi', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
+            $duLieuThe = ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai, 'dsTaiXeDangChay' => $dsTaiXeDangChay];
+            $theHtml             .= $this->renderPhanView('chuyenxe/_the_chuyen', $duLieuThe);
+            $dongHtml            .= $this->renderPhanView('chuyenxe/_dong_bang', $duLieuThe);
+            $modalXacNhanHtml    .= $this->renderPhanView('chuyenxe/_modal_xacnhan', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
+            $modalNopLaiHtml     .= $this->renderPhanView('chuyenxe/_modal_noplai', ['chuyen' => $chuyen]);
+            $modalSuaPhuPhiHtml  .= $this->renderPhanView('chuyenxe/_modal_suaphuphi', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
+            $modalNhoTaiKhacHtml .= $this->renderPhanView('chuyenxe/_modal_nhotaikhac', $duLieuThe);
         }
 
         echo json_encode([
-            'ok'                   => true,
-            'the_html'             => $theHtml,
-            'dong_html'            => $dongHtml,
-            'modal_xacnhan_html'   => $modalXacNhanHtml,
-            'modal_noplai_html'    => $modalNopLaiHtml,
-            'modal_suaphuphi_html' => $modalSuaPhuPhiHtml,
-            'so_dong_them'         => count($danhSach),
-            'con_them'             => $tongSo > ($boQua + count($danhSach)),
+            'ok'                    => true,
+            'the_html'              => $theHtml,
+            'dong_html'             => $dongHtml,
+            'modal_xacnhan_html'    => $modalXacNhanHtml,
+            'modal_noplai_html'     => $modalNopLaiHtml,
+            'modal_suaphuphi_html'  => $modalSuaPhuPhiHtml,
+            'modal_nhotaikhac_html' => $modalNhoTaiKhacHtml,
+            'so_dong_them'          => count($danhSach),
+            'con_them'              => $tongSo > ($boQua + count($danhSach)),
         ]);
         exit;
     }
@@ -307,7 +313,10 @@ class ChuyenXeController extends Controller
             die('Bạn không có quyền xem chuyến xe này.');
         }
 
-        $this->view('chuyenxe/chitiet', ['chuyen' => $chuyen], 'Chi tiết chuyến xe');
+        $this->view('chuyenxe/chitiet', [
+            'chuyen'          => $chuyen,
+            'lichSuChuyenGiao' => $chuyenXeModel->layLichSuChuyenGiao($id),
+        ], 'Chi tiết chuyến xe');
     }
 
     /** Tai xe nhap chi phi thuc te va xac nhan chuyen xe */
@@ -390,6 +399,42 @@ class ChuyenXeController extends Controller
             datThongBao('Đã cập nhật phụ phí. Công ty sẽ thấy số liệu mới khi chốt.');
         } else {
             datThongBao('Không sửa được — chuyến xe chưa xác nhận, đã bị chốt, hoặc không phải của bạn.', 'danger');
+        }
+        chuyenTrang('chuyenxe');
+    }
+
+    /**
+     * Tai xe nho tai xe khac chay gium chuyen cua minh (vi du ban dot xuat).
+     * Chi ap dung khi chuyen con "Moi giao". Tu thao tac duoc, khong can
+     * quan ly duyet. Xe giu nguyen, chi doi nguoi lai + bao cho nguoi moi.
+     */
+    public function nhotaikhac()
+    {
+        $this->yeuCauQuyen(['taixe']);
+        $this->yeuCauPost();
+
+        $id         = (int)($_POST['id'] ?? 0);
+        $idTaiXeMoi = (int)($_POST['id_tai_xe_moi'] ?? 0);
+        $idTaiXe    = taiKhoanHienTai()['id_tai_xe'];
+
+        $ketQua = $idTaiXe && $idTaiXeMoi
+            && $this->model('ChuyenXeModel')->nhoTaiXeKhacChay($id, $idTaiXe, $idTaiXeMoi);
+
+        if ($ketQua) {
+            $chuyen = $this->model('ChuyenXeModel')->layChiTiet($id);
+            $this->model('ThongBaoModel')->guiChoTaiXe(
+                $idTaiXeMoi,
+                'Bạn được nhờ chạy giùm chuyến ngày ' . dinhDangNgay($chuyen['trip_date'] ?? ''),
+                ($chuyen['ten_tai_xe'] ?? 'Một tài xế') . ' đã nhờ bạn chạy giùm chuyến '
+                    . ($chuyen['route'] ?? '') . '. Vào xem chi tiết và xác nhận khi đã có số liệu thực tế.',
+                'chuyenxe?trang_thai=moi',
+                'chuyen_xe_moi',
+                $id,
+                true
+            );
+            datThongBao('Đã chuyển chuyến xe này cho tài xế khác chạy giùm.');
+        } else {
+            datThongBao('Không nhờ được — chuyến đã xác nhận/chốt rồi, không phải chuyến của bạn, hoặc tài xế được chọn không hợp lệ.', 'danger');
         }
         chuyenTrang('chuyenxe');
     }

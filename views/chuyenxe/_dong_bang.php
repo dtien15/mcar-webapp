@@ -80,6 +80,10 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
                     data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">
               <?= bieuTuong('writing') ?> Nhập &amp; Xác nhận
             </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary"
+                    data-bs-toggle="modal" data-bs-target="#nhoTaiKhac<?= $chuyen['id'] ?>">
+              <?= bieuTuong('users') ?> Nhờ chạy giùm
+            </button>
           <?php elseif ($chuyen['status'] === 'tai_xe_xac_nhan'): ?>
             <button type="button" class="btn btn-sm btn-outline-primary"
                     data-bs-toggle="modal" data-bs-target="#suaPhuPhi<?= $chuyen['id'] ?>">

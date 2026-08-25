@@ -270,5 +270,21 @@
       </div>
     </fieldset>
 
+    <?php if (!empty($lichSuChuyenGiao)): ?>
+    <fieldset class="nhom-truong mb-0 mt-3">
+      <legend><?= bieuTuong('users') ?> Lịch sử chuyển giao tài xế</legend>
+      <div style="font-size:13px">
+        <?php foreach ($lichSuChuyenGiao as $lan): ?>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="text-muted" style="font-size:11px; min-width:110px">
+              <?= h(dinhDangNgay($lan['created_at'], 'd/m/Y H:i')) ?>
+            </span>
+            <span><?= h($lan['ten_tu']) ?> <?= bieuTuong('arrow-right') ?> <strong><?= h($lan['ten_den']) ?></strong></span>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    </fieldset>
+    <?php endif; ?>
+
   </div>
 </div>

@@ -201,6 +201,58 @@ class ChuyenXeModel extends Model
         );
     }
 
+    /**
+     * Tai xe nho tai xe khac chay gium chuyen cua minh (vi du ban dot xuat).
+     * Chi ap dung khi chuyen con "Moi giao" (chua nhap chi phi/xac nhan) va
+     * nguoi goi dung la tai xe hien tai cua chuyen. Xe giu nguyen, chi doi
+     * nguoi lai. Ghi lai lich su chuyen giao de xem lai duoc du chuyen qua
+     * bao nhieu tay.
+     */
+    public function nhoTaiXeKhacChay($id, $idTaiXeHienTai, $idTaiXeMoi)
+    {
+        $idTaiXeMoi = (int)$idTaiXeMoi;
+        if ($idTaiXeMoi === (int)$idTaiXeHienTai) {
+            return false;
+        }
+
+        $chuyen = $this->motDong(
+            "SELECT id FROM trips WHERE id = ? AND driver_id = ? AND status = 'moi'",
+            [(int)$id, (int)$idTaiXeHienTai]
+        );
+        if (!$chuyen) {
+            return false;
+        }
+
+        $taiXeMoiHopLe = $this->motGiaTri(
+            "SELECT id FROM drivers WHERE id = ? AND status = 'active'",
+            [$idTaiXeMoi]
+        );
+        if (!$taiXeMoiHopLe) {
+            return false;
+        }
+
+        $this->thucThi("UPDATE trips SET driver_id = ? WHERE id = ?", [$idTaiXeMoi, (int)$id]);
+        $this->thucThi(
+            "INSERT INTO trip_driver_handoffs (trip_id, from_driver_id, to_driver_id) VALUES (?,?,?)",
+            [(int)$id, (int)$idTaiXeHienTai, $idTaiXeMoi]
+        );
+        return true;
+    }
+
+    /** Lich su chuyen giao tai xe cua 1 chuyen xe (moi nhat truoc), dung cho trang chi tiet */
+    public function layLichSuChuyenGiao($idChuyen)
+    {
+        return $this->truyVan(
+            "SELECT h.*, d1.full_name AS ten_tu, d2.full_name AS ten_den
+             FROM trip_driver_handoffs h
+             JOIN drivers d1 ON d1.id = h.from_driver_id
+             JOIN drivers d2 ON d2.id = h.to_driver_id
+             WHERE h.trip_id = ?
+             ORDER BY h.created_at DESC",
+            [(int)$idChuyen]
+        );
+    }
+
     /** Quan ly chot hoan thanh chuyen xe */
     public function chotHoanThanh($id)
     {

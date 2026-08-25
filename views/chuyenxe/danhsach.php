@@ -222,6 +222,11 @@ $dsTab = [
   <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_suaphuphi.php'; endforeach; ?>
 </div>
 
+<!-- Hop thoai tai xe nho tai xe khac chay gium chuyen cua minh -->
+<div id="khoiModalNhoTaiKhac">
+  <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_nhotaikhac.php'; endforeach; ?>
+</div>
+
 <script>
 // ---------------------------------------------------------------
 // "Xem them": tai them 1 trang chuyen xe qua AJAX, noi vao DOM
@@ -253,6 +258,7 @@ $dsTab = [
         document.getElementById('khoiModalXacNhan').insertAdjacentHTML('beforeend', kq.modal_xacnhan_html);
         document.getElementById('khoiModalNopLai').insertAdjacentHTML('beforeend', kq.modal_noplai_html);
         document.getElementById('khoiModalSuaPhuPhi').insertAdjacentHTML('beforeend', kq.modal_suaphuphi_html);
+        document.getElementById('khoiModalNhoTaiKhac').insertAdjacentHTML('beforeend', kq.modal_nhotaikhac_html);
 
         boQua += kq.so_dong_them;
 
