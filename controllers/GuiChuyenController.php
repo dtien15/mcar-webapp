@@ -96,7 +96,7 @@ class GuiChuyenController extends Controller
             'chuyenxe?trang_thai=moi',
             'chuyen_xe_moi',
             $idChuyenXe,
-            true
+            false // chi bao 1 lan, khong nhac lai moi 30 phut
         );
     }
 }

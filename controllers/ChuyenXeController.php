@@ -560,7 +560,7 @@ class ChuyenXeController extends Controller
                 'chuyenxe?trang_thai=moi',
                 'chuyen_xe_moi',
                 $id,
-                true
+                false // chi bao 1 lan, khong nhac lai lien tuc gay cam giac spam
             );
             datThongBao('Đã chuyển chuyến xe này cho tài xế khác chạy giùm.');
         } else {
@@ -749,7 +749,7 @@ class ChuyenXeController extends Controller
             'chuyenxe?trang_thai=moi',
             'chuyen_xe_moi',
             $idChuyenXe,
-            true  // can tai xe xac nhan -> se nhac lai neu bo quen
+            false // chi bao 1 lan (khong con nhac lai moi 30 phut - gay cam giac spam)
         );
     }
 
@@ -763,7 +763,7 @@ class ChuyenXeController extends Controller
             'chuyenxe?trang_thai=moi',
             'chuyen_xe_moi',
             $idChuyenXe,
-            true
+            false
         );
     }
 
