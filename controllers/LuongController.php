@@ -16,10 +16,22 @@ class LuongController extends Controller
         $luongModel = $this->model('LuongModel');
         $bangLuong  = $luongModel->layTheoKy($thang, $nam);
 
+        // Canh bao neu co tai xe thu ngoai te nhung luc tinh luong ty gia dang la 0
+        // (se lam gia tri ngoai te bi tinh thanh 0d, che mat mot khoan tien that su).
+        $coCanhBaoTyGia = false;
+        foreach ($bangLuong as $dong) {
+            if ((((float)$dong['total_collected_usd'] > 0) && (float)$dong['exchange_rate_usd'] <= 0)
+                || (((float)$dong['total_collected_eur'] > 0) && (float)$dong['exchange_rate_eur'] <= 0)) {
+                $coCanhBaoTyGia = true;
+                break;
+            }
+        }
+
         $this->view('luong/danhsach', [
-            'thang'     => $thang,
-            'nam'       => $nam,
-            'bangLuong' => $bangLuong,
+            'thang'          => $thang,
+            'nam'            => $nam,
+            'bangLuong'      => $bangLuong,
+            'coCanhBaoTyGia' => $coCanhBaoTyGia,
         ], 'Bảng lương');
     }
 

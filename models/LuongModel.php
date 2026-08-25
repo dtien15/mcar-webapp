@@ -196,12 +196,16 @@ class LuongModel extends Model
     /**
      * Xac dinh trang thai bang luong. Tai xe khong chay cuoc nao trong ky VA
      * khong co luong co ban/phu cap gi (tong luong = 0) VA khong co no ky
-     * truoc thi coi la "Khong co du lieu" - tranh hien nham "Da thanh toan
-     * du" cho nguoi khong phat sinh gi ca (de bi hieu la da tra tien roi).
+     * truoc VA con lai cung bang 0 thi moi coi la "Khong co du lieu" - tranh
+     * hien nham "Da thanh toan du" cho nguoi khong phat sinh gi ca (de bi
+     * hieu la da tra tien roi). Phai kiem tra ca con lai: neu tai xe khong
+     * chay cuoc nao nhung van bi tru bao hiem/con no ky truoc thi con lai
+     * # 0, khong duoc goi la "khong co du lieu" - se che mat mot khoan no
+     * that su (vd bao hiem thang do van phai dong du khong chay cuoc nao).
      */
     private function tinhTrangThai($tongLuong, $soDuTruoc, $soCuoc, $conLai)
     {
-        if ((int)$soCuoc === 0 && abs((float)$tongLuong) < 1 && abs((float)$soDuTruoc) < 1) {
+        if ((int)$soCuoc === 0 && abs((float)$tongLuong) < 1 && abs((float)$soDuTruoc) < 1 && abs((float)$conLai) < 1) {
             return 'Không có dữ liệu';
         }
         if (abs($conLai) < 1) {

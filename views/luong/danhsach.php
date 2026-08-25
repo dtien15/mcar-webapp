@@ -56,6 +56,15 @@ foreach ($bangLuong as $dong) {
   </div>
 </div>
 
+<?php if (!empty($coCanhBaoTyGia)): ?>
+  <div class="alert alert-warning d-flex align-items-center gap-2">
+    <?= bieuTuong('alert-triangle') ?>
+    <div>Có tài xế thu tiền khách bằng ngoại tệ (USD/EUR) nhưng chưa cấu hình tỷ giá quy đổi
+      (hoặc tỷ giá đang là 0) lúc tính lương. Khoản ngoại tệ này đang bị tính là 0đ trong bảng lương.
+      Vào <a href="<?= duongDan('caidat') ?>">Cài đặt</a> để nhập tỷ giá rồi bấm "Tính lại lương".</div>
+  </div>
+<?php endif; ?>
+
 <?php if ($bangLuong): ?>
 <div class="luoi-thong-ke mb-3">
   <div class="o-thong-ke">
