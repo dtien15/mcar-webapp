@@ -180,8 +180,37 @@ $menu = [
 (function () {
   var URL_KIEM_TRA = '<?= duongDan('thongbao/kiemtra') ?>';
   var URL_DOC      = '<?= duongDan('thongbao/doc') ?>';
+  var URL_XOA      = '<?= duongDan('thongbao/xoa') ?>';
+  var TOKEN_CSRF   = '<?= h(taoToken()) ?>';
   var GIAY_KIEM_TRA = 30;
   var KHOA_BO_QUA  = 'mcar_bo_qua_thong_bao';
+
+  // --- Xoa 1 thong bao (nut X, dung o trang Thong bao va Tong quan) ---
+  document.addEventListener('click', function (e) {
+    var nut = e.target.closest('.nut-xoa-thong-bao');
+    if (!nut) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var dong = nut.closest('.dong-thong-bao');
+    nut.disabled = true;
+    fetch(URL_XOA + '/' + nut.getAttribute('data-id'), {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: TOKEN_CSRF })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (kq) {
+        if (kq.ok && dong) {
+          dong.style.transition = 'opacity .15s';
+          dong.style.opacity = '0';
+          setTimeout(function () { dong.remove(); }, 150);
+        } else {
+          nut.disabled = false;
+        }
+      })
+      .catch(function () { nut.disabled = false; });
+  });
 
   var cham     = document.getElementById('chamThongBao');
   var dsNhanh  = document.getElementById('dsThongBaoNhanh');

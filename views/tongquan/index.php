@@ -95,17 +95,19 @@ $mauLoai = [
           <?php foreach ($dsThongBao as $tb):
             $kieu = $mauLoai[$tb['type']] ?? ['icon' => 'bell', 'mau' => 'nen-xanh'];
           ?>
-            <a href="<?= duongDan('thongbao/doc/' . $tb['id']) ?>"
-               class="dong-thong-bao <?= $tb['is_read'] ? '' : 'chua-doc' ?>">
-              <div class="bieu-tuong <?= $kieu['mau'] ?>"><?= bieuTuong($kieu['icon']) ?></div>
-              <div class="phan-chu">
-                <div class="tieu-de"><?= h($tb['title']) ?></div>
-                <div class="thoi-gian"><?= h(thoiGianTuongDoi($tb['created_at'])) ?></div>
-              </div>
-              <?php if (!$tb['is_read']): ?>
-                <span class="cham-chua-doc" title="Chưa đọc"></span>
-              <?php endif; ?>
-            </a>
+            <div class="dong-thong-bao <?= $tb['is_read'] ? '' : 'chua-doc' ?>">
+              <a href="<?= duongDan('thongbao/doc/' . $tb['id']) ?>" class="thong-bao-lienket">
+                <div class="bieu-tuong <?= $kieu['mau'] ?>"><?= bieuTuong($kieu['icon']) ?></div>
+                <div class="phan-chu">
+                  <div class="tieu-de"><?= h($tb['title']) ?></div>
+                  <div class="thoi-gian"><?= h(thoiGianTuongDoi($tb['created_at'])) ?></div>
+                </div>
+                <?php if (!$tb['is_read']): ?>
+                  <span class="cham-chua-doc" title="Chưa đọc"></span>
+                <?php endif; ?>
+              </a>
+              <button type="button" class="nut-xoa-thong-bao" data-id="<?= (int)$tb['id'] ?>" title="Xóa thông báo"><?= bieuTuong('x') ?></button>
+            </div>
           <?php endforeach; ?>
           <?php if (!$dsThongBao): ?>
             <div class="khong-co-du-lieu"><?= bieuTuong('inbox') ?><br>Chưa có thông báo nào</div>

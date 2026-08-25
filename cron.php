@@ -72,10 +72,10 @@ $ghiLog[] = 'Nhắc lại: ' . count($denHan) . ' thông báo · '
           . $soNguoi . ' người · gửi tới ' . $soThietBi . ' thiết bị';
 
 // ---------------------------------------------------------------------
-// 2. Don dep thong bao cu (giu lai 90 ngay)
+// 2. Don dep thong bao cu (da doc: giu 30 ngay, chua doc: giu toi da 60 ngay)
 // ---------------------------------------------------------------------
-$thongBaoModel->xoaThongBaoCu(90);
-$ghiLog[] = 'Đã dọn thông báo cũ hơn 90 ngày';
+$thongBaoModel->xoaThongBaoCu(30, 60);
+$ghiLog[] = 'Đã dọn thông báo cũ (đã đọc >30 ngày, chưa đọc >60 ngày)';
 
 require_once DUONG_DAN_GOC . '/models/GhiNhoModel.php';
 (new GhiNhoModel())->xoaMaHetHan();

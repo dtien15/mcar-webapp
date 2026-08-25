@@ -240,12 +240,27 @@ class ThongBaoModel extends Model
         );
     }
 
-    /** Xoa thong bao cu hon N ngay (don dep dinh ky) */
-    public function xoaThongBaoCu($soNgay = 90)
+    /**
+     * Xoa thong bao cu (don dep dinh ky, tranh phinh CSDL): thong bao DA DOC
+     * xoa sau $soNgayDaDoc ngay; du CHUA DOC cung xoa luon sau $soNgayToiDa
+     * ngay (an toan hon, phong khi khong ai bam vao thong bao do).
+     */
+    public function xoaThongBaoCu($soNgayDaDoc = 30, $soNgayToiDa = 60)
     {
         return $this->thucThi(
-            "DELETE FROM notifications WHERE is_read = 1 AND created_at < DATE_SUB(NOW(), INTERVAL ? DAY)",
-            [(int)$soNgay]
+            "DELETE FROM notifications
+             WHERE (is_read = 1 AND created_at < DATE_SUB(NOW(), INTERVAL ? DAY))
+                OR created_at < DATE_SUB(NOW(), INTERVAL ? DAY)",
+            [(int)$soNgayDaDoc, (int)$soNgayToiDa]
+        );
+    }
+
+    /** Xoa 1 thong bao theo yeu cau nguoi dung (nut X) */
+    public function xoaMot($id, $idTaiKhoan)
+    {
+        return $this->thucThi(
+            "DELETE FROM notifications WHERE id = ? AND user_id = ?",
+            [(int)$id, (int)$idTaiKhoan]
         );
     }
 }

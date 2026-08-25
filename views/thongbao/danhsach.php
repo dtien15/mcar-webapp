@@ -32,25 +32,27 @@ $mauLoai = [
       <?php foreach ($danhSach as $tb):
         $kieu = $mauLoai[$tb['type']] ?? ['icon' => 'bell', 'mau' => 'nen-xanh'];
       ?>
-        <a href="<?= duongDan('thongbao/doc/' . $tb['id']) ?>"
-           class="dong-thong-bao <?= $tb['is_read'] ? '' : 'chua-doc' ?>">
-          <div class="bieu-tuong <?= $kieu['mau'] ?>"><?= bieuTuong($kieu['icon']) ?></div>
-          <div class="phan-chu">
-            <div class="tieu-de"><?= h($tb['title']) ?></div>
-            <?php if ($tb['content']): ?>
-              <div class="noi-dung"><?= h($tb['content']) ?></div>
-            <?php endif; ?>
-            <div class="thoi-gian">
-              <?= h(thoiGianTuongDoi($tb['created_at'])) ?>
-              <?php if (!$tb['is_read'] && $tb['need_action'] && $tb['remind_count'] > 0): ?>
-                · <span class="text-danger">đã nhắc <?= (int)$tb['remind_count'] ?> lần</span>
+        <div class="dong-thong-bao <?= $tb['is_read'] ? '' : 'chua-doc' ?>">
+          <a href="<?= duongDan('thongbao/doc/' . $tb['id']) ?>" class="thong-bao-lienket">
+            <div class="bieu-tuong <?= $kieu['mau'] ?>"><?= bieuTuong($kieu['icon']) ?></div>
+            <div class="phan-chu">
+              <div class="tieu-de"><?= h($tb['title']) ?></div>
+              <?php if ($tb['content']): ?>
+                <div class="noi-dung"><?= h($tb['content']) ?></div>
               <?php endif; ?>
+              <div class="thoi-gian">
+                <?= h(thoiGianTuongDoi($tb['created_at'])) ?>
+                <?php if (!$tb['is_read'] && $tb['need_action'] && $tb['remind_count'] > 0): ?>
+                  · <span class="text-danger">đã nhắc <?= (int)$tb['remind_count'] ?> lần</span>
+                <?php endif; ?>
+              </div>
             </div>
-          </div>
-          <?php if (!$tb['is_read']): ?>
-            <span class="cham-chua-doc" title="Chưa đọc"></span>
-          <?php endif; ?>
-        </a>
+            <?php if (!$tb['is_read']): ?>
+              <span class="cham-chua-doc" title="Chưa đọc"></span>
+            <?php endif; ?>
+          </a>
+          <button type="button" class="nut-xoa-thong-bao" data-id="<?= (int)$tb['id'] ?>" title="Xóa thông báo"><?= bieuTuong('x') ?></button>
+        </div>
       <?php endforeach; ?>
 
       <?php if (!$danhSach): ?>

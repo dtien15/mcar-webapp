@@ -224,4 +224,26 @@ class ThongBaoController extends Controller
         datThongBao('Đã đánh dấu tất cả thông báo là đã đọc.');
         chuyenTrang('thongbao');
     }
+
+    /** Xoa 1 thong bao (nut X) - goi bang fetch tu trinh duyet */
+    public function xoa($id = 0)
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        if (!taiKhoanHienTai()) {
+            echo json_encode(['ok' => false, 'loi' => 'Chưa đăng nhập']);
+            exit;
+        }
+
+        $duLieu = json_decode(file_get_contents('php://input'), true);
+        $token  = $duLieu['token'] ?? ($_POST['token'] ?? '');
+        if (!kiemTraToken($token)) {
+            echo json_encode(['ok' => false, 'loi' => 'Phiên làm việc hết hạn, hãy tải lại trang']);
+            exit;
+        }
+
+        $this->model('ThongBaoModel')->xoaMot((int)$id, taiKhoanHienTai()['id']);
+        echo json_encode(['ok' => true]);
+        exit;
+    }
 }
