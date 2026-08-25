@@ -8,7 +8,7 @@
   RewriteEngine On
 
   # Chan truy cap truc tiep vao cac thu muc ma nguon
-  RewriteRule ^(config|core|models|controllers|views|helpers|database)/ - [F,L]
+  RewriteRule ^(config|core|models|controllers|views|helpers|database|ws-server)/ - [F,L]
 
   # Dieu huong moi request khong phai file/thu muc that vao index.php
   RewriteCond %{REQUEST_FILENAME} !-f

@@ -35,8 +35,13 @@ class KetNoi
      * Nap file cau hinh.
      * Uu tien config/cauhinh.php; neu chua co thi dung lai config/db.php (ban cu)
      * de khong phai cau hinh lai khi nang cap.
+     * Cong khai (khong con private): index.php goi ham nay ngay tu dau, DE CHAC
+     * CHAN cac hang nhu WS_URL/WS_SHARED_SECRET da co gia tri truoc khi controller
+     * chay - truoc day cau hinh chi duoc nap "luoi" luc thuc su ket noi DB (tuc la
+     * luc mot Model duoc tao), nen nhung request KHONG dung Model nao (vd API cap
+     * token realtime) se khong thay duoc cac hang trong cauhinh.php.
      */
-    private static function napCauHinh()
+    public static function napCauHinh()
     {
         if (defined('DB_HOST')) {
             return;

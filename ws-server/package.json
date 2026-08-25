@@ -1,0 +1,13 @@
+{
+  "name": "mcar-realtime",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MCAR - server WebSocket nho gon, chi lo 1 viec: giu ket noi voi trinh duyet va bao (nudge) khi PHP co thong bao moi. Khong chua logic nghiep vu.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

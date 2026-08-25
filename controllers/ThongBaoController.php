@@ -18,6 +18,29 @@ class ThongBaoController extends Controller
     }
 
     /**
+     * Cap token de trinh duyet mo ket noi WebSocket realtime (ws-server/).
+     * Goi lai moi lan (re)connect thay vi nhung 1 token co dinh vao trang,
+     * de khong bao gio bi het han giua chung khi tab mo lau.
+     */
+    public function tokenRealtime()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store');
+
+        if (!taiKhoanHienTai() || !coRealtime()) {
+            echo json_encode(['ok' => false]);
+            exit;
+        }
+
+        echo json_encode([
+            'ok'    => true,
+            'token' => taoTokenWebSocket(),
+            'url'   => WS_URL,
+        ]);
+        exit;
+    }
+
+    /**
      * API cho trinh duyet goi dinh ky (moi 30 giay).
      * Tra ve so thong bao chua doc + cac thong bao can bat popup.
      */

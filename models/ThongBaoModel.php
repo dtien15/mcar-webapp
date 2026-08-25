@@ -44,6 +44,7 @@ class ThongBaoModel extends Model
                 ]
             );
             $this->danhThucThietBi($taiKhoan['id']);
+            baoThucRealtime($taiKhoan['id']);
         }
         return count($dsTaiKhoan);
     }
@@ -62,6 +63,7 @@ class ThongBaoModel extends Model
             );
             $this->danhThucThietBi($taiKhoan['id']);
         }
+        baoThucRealtimeQuanLy();
         return count($dsTaiKhoan);
     }
 

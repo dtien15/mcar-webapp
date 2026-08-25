@@ -181,8 +181,11 @@ $menu = [
   var URL_KIEM_TRA = '<?= duongDan('thongbao/kiemtra') ?>';
   var URL_DOC      = '<?= duongDan('thongbao/doc') ?>';
   var URL_XOA      = '<?= duongDan('thongbao/xoa') ?>';
+  var URL_TOKEN_REALTIME = '<?= duongDan('thongbao/tokenrealtime') ?>';
   var TOKEN_CSRF   = '<?= h(taoToken()) ?>';
-  var GIAY_KIEM_TRA = 30;
+  // Realtime (WebSocket) bao ngay khi co tin - vong lap dinh ky chi con la
+  // luoi an toan du phong khi ws-server tat/mat ket noi, nen keo dai ra.
+  var GIAY_KIEM_TRA = 90;
   var KHOA_BO_QUA  = 'mcar_bo_qua_thong_bao';
 
   // --- Xoa 1 thong bao (nut X, dung o trang Thong bao va Tong quan) ---
@@ -331,6 +334,46 @@ $menu = [
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden) kiemTra();
   });
+
+  // ---------------------------------------------------------------
+  // Realtime: mo 1 ket noi WebSocket toi ws-server/ (neu da cau hinh).
+  // Server do KHONG gui du lieu that, chi "nhac" - nhan duoc nhac thi
+  // goi lai kiemTra() nhu binh thuong. Neu ws-server chua trien khai
+  // hoac dang tat thi tu dong bo qua, khong anh huong gi den web -
+  // vong lap kiemTra() dinh ky ben tren van chay du phong.
+  // ---------------------------------------------------------------
+  var giayChoKetNoiLai = 3;
+
+  function moKetNoiRealtime() {
+    fetch(URL_TOKEN_REALTIME, { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (kq) {
+        if (!kq.ok || !kq.token || !kq.url) return; // chua cau hinh realtime, bo qua lang le
+
+        var ws;
+        try { ws = new WebSocket(kq.url); } catch (e) { return; }
+
+        ws.onopen = function () {
+          giayChoKetNoiLai = 3; // ket noi duoc -> reset thoi gian cho lan sau neu rot
+          ws.send(JSON.stringify({ type: 'auth', token: kq.token }));
+        };
+        ws.onmessage = function (ev) {
+          try {
+            var goi = JSON.parse(ev.data);
+            if (goi.type === 'nudge') kiemTra();
+          } catch (e) { /* bo qua goi tin la */ }
+        };
+        ws.onclose = function () {
+          // Rot ket noi (mat mang, ws-server restart...) -> thu lai, gian cach tang dan toi da 60s
+          setTimeout(moKetNoiRealtime, giayChoKetNoiLai * 1000);
+          giayChoKetNoiLai = Math.min(giayChoKetNoiLai * 2, 60);
+        };
+        ws.onerror = function () { ws.close(); };
+      })
+      .catch(function () { /* khong lay duoc token, bo qua - van con vong lap dinh ky */ });
+  }
+
+  moKetNoiRealtime();
 })();
 
 // ---------------------------------------------------------------
