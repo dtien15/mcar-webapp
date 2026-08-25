@@ -241,6 +241,19 @@ window.mcarRealtime = {
 
   var hoTroThongBao = ('Notification' in window);
 
+  // Da dang ky push that (Service Worker) thi KHONG hien them popup trong
+  // trang nua - neu khong nguoi dung se nhan 2 thong bao cung luc cho 1 su
+  // kien (1 tu push that, 1 tu popup trong trang qua realtime/kiem tra dinh
+  // ky), gay cam giac trung lap kho chiu. Chi giu popup trong trang lam
+  // phuong an du phong cho nguoi CHUA bat push.
+  var coPushDangKy = false;
+  if ('serviceWorker' in navigator && 'PushManager' in window) {
+    navigator.serviceWorker.ready
+      .then(function (dk) { return dk.pushManager.getSubscription(); })
+      .then(function (dangKy) { coPushDangKy = !!dangKy; })
+      .catch(function () {});
+  }
+
   // --- Moi nguoi dung cap quyen nhan thong bao ---
   function capNhatOMoi() {
     if (!oMoi || !hoTroThongBao) return;
@@ -338,7 +351,9 @@ window.mcarRealtime = {
         var chuong = document.querySelector('.nut-chuong');
         if (chuong) chuong.setAttribute('aria-label', 'Thông báo (' + kq.chuaDoc + ' chưa đọc)');
 
-        (kq.popup || []).forEach(hienPopup);
+        // Chi hien popup trong trang neu CHUA dang ky push that - tranh 2
+        // thong bao cung luc cho 1 su kien (xem giai thich o dinh nghia coPushDangKy).
+        if (!coPushDangKy) (kq.popup || []).forEach(hienPopup);
 
         if (kq.danhSach) veDanhSach(kq.danhSach);
       })
