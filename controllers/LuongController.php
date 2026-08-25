@@ -85,8 +85,30 @@ class LuongController extends Controller
             'nam'       => $nam,
             'taiXe'     => $taiXeModel->layTheoId($idTaiXe),
             'bangLuong' => $bangLuong,
-            'dsChuyen'  => $chuyenXeModel->chuyenXeCuaTaiXeTheoKy($idTaiXe, $tuNgay, $denNgay),
             'lichSu'    => $luongModel->lichSuTaiXe($idTaiXe, 6),
         ], 'Phiếu lương');
+    }
+
+    /** Bang luong chi tiet tung cuoc xe trong ky (tach rieng khoi phieu luong tong hop) */
+    public function chitiet($idTaiXe = 0, $thang = 0, $nam = 0)
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+
+        $idTaiXe = (int)$idTaiXe;
+        $thang   = (int)$thang ?: (int)date('n');
+        $nam     = (int)$nam ?: (int)date('Y');
+
+        $chuyenXeModel = $this->model('ChuyenXeModel');
+        $taiXeModel    = $this->model('TaiXeModel');
+
+        $tuNgay  = layNgayDauThang($thang, $nam);
+        $denNgay = layNgayCuoiThang($thang, $nam);
+
+        $this->view('luong/chitiet', [
+            'thang'    => $thang,
+            'nam'      => $nam,
+            'taiXe'    => $taiXeModel->layTheoId($idTaiXe),
+            'dsChuyen' => $chuyenXeModel->chuyenXeCuaTaiXeTheoKy($idTaiXe, $tuNgay, $denNgay),
+        ], 'Bảng lương chi tiết');
     }
 }
