@@ -95,11 +95,11 @@ foreach ($bangLuong as $dong) {
             <div class="the-luong-dau">
               <div class="the-luong-avatar"><?= h(chuCaiDauTen($dong['ten_tai_xe'])) ?></div>
               <div class="the-luong-ten-khoi">
-                <div class="the-luong-ten"><?= h($dong['ten_tai_xe']) ?></div>
+                <div class="the-luong-ten" title="<?= h($dong['ten_tai_xe']) ?>"><?= h($dong['ten_tai_xe']) ?></div>
                 <div class="the-luong-so-cuoc"><?= (int)$dong['trip_count'] ?> cuốc trong kỳ</div>
               </div>
-              <span class="huy-hieu-trang-thai tt-<?= $mauTrangThai ?>"><?= h($dong['status']) ?></span>
             </div>
+            <span class="huy-hieu-trang-thai tt-<?= $mauTrangThai ?> the-luong-trang-thai"><?= h($dong['status']) ?></span>
 
             <div class="the-luong-so-lieu">
               <div class="the-luong-o-so">
