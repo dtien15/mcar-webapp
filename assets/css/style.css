@@ -367,42 +367,6 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
 .canh-giua { text-align: center; }
 .khong-co-du-lieu { padding: 40px 20px; text-align: center; color: var(--mau-chu-nhat); }
 
-/* ---------- Bieu do cot (mot chuoi du lieu, mot mau duy nhat) ---------- */
-.bieu-do-cot { display: flex; flex-direction: column; gap: 6px; }
-.dong-bieu-do {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 2px 4px;
-  border-radius: 6px;
-}
-.dong-bieu-do:hover { background: #f8fafc; }
-.dong-bieu-do .ten-cot { width: 56px; font-size: 12px; color: var(--mau-chu-nhat); flex-shrink: 0; }
-.dong-bieu-do .duong-ray { flex: 1; background: #f1f5f9; border-radius: 4px; height: 22px; overflow: hidden; }
-.dong-bieu-do .thanh {
-  background: var(--mau-chinh);
-  height: 100%;
-  border-radius: 0 4px 4px 0;
-  min-width: 2px;
-  transition: width .3s ease;
-}
-.dong-bieu-do.thang-hien-tai .thanh { background: #0f766e; }
-.dong-bieu-do .gia-tri-cot {
-  width: 118px;
-  text-align: right;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--mau-chu);
-  flex-shrink: 0;
-}
-.dong-bieu-do .so-chuyen-cot {
-  width: 62px;
-  text-align: right;
-  font-size: 11px;
-  color: var(--mau-chu-nhat);
-  flex-shrink: 0;
-}
-
 /* ---------- Form ---------- */
 .form-label { font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px; }
 .form-control, .form-select { font-size: 13px; border-color: #cbd5e1; }
@@ -685,9 +649,6 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
   .o-thong-ke .bieu-tuong { width: 36px; height: 36px; font-size: 19px; }
   .o-thong-ke .gia-tri { font-size: 16px; }
   .o-thong-ke .nhan { font-size: 11px; }
-
-  .dong-bieu-do .gia-tri-cot { width: 96px; font-size: 11px; }
-  .dong-bieu-do .so-chuyen-cot { display: none; }
 
   /* Nut bam to hon cho de cham tren dien thoai */
   .btn { padding: 8px 14px; }

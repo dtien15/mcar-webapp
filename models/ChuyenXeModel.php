@@ -75,6 +75,7 @@ class ChuyenXeModel extends Model
             "SELECT COUNT(*) AS so_chuyen,
                     COALESCE(SUM(revenue_vnd),0)   AS thu_vnd,
                     COALESCE(SUM(revenue_usd),0)   AS thu_usd,
+                    COALESCE(SUM(revenue_eur),0)   AS thu_eur,
                     COALESCE(SUM(trip_fee),0)      AS tien_tai,
                     COALESCE(SUM(fuel_cost),0)     AS xang_dau,
                     COALESCE(SUM(overnight_fee),0) AS luu_dem,
@@ -83,6 +84,12 @@ class ChuyenXeModel extends Model
              FROM trips t WHERE {$dieuKien}",
             $thamSo
         );
+    }
+
+    /** Quy doi 1 khoan tien co ca VND/USD/EUR ve 1 con so VND duy nhat, dung ty gia cho san */
+    public static function quyDoiTien($vnd, $usd, $eur, $tyGiaUsd, $tyGiaEur)
+    {
+        return (float)$vnd + (float)$usd * (float)$tyGiaUsd + (float)$eur * (float)$tyGiaEur;
     }
 
     /** Dung menh de WHERE tu bo loc */
@@ -334,6 +341,8 @@ class ChuyenXeModel extends Model
             "SELECT MONTH(trip_date) AS thang,
                     COUNT(*) AS so_chuyen,
                     COALESCE(SUM(revenue_vnd),0) AS doanh_thu,
+                    COALESCE(SUM(revenue_usd),0) AS doanh_thu_usd,
+                    COALESCE(SUM(revenue_eur),0) AS doanh_thu_eur,
                     COALESCE(SUM(fuel_cost),0)   AS xang_dau,
                     COALESCE(SUM(trip_fee),0)    AS tien_tai
              FROM trips WHERE YEAR(trip_date) = ?
@@ -343,15 +352,18 @@ class ChuyenXeModel extends Model
 
         $ketQua = [];
         for ($thang = 1; $thang <= 12; $thang++) {
-            $ketQua[$thang] = ['thang' => $thang, 'so_chuyen' => 0, 'doanh_thu' => 0, 'xang_dau' => 0, 'tien_tai' => 0];
+            $ketQua[$thang] = ['thang' => $thang, 'so_chuyen' => 0, 'doanh_thu' => 0,
+                'doanh_thu_usd' => 0, 'doanh_thu_eur' => 0, 'xang_dau' => 0, 'tien_tai' => 0];
         }
         foreach ($duLieu as $dong) {
             $ketQua[(int)$dong['thang']] = [
-                'thang'     => (int)$dong['thang'],
-                'so_chuyen' => (int)$dong['so_chuyen'],
-                'doanh_thu' => (float)$dong['doanh_thu'],
-                'xang_dau'  => (float)$dong['xang_dau'],
-                'tien_tai'  => (float)$dong['tien_tai'],
+                'thang'         => (int)$dong['thang'],
+                'so_chuyen'     => (int)$dong['so_chuyen'],
+                'doanh_thu'     => (float)$dong['doanh_thu'],
+                'doanh_thu_usd' => (float)$dong['doanh_thu_usd'],
+                'doanh_thu_eur' => (float)$dong['doanh_thu_eur'],
+                'xang_dau'      => (float)$dong['xang_dau'],
+                'tien_tai'      => (float)$dong['tien_tai'],
             ];
         }
         return $ketQua;
@@ -364,6 +376,8 @@ class ChuyenXeModel extends Model
             "SELECT c.id, c.name, c.plate_number, c.seats,
                     COUNT(t.id) AS so_chuyen,
                     COALESCE(SUM(t.revenue_vnd),0) AS doanh_thu,
+                    COALESCE(SUM(t.revenue_usd),0) AS doanh_thu_usd,
+                    COALESCE(SUM(t.revenue_eur),0) AS doanh_thu_eur,
                     COALESCE(SUM(t.fuel_cost),0)   AS xang_dau,
                     COALESCE(SUM(t.maintenance),0) AS bao_duong,
                     COALESCE(SUM(t.trip_fee),0)    AS tien_tai
@@ -381,6 +395,8 @@ class ChuyenXeModel extends Model
             "SELECT d.id, d.full_name, d.short_name,
                     COUNT(t.id) AS so_chuyen,
                     COALESCE(SUM(t.revenue_vnd),0)   AS doanh_thu,
+                    COALESCE(SUM(t.revenue_usd),0)   AS doanh_thu_usd,
+                    COALESCE(SUM(t.revenue_eur),0)   AS doanh_thu_eur,
                     COALESCE(SUM(t.trip_fee),0)      AS tien_tai,
                     COALESCE(SUM(t.overnight_fee),0) AS luu_dem,
                     COALESCE(SUM(t.fine),0)          AS phat
@@ -397,7 +413,9 @@ class ChuyenXeModel extends Model
         return $this->truyVan(
             "SELECT ct.id, ct.name,
                     COUNT(t.id) AS so_chuyen,
-                    COALESCE(SUM(t.revenue_vnd),0) AS doanh_thu
+                    COALESCE(SUM(t.revenue_vnd),0) AS doanh_thu,
+                    COALESCE(SUM(t.revenue_usd),0) AS doanh_thu_usd,
+                    COALESCE(SUM(t.revenue_eur),0) AS doanh_thu_eur
              FROM contract_types ct
              LEFT JOIN trips t ON t.contract_type_id = ct.id AND t.trip_date BETWEEN ? AND ?
              GROUP BY ct.id ORDER BY doanh_thu DESC",
