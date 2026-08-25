@@ -19,6 +19,23 @@ function bieuTuong($ten, $themLop = '')
     return '<i class="ti ti-' . h($ten) . ($themLop ? ' ' . h($themLop) : '') . '"></i>';
 }
 
+/**
+ * Chu cai dau cua 1-2 tu dau tien trong ten, dung lam avatar (vd Bang luong,
+ * modal chat). Dat o day (khong rieng trong 1 view) vi can dung o ca trang
+ * chinh lan fragment render rieng qua AJAX realtime.
+ */
+function chuCaiDauTen($ten)
+{
+    $tu = preg_split('/\s+/u', trim($ten));
+    $tu = array_filter($tu);
+    if (!$tu) return '?';
+    $dau = mb_substr(reset($tu), 0, 1, 'UTF-8');
+    if (count($tu) > 1) {
+        $dau .= mb_substr(end($tu), 0, 1, 'UTF-8');
+    }
+    return mb_strtoupper($dau, 'UTF-8');
+}
+
 /** Dinh dang so tien kieu Viet Nam: 1234567 -> 1.234.567 */
 function dinhDangTien($so, $soLeThapPhan = 0)
 {

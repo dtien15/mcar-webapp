@@ -234,6 +234,9 @@ $dsTab = [
   <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_nhotaikhac.php'; endforeach; ?>
 </div>
 
+<!-- Modal chat dung chung cho tat ca cac chuyen (mcarMoChat(id) mo cho dung chuyen) -->
+<?php include DUONG_DAN_GOC . '/views/chuyenxe/_modal_chat.php'; ?>
+
 <script>
 // ---------------------------------------------------------------
 // "Xem them": tai them 1 trang chuyen xe qua AJAX, noi vao DOM
@@ -290,6 +293,11 @@ $dsTab = [
   // ---------------------------------------------------------------
   function taiLaiTheoRealtime() {
     if (dangTai) return;
+    // Dang mo bat ky modal nao (Xac nhan/Nop lai/Sua phu phi/Nho tai khac) thi
+    // KHONG thay the DOM luc nay - se lam mat modal + du lieu dang go dang lung.
+    // Lan nudge sau se tu cap nhat khi nguoi dung dong modal ra.
+    if (document.querySelector('.modal.show')) return;
+
     var thamSo = new URLSearchParams(window.location.search);
     thamSo.set('bo_qua', 0);
     thamSo.set('lam_moi', 1);

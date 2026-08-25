@@ -9,12 +9,30 @@ class LuongController extends Controller
     public function danhSach()
     {
         $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->view('luong/danhsach', $this->layDuLieuKy(), 'Bảng lương');
+    }
 
+    /**
+     * API nho tra ve HTML da render san cua noi dung Bang luong (o thong ke +
+     * luoi the + modal thanh toan) - dung khi realtime nhan duoc "nudge" (co
+     * chuyen vua chot/mo lai/thanh toan...) de tu cap nhat, khong can F5.
+     */
+    public function soLieuMoi()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        header('Content-Type: application/json; charset=utf-8');
+
+        echo json_encode(['ok' => true, 'html' => $this->dungView('luong/_noidung', $this->layDuLieuKy())]);
+        exit;
+    }
+
+    /** Doc thang/nam tu query string + tinh toan du lieu bang luong cua ky do (dung chung 2 noi tren) */
+    private function layDuLieuKy()
+    {
         $thang = max(1, min(12, (int)layGet('thang', date('n'))));
         $nam   = (int)layGet('nam', date('Y'));
 
-        $luongModel = $this->model('LuongModel');
-        $bangLuong  = $luongModel->layTheoKy($thang, $nam);
+        $bangLuong = $this->model('LuongModel')->layTheoKy($thang, $nam);
 
         // Canh bao neu co tai xe thu ngoai te nhung luc tinh luong ty gia dang la 0
         // (se lam gia tri ngoai te bi tinh thanh 0d, che mat mot khoan tien that su).
@@ -27,12 +45,12 @@ class LuongController extends Controller
             }
         }
 
-        $this->view('luong/danhsach', [
+        return [
             'thang'          => $thang,
             'nam'            => $nam,
             'bangLuong'      => $bangLuong,
             'coCanhBaoTyGia' => $coCanhBaoTyGia,
-        ], 'Bảng lương');
+        ];
     }
 
     /** Tinh lai luong cho toan bo tai xe trong ky */

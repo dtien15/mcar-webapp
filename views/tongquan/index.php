@@ -5,6 +5,7 @@ $mauLoai = [
     'chuyen_da_chot' => ['icon' => 'circle-check', 'mau' => 'nen-luc'],
     'cho_chot'       => ['icon' => 'clock',        'mau' => 'nen-vang'],
     'luong'          => ['icon' => 'report-money', 'mau' => 'nen-tim'],
+    'chat_moi'       => ['icon' => 'message-circle', 'mau' => 'nen-xanh'],
 ];
 ?>
 

@@ -50,4 +50,27 @@ class ChatModel extends Model
             [(int)$idChuyen, (int)$idNguoiXem]
         );
     }
+
+    /**
+     * Danh sach id chuyen xe co tin nhan CHUA XEM doi voi 1 tai khoan - dung
+     * cham do tren nut "Nhan tin" o danh sach chuyen xe. Quan ly thay chua
+     * xem tren moi chuyen; tai xe chi thay chua xem tren chuyen cua chinh minh.
+     */
+    public function layTripCoTinChuaXem($idNguoiXem, $idTaiXeNeuLaTaiXe = null)
+    {
+        if ($idTaiXeNeuLaTaiXe) {
+            $ds = $this->truyVan(
+                "SELECT DISTINCT c.trip_id FROM chat_messages c
+                 JOIN trips t ON t.id = c.trip_id
+                 WHERE t.driver_id = ? AND c.sender_id <> ? AND c.read_at IS NULL",
+                [(int)$idTaiXeNeuLaTaiXe, (int)$idNguoiXem]
+            );
+        } else {
+            $ds = $this->truyVan(
+                "SELECT DISTINCT trip_id FROM chat_messages WHERE sender_id <> ? AND read_at IS NULL",
+                [(int)$idNguoiXem]
+            );
+        }
+        return array_map(function ($d) { return (int)$d['trip_id']; }, $ds);
+    }
 }

@@ -64,20 +64,39 @@ class ChatController extends Controller
             exit;
         }
 
-        $idNguoiGui = taiKhoanHienTai()['id'];
+        $taiKhoan   = taiKhoanHienTai();
+        $idNguoiGui = $taiKhoan['id'];
         $this->model('ChatModel')->guiTinNhan($idChuyen, $idNguoiGui, $noiDung);
 
-        // Bao realtime cho phia con lai: neu nguoi gui la tai xe -> bao tat ca quan
-        // ly; neu nguoi gui la quan ly -> bao dung tai khoan cua tai xe chuyen nay.
+        // Tao THONG BAO THAT (khong chi "nhac" WebSocket suong) - de con dau ben
+        // kia thay ngay o chuong thong bao, va nhat la nhan duoc PUSH NOTIFICATION
+        // ngay ca khi ho khong mo web/tat trinh duyet. baoThucRealtime*() ben
+        // trong ThongBaoModel se tu lo phan "nhac tuc thi" cho ben dang mo web.
+        $duongDanChuyen = 'chuyenxe/chitiet/' . $idChuyen;
+        $noiDungRutGon  = mb_strlen($noiDung) > 80 ? mb_substr($noiDung, 0, 80) . '…' : $noiDung;
+
         if (laQuanLy()) {
             if ($chuyen['driver_id']) {
                 $taiKhoanTaiXe = $this->model('NguoiDungModel')->layTheoDriverId($chuyen['driver_id']);
                 if ($taiKhoanTaiXe) {
-                    baoThucRealtime($taiKhoanTaiXe['id']);
+                    $this->model('ThongBaoModel')->guiChoTaiXe(
+                        $chuyen['driver_id'],
+                        $taiKhoan['ho_ten'] . ' nhắn tin về chuyến ngày ' . dinhDangNgay($chuyen['trip_date']),
+                        $noiDungRutGon,
+                        $duongDanChuyen,
+                        'chat_moi',
+                        $idChuyen
+                    );
                 }
             }
         } else {
-            baoThucRealtimeQuanLy();
+            $this->model('ThongBaoModel')->guiChoQuanLy(
+                $taiKhoan['ho_ten'] . ' nhắn tin về chuyến ngày ' . dinhDangNgay($chuyen['trip_date']),
+                $noiDungRutGon,
+                $duongDanChuyen,
+                'chat_moi',
+                $idChuyen
+            );
         }
 
         echo json_encode(['ok' => true]);

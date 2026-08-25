@@ -74,6 +74,12 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
       <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-sm btn-outline-secondary w-100">
         <?= bieuTuong('file-invoice') ?> Xem chi tiết phiếu
       </a>
+      <button type="button" class="btn btn-sm btn-outline-info w-100 nut-chat-nhanh" onclick="mcarMoChat(<?= $chuyen['id'] ?>)">
+        <?= bieuTuong('message-circle') ?> Nhắn tin
+        <?php if (!empty($dsTripChuaXemChat) && in_array($chuyen['id'], $dsTripChuaXemChat, true)): ?>
+          <span class="cham-chua-doc-chat"></span>
+        <?php endif; ?>
+      </button>
     <?php elseif ($cuaToi): ?>
       <?php if ($chuyen['status'] !== 'hoan_thanh'): ?>
         <?php if ($duocXacNhan): ?>
@@ -95,6 +101,12 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
       <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-outline-secondary w-100">
         <?= bieuTuong('file-invoice') ?> Xem chi tiết phiếu
       </a>
+      <button type="button" class="btn btn-outline-info w-100 nut-chat-nhanh" onclick="mcarMoChat(<?= $chuyen['id'] ?>)">
+        <?= bieuTuong('message-circle') ?> Nhắn tin
+        <?php if (!empty($dsTripChuaXemChat) && in_array($chuyen['id'], $dsTripChuaXemChat, true)): ?>
+          <span class="cham-chua-doc-chat"></span>
+        <?php endif; ?>
+      </button>
     <?php endif; ?>
   </div>
 </div>

@@ -31,6 +31,20 @@ class ThanhToanController extends Controller
         $this->danhSach($id);
     }
 
+    /**
+     * API nho tra ve HTML da render san cua tab "Cong no tai xe" - dung khi
+     * realtime nhan duoc "nudge" de tu cap nhat, khong can F5.
+     */
+    public function congNoMoi()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        header('Content-Type: application/json; charset=utf-8');
+
+        $congNo = $this->model('LuongModel')->congNoMoiNhat();
+        echo json_encode(['ok' => true, 'html' => $this->dungView('thanhtoan/_congno', ['congNo' => $congNo])]);
+        exit;
+    }
+
     public function luu()
     {
         $this->yeuCauQuyen(['admin', 'ketoan']);

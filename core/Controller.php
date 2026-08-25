@@ -29,8 +29,14 @@ class Controller
         echo $this->dungView($duongDanView, $duLieu);
     }
 
-    /** Dung noi dung view thanh chuoi */
-    private function dungView($duongDanView, array $duLieu)
+    /**
+     * Dung noi dung 1 view thanh chuoi HTML - dung khi hien thi trang binh
+     * thuong (qua view()/viewTrong()) VA khi can render 1 fragment rieng le
+     * de tra ve qua AJAX (vd danh sach lam moi realtime, khong tai lai ca
+     * trang). Truoc day ChuyenXeController tu khai bao 1 ham renderPhanView()
+     * rieng lam y het viec nay - da gop lai dung chung o day.
+     */
+    protected function dungView($duongDanView, array $duLieu)
     {
         $tapTin = DUONG_DAN_GOC . '/views/' . $duongDanView . '.php';
         if (!file_exists($tapTin)) {

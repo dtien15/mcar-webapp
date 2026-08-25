@@ -18,19 +18,30 @@ class ChuyenXeController extends Controller
         $tongSo        = $chuyenXeModel->demTheoLoc($loc);
 
         $duLieu = [
-            'loc'             => $loc,
-            'danhSach'        => $danhSach,
-            'tongSo'          => $tongSo,
-            'soDong'          => $soDong,
-            'conThem'         => $tongSo > count($danhSach),
-            'tongHop'         => $chuyenXeModel->tongHopTheoLoc($loc),
-            'dsXe'            => $this->model('XeModel')->layTatCa(),
-            'dsTaiXe'         => $this->model('TaiXeModel')->layTatCa(),
-            'dsTaiXeDangChay' => $this->model('TaiXeModel')->layTaiXeDangChay(),
-            'dsLoaiKeo'       => $this->model('LoaiKeoModel')->layTatCa(),
+            'loc'                => $loc,
+            'danhSach'           => $danhSach,
+            'tongSo'             => $tongSo,
+            'soDong'             => $soDong,
+            'conThem'            => $tongSo > count($danhSach),
+            'tongHop'            => $chuyenXeModel->tongHopTheoLoc($loc),
+            'dsXe'               => $this->model('XeModel')->layTatCa(),
+            'dsTaiXe'            => $this->model('TaiXeModel')->layTatCa(),
+            'dsTaiXeDangChay'    => $this->model('TaiXeModel')->layTaiXeDangChay(),
+            'dsLoaiKeo'          => $this->model('LoaiKeoModel')->layTatCa(),
+            'dsTripChuaXemChat'  => $this->layTripChuaXemChat(),
         ];
 
         $this->view('chuyenxe/danhsach', $duLieu, 'Chuyến xe');
+    }
+
+    /** Danh sach id chuyen co tin nhan chua xem, theo dung vai tro tai khoan hien tai */
+    private function layTripChuaXemChat()
+    {
+        if (!taiKhoanHienTai()) {
+            return [];
+        }
+        $idTaiXe = laTaiXe() ? (int)(taiKhoanHienTai()['id_tai_xe'] ?? 0) : null;
+        return $this->model('ChatModel')->layTripCoTinChuaXem(taiKhoanHienTai()['id'], $idTaiXe);
     }
 
     /**
@@ -54,7 +65,8 @@ class ChuyenXeController extends Controller
         $chuyenXeModel   = $this->model('ChuyenXeModel');
         $danhSach        = $chuyenXeModel->locDanhSach($loc, $soDong, $boQua);
         $tongSo          = $chuyenXeModel->demTheoLoc($loc);
-        $dsTaiXeDangChay = $this->model('TaiXeModel')->layTaiXeDangChay();
+        $dsTaiXeDangChay   = $this->model('TaiXeModel')->layTaiXeDangChay();
+        $dsTripChuaXemChat = $this->layTripChuaXemChat();
 
         $theHtml          = '';
         $dongHtml         = '';
@@ -63,13 +75,13 @@ class ChuyenXeController extends Controller
         $modalSuaPhuPhiHtml = '';
         $modalNhoTaiKhacHtml = '';
         foreach ($danhSach as $chuyen) {
-            $duLieuThe = ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai, 'dsTaiXeDangChay' => $dsTaiXeDangChay];
-            $theHtml             .= $this->renderPhanView('chuyenxe/_the_chuyen', $duLieuThe);
-            $dongHtml            .= $this->renderPhanView('chuyenxe/_dong_bang', $duLieuThe);
-            $modalXacNhanHtml    .= $this->renderPhanView('chuyenxe/_modal_xacnhan', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
-            $modalNopLaiHtml     .= $this->renderPhanView('chuyenxe/_modal_noplai', ['chuyen' => $chuyen]);
-            $modalSuaPhuPhiHtml  .= $this->renderPhanView('chuyenxe/_modal_suaphuphi', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
-            $modalNhoTaiKhacHtml .= $this->renderPhanView('chuyenxe/_modal_nhotaikhac', $duLieuThe);
+            $duLieuThe = ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai, 'dsTaiXeDangChay' => $dsTaiXeDangChay, 'dsTripChuaXemChat' => $dsTripChuaXemChat];
+            $theHtml             .= $this->dungView('chuyenxe/_the_chuyen', $duLieuThe);
+            $dongHtml            .= $this->dungView('chuyenxe/_dong_bang', $duLieuThe);
+            $modalXacNhanHtml    .= $this->dungView('chuyenxe/_modal_xacnhan', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
+            $modalNopLaiHtml     .= $this->dungView('chuyenxe/_modal_noplai', ['chuyen' => $chuyen]);
+            $modalSuaPhuPhiHtml  .= $this->dungView('chuyenxe/_modal_suaphuphi', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
+            $modalNhoTaiKhacHtml .= $this->dungView('chuyenxe/_modal_nhotaikhac', $duLieuThe);
         }
 
         echo json_encode([
@@ -91,15 +103,6 @@ class ChuyenXeController extends Controller
     {
         $soDong = (int)layGet('so_dong', 20);
         return in_array($soDong, [20, 50, 100], true) ? $soDong : 20;
-    }
-
-    /** Render 1 file view thanh chuoi HTML (dung cho fragment tra ve qua AJAX) */
-    private function renderPhanView($tenView, array $duLieu)
-    {
-        extract($duLieu);
-        ob_start();
-        require DUONG_DAN_GOC . '/views/' . $tenView . '.php';
-        return ob_get_clean();
     }
 
     /** Form them chuyen xe moi */
