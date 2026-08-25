@@ -89,7 +89,12 @@ foreach ($bangLuong as $dong) {
     <?php else: ?>
       <div class="luoi-luong">
         <?php foreach ($bangLuong as $dong):
-          $mauTrangThai = $dong['remaining'] < 0 ? 'danger' : ($dong['remaining'] > 0 ? 'warning' : 'success');
+          switch ($dong['status']) {
+              case 'Công ty còn thiếu': $mauTrangThai = 'warning'; break;
+              case 'Tài xế còn thiếu':  $mauTrangThai = 'danger';  break;
+              case 'Đã thanh toán đủ':  $mauTrangThai = 'success'; break;
+              default:                  $mauTrangThai = 'secondary';
+          }
         ?>
           <div class="the-luong">
             <div class="the-luong-dau">

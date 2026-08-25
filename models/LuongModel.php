@@ -93,14 +93,7 @@ class LuongModel extends Model
 
         $conLai = $tongLuong + $soDuTruoc - (float)$tongHop['thu_khach'] + (float)$tongHop['hoan_tien'] - $ctyDaTra;
 
-        $trangThai = 'Đã đối chiếu';
-        if (abs($conLai) < 1) {
-            $trangThai = 'Đã thanh toán đủ';
-        } elseif ($conLai > 0) {
-            $trangThai = 'Công ty còn thiếu';
-        } elseif ($conLai < 0) {
-            $trangThai = 'Tài xế còn thiếu';
-        }
+        $trangThai = $this->tinhTrangThai($tongLuong, $soDuTruoc, $tongHop['so_chuyen'], $conLai);
 
         $this->thucThi(
             "INSERT INTO payroll
@@ -153,19 +146,29 @@ class LuongModel extends Model
                 - (float)$banGhi['total_collected'] + (float)$banGhi['total_refund']
                 - (float)$ctyDaTra;
 
-        $trangThai = 'Đã đối chiếu';
-        if (abs($conLai) < 1) {
-            $trangThai = 'Đã thanh toán đủ';
-        } elseif ($conLai > 0) {
-            $trangThai = 'Công ty còn thiếu';
-        } else {
-            $trangThai = 'Tài xế còn thiếu';
-        }
+        $trangThai = $this->tinhTrangThai($banGhi['total_salary'], $banGhi['prev_balance'], $banGhi['trip_count'], $conLai);
 
         return $this->thucThi(
             "UPDATE payroll SET company_paid = ?, remaining = ?, status = ?, note = ? WHERE id = ?",
             [(float)$ctyDaTra, $conLai, $trangThai, $ghiChu, (int)$id]
         );
+    }
+
+    /**
+     * Xac dinh trang thai bang luong. Tai xe khong chay cuoc nao trong ky VA
+     * khong co luong co ban/phu cap gi (tong luong = 0) VA khong co no ky
+     * truoc thi coi la "Khong co du lieu" - tranh hien nham "Da thanh toan
+     * du" cho nguoi khong phat sinh gi ca (de bi hieu la da tra tien roi).
+     */
+    private function tinhTrangThai($tongLuong, $soDuTruoc, $soCuoc, $conLai)
+    {
+        if ((int)$soCuoc === 0 && abs((float)$tongLuong) < 1 && abs((float)$soDuTruoc) < 1) {
+            return 'Không có dữ liệu';
+        }
+        if (abs($conLai) < 1) {
+            return 'Đã thanh toán đủ';
+        }
+        return $conLai > 0 ? 'Công ty còn thiếu' : 'Tài xế còn thiếu';
     }
 
     /** Cong no moi nhat cua tat ca tai xe */

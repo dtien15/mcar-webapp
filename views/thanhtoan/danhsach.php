@@ -125,7 +125,15 @@
                 <th class="canh-phai">Cty đã trả</th><th class="canh-phai">Còn lại</th><th>Tình trạng</th><th class="canh-phai">Thao tác</th></tr>
           </thead>
           <tbody>
-          <?php $tongNo = 0; foreach ($congNo as $no): $tongNo += (float)$no['remaining']; ?>
+          <?php $tongNo = 0; foreach ($congNo as $no):
+            $tongNo += (float)$no['remaining'];
+            switch ($no['status']) {
+                case 'Công ty còn thiếu': $mauNo = 'warning'; break;
+                case 'Tài xế còn thiếu':  $mauNo = 'danger';  break;
+                case 'Đã thanh toán đủ':  $mauNo = 'success'; break;
+                default:                  $mauNo = 'secondary';
+            }
+          ?>
             <tr>
               <td><strong><?= h($no['ten_tai_xe']) ?></strong></td>
               <td><?= (int)$no['month'] ?>/<?= (int)$no['year'] ?></td>
@@ -133,7 +141,7 @@
               <td class="canh-phai"><?= dinhDangTien($no['company_paid']) ?></td>
               <td class="canh-phai <?= $no['remaining'] < 0 ? 'so-am' : 'so-duong' ?>"><?= dinhDangTien($no['remaining']) ?></td>
               <td>
-                <span class="huy-hieu-trang-thai tt-<?= $no['remaining'] < 0 ? 'danger' : ($no['remaining'] > 0 ? 'warning' : 'success') ?>">
+                <span class="huy-hieu-trang-thai tt-<?= $mauNo ?>">
                   <?= h($no['status']) ?>
                 </span>
               </td>
