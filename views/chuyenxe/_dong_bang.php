@@ -96,6 +96,11 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
                     data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">
               <?= bieuTuong('writing') ?> Nhập &amp; Xác nhận
             </button>
+          <?php elseif ($chuyen['status'] === 'tai_xe_xac_nhan'): ?>
+            <button type="button" class="btn btn-sm btn-outline-primary"
+                    data-bs-toggle="modal" data-bs-target="#suaPhuPhi<?= $chuyen['id'] ?>">
+              <?= bieuTuong('receipt') ?> Sửa phụ phí
+            </button>
           <?php endif; ?>
         <?php endif; ?>
         <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-sm btn-outline-secondary">

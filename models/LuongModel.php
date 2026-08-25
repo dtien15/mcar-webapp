@@ -88,6 +88,7 @@ class LuongModel extends Model
             + (float)$tongHop['tien_tai']
             + (float)$tongHop['phi_san_bay']
             + (float)$tongHop['phat_sinh']
+            + (float)$tongHop['phu_phi_khac']
             - (float)$tongHop['phat'];
 
         $conLai = $tongLuong + $soDuTruoc - (float)$tongHop['thu_khach'] + (float)$tongHop['hoan_tien'] - $ctyDaTra;
@@ -104,20 +105,21 @@ class LuongModel extends Model
         $this->thucThi(
             "INSERT INTO payroll
                 (driver_id, month, year, from_date, to_date, trip_count, total_overnight,
-                 total_fee, total_fine, total_collected, total_refund, prev_balance,
+                 total_fee, total_extra_surcharge, total_fine, total_collected, total_refund, prev_balance,
                  total_salary, company_paid, remaining, status, note)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
              ON DUPLICATE KEY UPDATE
                 from_date=VALUES(from_date), to_date=VALUES(to_date),
                 trip_count=VALUES(trip_count), total_overnight=VALUES(total_overnight),
-                total_fee=VALUES(total_fee), total_fine=VALUES(total_fine),
+                total_fee=VALUES(total_fee), total_extra_surcharge=VALUES(total_extra_surcharge),
+                total_fine=VALUES(total_fine),
                 total_collected=VALUES(total_collected), total_refund=VALUES(total_refund),
                 prev_balance=VALUES(prev_balance), total_salary=VALUES(total_salary),
                 remaining=VALUES(remaining), status=VALUES(status)",
             [
                 (int)$idTaiXe, (int)$thang, (int)$nam, $tuNgay, $denNgay,
                 (int)$tongHop['so_chuyen'], (float)$tongHop['luu_dem'],
-                (float)$tongHop['tien_tai'], (float)$tongHop['phat'],
+                (float)$tongHop['tien_tai'], (float)$tongHop['phu_phi_khac'], (float)$tongHop['phat'],
                 (float)$tongHop['thu_khach'], (float)$tongHop['hoan_tien'],
                 $soDuTruoc, $tongLuong, $ctyDaTra, $conLai, $trangThai, $ghiChu,
             ]

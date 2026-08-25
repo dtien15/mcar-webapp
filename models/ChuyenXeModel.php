@@ -25,6 +25,8 @@ class ChuyenXeModel extends Model
     public static function cotTaiXe()
     {
         return ['revenue_vnd', 'trip_fee', 'overnight_fee', 'deposit_amount', 'customer_paid',
+                'collector_name', 'collector_note', 'transfer_note',
+                'extra_surcharge', 'extra_surcharge_payer', 'extra_surcharge_note',
                 'fuel_cost', 'fuel_vat', 'fuel_payer', 'vetc', 'maintenance', 'fine',
                 'refund_vnd', 'refund_usd', 'cash_advance', 'direct_payment', 'note'];
     }
@@ -151,6 +153,9 @@ class ChuyenXeModel extends Model
 
         return $this->thucThi(
             "UPDATE trips SET revenue_vnd=?, trip_fee=?, overnight_fee=?, outsource_cost=?, deposit_amount=?, customer_paid=?,
+                    collector_name=?, collector_note=?,
+                    transfer_proof_image=COALESCE(?, transfer_proof_image), transfer_note=?,
+                    extra_surcharge=?, extra_surcharge_payer=?, extra_surcharge_note=?,
                     fuel_cost=?, fuel_vat=?, fuel_payer=?, vetc=?, maintenance=?, fine=?,
                     refund_vnd=?, refund_usd=?, cash_advance=?, direct_payment=?, note=?,
                     status='tai_xe_xac_nhan', driver_confirmed_at=NOW()
@@ -158,10 +163,40 @@ class ChuyenXeModel extends Model
             [
                 $duLieu['revenue_vnd'], $duLieu['trip_fee'], $duLieu['overnight_fee'], $duLieu['outsource_cost'],
                 $duLieu['deposit_amount'], $duLieu['customer_paid'],
+                $duLieu['collector_name'], $duLieu['collector_note'],
+                $duLieu['transfer_proof_image'], $duLieu['transfer_note'],
+                $duLieu['extra_surcharge'], $duLieu['extra_surcharge_payer'], $duLieu['extra_surcharge_note'],
                 $duLieu['fuel_cost'], $duLieu['fuel_vat'], $duLieu['fuel_payer'], $duLieu['vetc'],
                 $duLieu['maintenance'], $duLieu['fine'], $duLieu['refund_vnd'],
                 $duLieu['refund_usd'], $duLieu['cash_advance'], $duLieu['direct_payment'],
                 $duLieu['note'], (int)$id,
+            ]
+        );
+    }
+
+    /**
+     * Tai xe kiem tra/sua lai phu phi (luu dem/chay khuya + phu phi khac) SAU KHI
+     * da xac nhan chuyen nhung TRUOC khi cong ty chot - dung cho truong hop thuc
+     * te phat sinh khac voi luc xac nhan (vd khach doi y luu dem giua chung).
+     * Khong sua duoc chuyen da bi chot (hoan_thanh) hoac chua xac nhan (moi).
+     */
+    public function taiXeSuaPhuPhi($id, $idTaiXe, array $duLieu)
+    {
+        $chuyen = $this->motDong(
+            "SELECT id FROM trips WHERE id = ? AND driver_id = ? AND status = 'tai_xe_xac_nhan'",
+            [(int)$id, (int)$idTaiXe]
+        );
+        if (!$chuyen) {
+            return false;
+        }
+
+        return $this->thucThi(
+            "UPDATE trips SET overnight_fee=?, extra_surcharge=?, extra_surcharge_payer=?,
+                    extra_surcharge_note=?, surcharge_updated_at=NOW()
+             WHERE id = ?",
+            [
+                $duLieu['overnight_fee'], $duLieu['extra_surcharge'],
+                $duLieu['extra_surcharge_payer'], $duLieu['extra_surcharge_note'], (int)$id,
             ]
         );
     }
@@ -418,6 +453,8 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(overnight_fee),0) AS luu_dem,
                     COALESCE(SUM(airport_fee),0)   AS phi_san_bay,
                     COALESCE(SUM(other_fee),0)     AS phat_sinh,
+                    COALESCE(SUM(CASE WHEN extra_surcharge_payer = 'tai_xe'
+                                       THEN extra_surcharge ELSE 0 END), 0) AS phu_phi_khac,
                     COALESCE(SUM(trip_fee),0)      AS tien_tai,
                     COALESCE(SUM(fine),0)          AS phat,
                     COALESCE(SUM(CASE WHEN customer_paid = 0 AND cash_remitted = 0

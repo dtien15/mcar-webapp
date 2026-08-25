@@ -51,25 +51,28 @@ class ChuyenXeController extends Controller
         $danhSach      = $chuyenXeModel->locDanhSach($loc, $soDong, $boQua);
         $tongSo        = $chuyenXeModel->demTheoLoc($loc);
 
-        $theHtml         = '';
-        $dongHtml        = '';
+        $theHtml          = '';
+        $dongHtml         = '';
         $modalXacNhanHtml = '';
         $modalNopLaiHtml  = '';
+        $modalSuaPhuPhiHtml = '';
         foreach ($danhSach as $chuyen) {
-            $theHtml          .= $this->renderPhanView('chuyenxe/_the_chuyen', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
-            $dongHtml         .= $this->renderPhanView('chuyenxe/_dong_bang', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
-            $modalXacNhanHtml .= $this->renderPhanView('chuyenxe/_modal_xacnhan', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
-            $modalNopLaiHtml  .= $this->renderPhanView('chuyenxe/_modal_noplai', ['chuyen' => $chuyen]);
+            $theHtml            .= $this->renderPhanView('chuyenxe/_the_chuyen', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
+            $dongHtml           .= $this->renderPhanView('chuyenxe/_dong_bang', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
+            $modalXacNhanHtml   .= $this->renderPhanView('chuyenxe/_modal_xacnhan', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
+            $modalNopLaiHtml    .= $this->renderPhanView('chuyenxe/_modal_noplai', ['chuyen' => $chuyen]);
+            $modalSuaPhuPhiHtml .= $this->renderPhanView('chuyenxe/_modal_suaphuphi', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
         }
 
         echo json_encode([
-            'ok'                 => true,
-            'the_html'           => $theHtml,
-            'dong_html'          => $dongHtml,
-            'modal_xacnhan_html' => $modalXacNhanHtml,
-            'modal_noplai_html'  => $modalNopLaiHtml,
-            'so_dong_them'       => count($danhSach),
-            'con_them'           => $tongSo > ($boQua + count($danhSach)),
+            'ok'                   => true,
+            'the_html'             => $theHtml,
+            'dong_html'            => $dongHtml,
+            'modal_xacnhan_html'   => $modalXacNhanHtml,
+            'modal_noplai_html'    => $modalNopLaiHtml,
+            'modal_suaphuphi_html' => $modalSuaPhuPhiHtml,
+            'so_dong_them'         => count($danhSach),
+            'con_them'             => $tongSo > ($boQua + count($danhSach)),
         ]);
         exit;
     }
@@ -207,6 +210,12 @@ class ChuyenXeController extends Controller
 
         // Quan ly duoc phep sua ca phan chi phi cua tai xe
         $duLieuTaiXe = [
+            'collector_name'        => $this->chuTuForm('ai_thu'),
+            'collector_note'        => $this->chuTuForm('ghi_chu_thu'),
+            'transfer_note'         => $this->chuTuForm('ck_qua_ai'),
+            'extra_surcharge'       => $this->soTuForm('phu_phi_khac'),
+            'extra_surcharge_payer' => $this->layNguoiTraPhuPhi(),
+            'extra_surcharge_note'  => $this->chuTuForm('ghi_chu_phu_phi_khac'),
             'fuel_cost'      => $this->soTuForm('xang_dau'),
             'fuel_vat'       => $this->soTuForm('vat_xang_dau'),
             'fuel_payer'     => $this->chuTuForm('nguoi_tra_xang_dau'),
@@ -220,6 +229,12 @@ class ChuyenXeController extends Controller
             'note'           => $this->chuTuForm('ghi_chu'),
         ];
         $duLieu = array_merge($duLieu, $duLieuTaiXe);
+
+        // Chi ghi de anh chuyen khoan neu co file moi gui len (khong xoa mat anh cu)
+        $anhCkMoi = $this->xuLyAnhCK('anh_ck');
+        if ($anhCkMoi !== null) {
+            $duLieu['transfer_proof_image'] = $anhCkMoi;
+        }
 
         // Tai xe tu tao: khoa cung xe + tai xe la chinh minh, khong tin gia tri POST gui len
         if (laTaiXe()) {
@@ -416,12 +431,19 @@ class ChuyenXeController extends Controller
         }
 
         $ketQua = $this->model('ChuyenXeModel')->taiXeXacNhan($id, $idTaiXe, [
-            'revenue_vnd'    => $this->soTuForm('thu_vnd'),
-            'trip_fee'       => $this->soTuForm('tien_cuoc_xe'),
-            'overnight_fee'  => $this->soTuForm('luu_dem'),
-            'outsource_cost' => $this->soTuForm('chi_phi_keo_ngoai'),
-            'deposit_amount' => $this->soTuForm('dat_coc'),
-            'customer_paid'  => !empty($_POST['khach_da_thanh_toan']) ? 1 : 0,
+            'revenue_vnd'            => $this->soTuForm('thu_vnd'),
+            'trip_fee'               => $this->soTuForm('tien_cuoc_xe'),
+            'overnight_fee'          => $this->soTuForm('luu_dem'),
+            'outsource_cost'         => $this->soTuForm('chi_phi_keo_ngoai'),
+            'deposit_amount'         => $this->soTuForm('dat_coc'),
+            'customer_paid'          => !empty($_POST['khach_da_thanh_toan']) ? 1 : 0,
+            'collector_name'         => $this->chuTuForm('ai_thu'),
+            'collector_note'         => $this->chuTuForm('ghi_chu_thu'),
+            'transfer_proof_image'   => $this->xuLyAnhCK('anh_ck'),
+            'transfer_note'          => $this->chuTuForm('ck_qua_ai'),
+            'extra_surcharge'        => $this->soTuForm('phu_phi_khac'),
+            'extra_surcharge_payer'  => $this->layNguoiTraPhuPhi(),
+            'extra_surcharge_note'   => $this->chuTuForm('ghi_chu_phu_phi_khac'),
             'fuel_cost'      => $this->soTuForm('xang_dau'),
             'fuel_vat'       => $this->soTuForm('vat_xang_dau'),
             'fuel_payer'     => $this->chuTuForm('nguoi_tra_xang_dau'),
@@ -446,6 +468,34 @@ class ChuyenXeController extends Controller
             datThongBao('Đã xác nhận chuyến xe. Chờ công ty chốt.');
         } else {
             datThongBao('Chuyến xe không hợp lệ hoặc đã được xác nhận trước đó.', 'danger');
+        }
+        chuyenTrang('chuyenxe');
+    }
+
+    /**
+     * Tai xe kiem tra/sua lai phu phi (luu dem/chay khuya + phu phi khac) SAU KHI
+     * da xac nhan chuyen nhung TRUOC khi cong ty chot. Dung khi thuc te phat sinh
+     * khac voi luc bam "Nhap chi phi & Xac nhan" (vd khach doi y luu dem giua chung).
+     */
+    public function suaphuphi()
+    {
+        $this->yeuCauQuyen(['taixe']);
+        $this->yeuCauPost();
+
+        $id      = (int)($_POST['id'] ?? 0);
+        $idTaiXe = taiKhoanHienTai()['id_tai_xe'];
+
+        $ketQua = $idTaiXe && $this->model('ChuyenXeModel')->taiXeSuaPhuPhi($id, $idTaiXe, [
+            'overnight_fee'         => $this->soTuForm('luu_dem'),
+            'extra_surcharge'       => $this->soTuForm('phu_phi_khac'),
+            'extra_surcharge_payer' => $this->layNguoiTraPhuPhi(),
+            'extra_surcharge_note'  => $this->chuTuForm('ghi_chu_phu_phi_khac'),
+        ]);
+
+        if ($ketQua) {
+            datThongBao('Đã cập nhật phụ phí. Công ty sẽ thấy số liệu mới khi chốt.');
+        } else {
+            datThongBao('Không sửa được — chuyến xe chưa xác nhận, đã bị chốt, hoặc không phải của bạn.', 'danger');
         }
         chuyenTrang('chuyenxe');
     }
@@ -641,6 +691,56 @@ class ChuyenXeController extends Controller
             $phan[] = 'Tiền cuốc ' . dinhDangTien($duLieu['trip_fee']) . 'đ';
         }
         return implode(' · ', $phan);
+    }
+
+    /** Doc "ai tra phu phi khac" tu form, chi nhan 2 gia tri hop le */
+    private function layNguoiTraPhuPhi()
+    {
+        $gt = $this->chuTuForm('nguoi_tra_phu_phi_khac');
+        return in_array($gt, ['tai_xe', 'cong_ty'], true) ? $gt : null;
+    }
+
+    /**
+     * Xu ly upload anh chuyen khoan cua khach (neu co gui len).
+     * Tra ve duong dan tuong doi da luu, hoac null neu khong co file gui len
+     * (de model dung COALESCE giu nguyen anh cu, khong xoa mat anh da co).
+     */
+    private function xuLyAnhCK($tenTruong)
+    {
+        if (empty($_FILES[$tenTruong]) || $_FILES[$tenTruong]['error'] === UPLOAD_ERR_NO_FILE) {
+            return null;
+        }
+        $tapTin = $_FILES[$tenTruong];
+        if ($tapTin['error'] !== UPLOAD_ERR_OK) {
+            datThongBao('Lỗi khi tải ảnh chuyển khoản lên, vui lòng thử lại.', 'danger');
+            return null;
+        }
+        if ($tapTin['size'] > 5 * 1024 * 1024) {
+            datThongBao('Ảnh chuyển khoản quá lớn (tối đa 5MB).', 'danger');
+            return null;
+        }
+
+        $thongTinAnh = @getimagesize($tapTin['tmp_name']);
+        $dsMimeChoPhep = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+        if (!$thongTinAnh || !isset($dsMimeChoPhep[$thongTinAnh['mime']])) {
+            datThongBao('Ảnh chuyển khoản phải là file ảnh (JPG/PNG/WEBP).', 'danger');
+            return null;
+        }
+
+        $thuMuc = DUONG_DAN_GOC . '/assets/uploads/ck';
+        if (!is_dir($thuMuc)) {
+            mkdir($thuMuc, 0755, true);
+            // Chan thuc thi script trong thu muc upload, phong khi co file la mao
+            file_put_contents($thuMuc . '/.htaccess', "php_flag engine off\n<FilesMatch \"\\.(php|phtml|php\\d)$\">\nRequire all denied\n</FilesMatch>\n");
+        }
+
+        $tenFile = bin2hex(random_bytes(16)) . '.' . $dsMimeChoPhep[$thongTinAnh['mime']];
+        if (!move_uploaded_file($tapTin['tmp_name'], $thuMuc . '/' . $tenFile)) {
+            datThongBao('Không lưu được ảnh chuyển khoản, vui lòng thử lại.', 'danger');
+            return null;
+        }
+
+        return 'assets/uploads/ck/' . $tenFile;
     }
 
     /** Doc bo loc tu query string, tai xe chi thay du lieu cua minh */

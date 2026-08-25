@@ -10,7 +10,7 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
 ?>
 <div class="modal fade" id="xacNhan<?= $chuyen['id'] ?>" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <form method="post" action="<?= duongDan('chuyenxe/xacnhan') ?>" class="modal-content"
+    <form method="post" action="<?= duongDan('chuyenxe/xacnhan') ?>" class="modal-content" enctype="multipart/form-data"
           onsubmit="return confirm('Bạn chắc chắn muốn xác nhận chuyến xe này? Sau khi xác nhận sẽ không tự sửa lại được nữa, phải liên hệ công ty nếu cần đổi.');">
       <?php truongToken(); ?>
       <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
@@ -56,9 +56,60 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
               <input type="text" class="form-control form-control-sm o-nhap-tien o-chi-phi-ngoai" placeholder="0"
                      name="chi_phi_keo_ngoai" value="<?= h(giaTriTienForm($chuyen, 'outsource_cost')) ?>">
             </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label">Ai thu tiền khách</label>
+              <input class="form-control form-control-sm" name="ai_thu" placeholder="VD: chính bạn / kế toán A"
+                     value="<?= h($chuyen['collector_name'] ?? '') ?>">
+            </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label">Ghi chú thu tiền</label>
+              <input class="form-control form-control-sm" name="ghi_chu_thu"
+                     value="<?= h($chuyen['collector_note'] ?? '') ?>">
+            </div>
           </div>
           <div class="text-muted mt-2" style="font-size:12px">
             Sửa lại nếu số liệu thực tế khác với công ty đã giao.
+          </div>
+        </fieldset>
+
+        <!-- Neu khach chuyen khoan: anh ck lam bang chung -->
+        <fieldset class="nhom-truong">
+          <legend>Nếu khách chuyển khoản</legend>
+          <div class="row g-2">
+            <div class="col-6 col-md-6">
+              <label class="form-label">Ảnh chụp chuyển khoản</label>
+              <input type="file" name="anh_ck" class="form-control form-control-sm" accept="image/png,image/jpeg,image/webp">
+            </div>
+            <div class="col-6 col-md-6">
+              <label class="form-label">Chuyển khoản qua ai / tài khoản nào</label>
+              <input class="form-control form-control-sm" name="ck_qua_ai"
+                     value="<?= h($chuyen['transfer_note'] ?? '') ?>">
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Phu phi khac phat sinh thuc te -->
+        <fieldset class="nhom-truong">
+          <legend>Phụ phí khác (nếu có)</legend>
+          <div class="row g-2">
+            <div class="col-6 col-md-4">
+              <label class="form-label">Số tiền</label>
+              <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0"
+                     name="phu_phi_khac" value="<?= h(giaTriTienForm($chuyen, 'extra_surcharge')) ?>">
+            </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label">Ai trả</label>
+              <select name="nguoi_tra_phu_phi_khac" class="form-select form-select-sm">
+                <option value="">-- Chọn --</option>
+                <option value="tai_xe" <?= ($chuyen['extra_surcharge_payer'] ?? '') === 'tai_xe' ? 'selected' : '' ?>>Bạn trả (cty hoàn lại)</option>
+                <option value="cong_ty" <?= ($chuyen['extra_surcharge_payer'] ?? '') === 'cong_ty' ? 'selected' : '' ?>>Công ty trả trực tiếp</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label">Ghi chú</label>
+              <input class="form-control form-control-sm" name="ghi_chu_phu_phi_khac"
+                     value="<?= h($chuyen['extra_surcharge_note'] ?? '') ?>">
+            </div>
           </div>
         </fieldset>
 

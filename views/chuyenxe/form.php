@@ -22,7 +22,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
   </div>
 <?php endif; ?>
 
-<form method="post" action="<?= duongDan('chuyenxe/luu') ?>">
+<form method="post" action="<?= duongDan('chuyenxe/luu') ?>" enctype="multipart/form-data">
   <?php truongToken(); ?>
   <input type="hidden" name="id" value="<?= h(giaTri($chuyenXe, 'id')) ?>">
 
@@ -212,6 +212,32 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                    value="<?= h(giaTriTienForm($chuyenXe, 'revenue_vnd')) ?>">
           </div>
           <div class="col-6 col-md-3">
+            <label class="form-label">Ai thu tiền khách</label>
+            <input name="ai_thu" class="form-control" placeholder="VD: tài xế / kế toán A" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'collector_name')) ?>">
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">Ghi chú thu tiền</label>
+            <input name="ghi_chu_thu" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'collector_note')) ?>">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label">Ảnh chuyển khoản của khách</label>
+            <?php if (!$khoaSua): ?>
+              <input type="file" name="anh_ck" class="form-control" accept="image/png,image/jpeg,image/webp">
+            <?php endif; ?>
+            <?php if (!empty($chuyenXe['transfer_proof_image'])): ?>
+              <a href="<?= duongDan($chuyenXe['transfer_proof_image']) ?>" target="_blank" class="d-inline-block mt-1">
+                <img src="<?= duongDan($chuyenXe['transfer_proof_image']) ?>" alt="Ảnh chuyển khoản" style="max-height:60px;border:1px solid #ddd;border-radius:4px">
+              </a>
+            <?php endif; ?>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label">Chuyển khoản qua ai / tài khoản nào</label>
+            <input name="ck_qua_ai" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'transfer_note')) ?>">
+          </div>
+          <div class="col-6 col-md-3">
             <label class="form-label">Tiền cuốc xe (trả tài xế)</label>
             <input type="text" name="tien_cuoc_xe" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
                    value="<?= h(giaTriTienForm($chuyenXe, 'trip_fee')) ?>">
@@ -249,6 +275,24 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
             <label class="form-label">Phát sinh khác</label>
             <input type="text" name="phat_sinh_khac" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
                    value="<?= h(giaTriTienForm($chuyenXe, 'other_fee')) ?>">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label">Phụ phí khác <span class="text-muted">(phát sinh thực tế)</span></label>
+            <input type="text" name="phu_phi_khac" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                   value="<?= h(giaTriTienForm($chuyenXe, 'extra_surcharge')) ?>">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label">Phụ phí khác do ai trả</label>
+            <select name="nguoi_tra_phu_phi_khac" class="form-select" <?= $chiXemSel ?>>
+              <option value="">-- Chọn --</option>
+              <option value="tai_xe" <?= giaTri($chuyenXe, 'extra_surcharge_payer') === 'tai_xe' ? 'selected' : '' ?>>Tài xế trả (cty hoàn lại)</option>
+              <option value="cong_ty" <?= giaTri($chuyenXe, 'extra_surcharge_payer') === 'cong_ty' ? 'selected' : '' ?>>Công ty trả trực tiếp</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">Ghi chú phụ phí khác</label>
+            <input name="ghi_chu_phu_phi_khac" class="form-control" <?= $chiXem ?>
+                   value="<?= h(giaTri($chuyenXe, 'extra_surcharge_note')) ?>">
           </div>
 
           <div class="col-12">

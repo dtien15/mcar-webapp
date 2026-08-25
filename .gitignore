@@ -5,3 +5,6 @@ config/db.php
 # File SQL va tai lieu - chi dung o may lap trinh, khong can dua len hosting
 database/
 HUONG_DAN_TRIEN_KHAI.md
+
+# Anh chuyen khoan khach tai len - du lieu thuc te cua tung server, khong dua len Git
+assets/uploads/

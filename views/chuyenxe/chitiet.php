@@ -94,6 +94,35 @@
           <label class="form-label">Khách trả VNĐ</label>
           <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['revenue_vnd']) ?>" readonly>
         </div>
+        <?php if (!empty($chuyen['collector_name'])): ?>
+        <div class="col-6 col-md-3">
+          <label class="form-label">Ai thu tiền khách</label>
+          <input class="form-control form-control-sm" value="<?= h($chuyen['collector_name']) ?>" readonly>
+        </div>
+        <?php endif; ?>
+        <?php if (!empty($chuyen['collector_note'])): ?>
+        <div class="col-12 col-md-6">
+          <label class="form-label">Ghi chú thu tiền</label>
+          <input class="form-control form-control-sm" value="<?= h($chuyen['collector_note']) ?>" readonly>
+        </div>
+        <?php endif; ?>
+        <?php if (!empty($chuyen['transfer_proof_image']) || !empty($chuyen['transfer_note'])): ?>
+        <div class="col-6 col-md-3">
+          <label class="form-label">Chuyển khoản qua ai</label>
+          <input class="form-control form-control-sm" value="<?= h($chuyen['transfer_note']) ?>" readonly>
+        </div>
+        <?php endif; ?>
+        <?php if (!empty($chuyen['transfer_proof_image'])): ?>
+        <div class="col-6 col-md-3">
+          <label class="form-label">Ảnh chuyển khoản</label>
+          <div>
+            <a href="<?= duongDan($chuyen['transfer_proof_image']) ?>" target="_blank">
+              <img src="<?= duongDan($chuyen['transfer_proof_image']) ?>" alt="Ảnh chuyển khoản"
+                   style="max-height:80px;border:1px solid #ddd;border-radius:4px">
+            </a>
+          </div>
+        </div>
+        <?php endif; ?>
         <?php if (laQuanLy() && !$chuyen['customer_paid'] && in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
         <div class="col-12 col-md-6">
           <label class="form-label">Tài xế nộp lại tiền cho công ty</label>
@@ -140,6 +169,19 @@
           <label class="form-label">Phát sinh khác</label>
           <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['other_fee']) ?>" readonly>
         </div>
+        <?php endif; ?>
+        <?php if ($chuyen['extra_surcharge'] > 0): ?>
+        <div class="col-6 col-md-3">
+          <label class="form-label">Phụ phí khác</label>
+          <input class="form-control form-control-sm"
+                 value="<?= dinhDangTien($chuyen['extra_surcharge']) ?> (<?= $chuyen['extra_surcharge_payer'] === 'cong_ty' ? 'Công ty trả' : 'Tài xế trả' ?>)" readonly>
+        </div>
+        <?php if (!empty($chuyen['extra_surcharge_note'])): ?>
+        <div class="col-12 col-md-6">
+          <label class="form-label">Ghi chú phụ phí khác</label>
+          <input class="form-control form-control-sm" value="<?= h($chuyen['extra_surcharge_note']) ?>" readonly>
+        </div>
+        <?php endif; ?>
         <?php endif; ?>
       </div>
     </fieldset>
@@ -217,6 +259,12 @@
         <div class="col-6 col-md-4">
           <span class="text-muted d-block" style="font-size:11px">Công ty chốt lúc</span>
           <?= h(dinhDangNgay($chuyen['completed_at'], 'd/m/Y H:i')) ?>
+        </div>
+        <?php endif; ?>
+        <?php if ($chuyen['surcharge_updated_at']): ?>
+        <div class="col-6 col-md-4">
+          <span class="text-muted d-block" style="font-size:11px">Tài xế sửa phụ phí lúc</span>
+          <?= h(dinhDangNgay($chuyen['surcharge_updated_at'], 'd/m/Y H:i')) ?>
         </div>
         <?php endif; ?>
       </div>
