@@ -216,9 +216,7 @@ $coCanhBaoTyGia = ((float)$bangLuong['total_collected_usd'] > 0 && $tyGiaUsd <= 
     </table>
 
     <div class="phieu-luong-cuoi">
-      <span class="nhan">TIỀN TÀI TRONG THÁNG CÒN LẠI
-        <span class="text-muted" style="font-weight:400; font-size:11px; display:block">(dương: công ty trả tài xế · âm: tài xế nộp công ty)</span>
-      </span>
+      <span class="nhan">TIỀN TÀI TRONG THÁNG CÒN LẠI</span>
       <span class="gt <?= $bangLuong['remaining'] < 0 ? 'so-am' : 'so-duong' ?>"><?= dinhDangTien($bangLuong['remaining']) ?></span>
     </div>
     <div class="mt-2" style="font-size:12px; font-style:italic">
