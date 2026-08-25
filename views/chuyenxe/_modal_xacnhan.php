@@ -58,7 +58,7 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label">Ai thu tiền khách</label>
-              <input class="form-control form-control-sm" name="ai_thu" placeholder="VD: chính bạn / kế toán A"
+              <input class="form-control form-control-sm" name="ai_thu"
                      value="<?= h($chuyen['collector_name'] ?? '') ?>">
             </div>
             <div class="col-6 col-md-4">

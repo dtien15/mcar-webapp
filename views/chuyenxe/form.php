@@ -49,8 +49,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
         <label class="form-label">
           <?= bieuTuong('clipboard-text') ?> Dán tin nhắn Zalo <span class="text-muted">(tự động điền các trường bên dưới - nhớ kiểm tra lại)</span>
         </label>
-        <textarea id="oDanNhanh" class="form-control" rows="3"
-                  placeholder="Dán nguyên đoạn tin nhắn giao chuyến vào đây, hoặc dán/đính kèm ảnh lịch trình rồi bấm Phân tích..."></textarea>
+        <textarea id="oDanNhanh" class="form-control" rows="3"></textarea>
         <div class="d-flex flex-wrap gap-2 align-items-center mt-1">
           <button type="button" id="nutPhanTich" class="btn btn-sm btn-outline-primary">
             <?= bieuTuong('wand') ?> Phân tích &amp; điền tự động
@@ -90,7 +89,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               </div>
               <div class="col-6 col-md-3">
                 <label class="form-label">Hành trình</label>
-                <input name="hanh_trinh" id="oHanhTrinh" class="form-control" placeholder="VD: SG-MN" <?= $chiXem ?>
+                <input name="hanh_trinh" id="oHanhTrinh" class="form-control" <?= $chiXem ?>
                        value="<?= h(giaTri($chuyenXe, 'route')) ?>">
               </div>
               <div class="col-6 col-md-3">
@@ -111,7 +110,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               </div>
               <div class="col-12 col-md-4">
                 <label class="form-label">Bảng đón khách <span class="text-muted">(nếu có)</span></label>
-                <input name="bang_don" class="form-control" placeholder="VD: tên khách / tên đoàn" <?= $chiXem ?>
+                <input name="bang_don" class="form-control" <?= $chiXem ?>
                        value="<?= h(giaTri($chuyenXe, 'pickup_sign')) ?>">
               </div>
 
@@ -245,7 +244,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               </div>
               <div class="col-6 col-md-3">
                 <label class="form-label">Ai thu tiền khách</label>
-                <input name="ai_thu" class="form-control" placeholder="VD: tài xế / kế toán A" <?= $chiXem ?>
+                <input name="ai_thu" class="form-control" <?= $chiXem ?>
                        value="<?= h(giaTri($chuyenXe, 'collector_name')) ?>">
               </div>
               <div class="col-12 col-md-6">

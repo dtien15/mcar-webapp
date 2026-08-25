@@ -38,8 +38,7 @@
         <label class="form-label">
           <?= bieuTuong('clipboard-text') ?> Dán tin nhắn Zalo <span class="text-muted">(tự động điền các trường bên dưới - nhớ kiểm tra lại)</span>
         </label>
-        <textarea id="oDanNhanh" class="form-control" rows="4"
-                  placeholder="Dán nguyên đoạn tin nhắn giao chuyến vào đây rồi bấm Phân tích..."></textarea>
+        <textarea id="oDanNhanh" class="form-control" rows="4"></textarea>
         <button type="button" id="nutPhanTich" class="btn btn-sm btn-outline-primary mt-2 mb-3">
           <?= bieuTuong('wand') ?> Phân tích &amp; điền tự động
         </button>
@@ -55,7 +54,7 @@
           </div>
           <div class="col-6 col-md-3">
             <label class="form-label">Hành trình</label>
-            <input name="hanh_trinh" class="form-control" placeholder="VD: SG-MN">
+            <input name="hanh_trinh" class="form-control">
           </div>
           <div class="col-6 col-md-3">
             <label class="form-label">Số lượng khách</label>
@@ -73,7 +72,7 @@
 
           <div class="col-12 col-md-4">
             <label class="form-label">Bảng đón khách <span class="text-muted">(nếu có)</span></label>
-            <input name="bang_don" class="form-control" placeholder="VD: tên khách / tên đoàn">
+            <input name="bang_don" class="form-control">
           </div>
           <div class="col-6 col-md-4">
             <label class="form-label">Họ tên khách</label>
