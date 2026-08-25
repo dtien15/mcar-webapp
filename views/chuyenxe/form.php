@@ -42,171 +42,186 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
           không cần xác nhận lại lần nữa, chuyến sẽ chuyển thẳng sang chờ công ty chốt.
         </div>
       <?php endif; ?>
-      <!-- 1. Thong tin chuyen di -->
-      <fieldset class="nhom-truong">
-        <legend>1. Thông tin chuyến đi</legend>
 
-        <?php if (!$khoaSua): ?>
-        <div class="row g-2 mb-3">
-          <div class="col-12">
-            <label class="form-label">
-              <?= bieuTuong('clipboard-text') ?> Dán tin nhắn Zalo <span class="text-muted">(tự động điền các trường bên dưới - nhớ kiểm tra lại)</span>
-            </label>
-            <textarea id="oDanNhanh" class="form-control" rows="3"
-                      placeholder="Dán nguyên đoạn tin nhắn giao chuyến vào đây, hoặc dán/đính kèm ảnh lịch trình rồi bấm Phân tích..."></textarea>
-            <div class="d-flex flex-wrap gap-2 align-items-center mt-1">
-              <button type="button" id="nutPhanTich" class="btn btn-sm btn-outline-primary">
-                <?= bieuTuong('wand') ?> Phân tích &amp; điền tự động
-              </button>
-              <button type="button" id="nutPhanTichAi" class="btn btn-sm btn-outline-success"
-                      data-url="<?= duongDan('chuyenxe/phantichai') ?>">
-                <?= bieuTuong('sparkles') ?> Phân tích bằng AI
-              </button>
-              <label class="btn btn-sm btn-outline-secondary mb-0" style="cursor:pointer">
-                <?= bieuTuong('paperclip') ?> Đính kèm ảnh
-                <input type="file" id="oAnhPhanTich" accept="image/png,image/jpeg,image/webp" hidden>
-              </label>
-              <span id="tenAnhDaChon" class="text-muted" style="font-size:12px"></span>
+      <?php if (!$khoaSua): ?>
+      <!-- Dan nhanh: luon hien san tren cung, ap dung duoc cho ca 4 nhom ben duoi -->
+      <div class="mb-3">
+        <label class="form-label">
+          <?= bieuTuong('clipboard-text') ?> Dán tin nhắn Zalo <span class="text-muted">(tự động điền các trường bên dưới - nhớ kiểm tra lại)</span>
+        </label>
+        <textarea id="oDanNhanh" class="form-control" rows="3"
+                  placeholder="Dán nguyên đoạn tin nhắn giao chuyến vào đây, hoặc dán/đính kèm ảnh lịch trình rồi bấm Phân tích..."></textarea>
+        <div class="d-flex flex-wrap gap-2 align-items-center mt-1">
+          <button type="button" id="nutPhanTich" class="btn btn-sm btn-outline-primary">
+            <?= bieuTuong('wand') ?> Phân tích &amp; điền tự động
+          </button>
+          <button type="button" id="nutPhanTichAi" class="btn btn-sm btn-outline-success"
+                  data-url="<?= duongDan('chuyenxe/phantichai') ?>">
+            <?= bieuTuong('sparkles') ?> Phân tích bằng AI
+          </button>
+          <label class="btn btn-sm btn-outline-secondary mb-0" style="cursor:pointer">
+            <?= bieuTuong('paperclip') ?> Đính kèm ảnh
+            <input type="file" id="oAnhPhanTich" accept="image/png,image/jpeg,image/webp" hidden>
+          </label>
+          <span id="tenAnhDaChon" class="text-muted" style="font-size:12px"></span>
+        </div>
+      </div>
+      <?php endif; ?>
+
+      <!-- 1. Chuyen di & khach - luon mo san, la nhung gi can dien dau tien -->
+      <div class="nhom-gap">
+        <button type="button" class="nhom-gap-dau" data-bs-toggle="collapse" data-bs-target="#gap1" aria-expanded="true">
+          <span class="nhom-gap-ten"><?= bieuTuong('route') ?> Chuyến đi &amp; khách</span>
+          <span class="nhom-gap-tom-tat" data-tom-tat="chuyendi"></span>
+          <?= bieuTuong('chevron-down', 'nhom-gap-mui-ten') ?>
+        </button>
+        <div class="collapse show" id="gap1">
+          <div class="nhom-gap-than">
+            <div class="row g-2">
+              <div class="col-6 col-md-3">
+                <label class="form-label">Ngày chạy xe *</label>
+                <input type="date" name="ngay_chay" class="form-control" required <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'trip_date', date('Y-m-d'))) ?>">
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Giờ đón khách</label>
+                <input type="time" name="gio_don" class="form-control" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'pickup_time')) ?>">
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Hành trình</label>
+                <input name="hanh_trinh" id="oHanhTrinh" class="form-control" placeholder="VD: SG-MN" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'route')) ?>">
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Số lượng khách</label>
+                <input type="number" min="0" name="so_luong_khach" class="form-control" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'passenger_count')) ?>">
+              </div>
+
+              <div class="col-6 col-md-4">
+                <label class="form-label">Điểm đón</label>
+                <input name="dia_diem_don" class="form-control" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'pickup_location')) ?>">
+              </div>
+              <div class="col-6 col-md-4">
+                <label class="form-label">Điểm trả</label>
+                <input name="dia_diem_tra" class="form-control" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'dropoff_location')) ?>">
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label">Bảng đón khách <span class="text-muted">(nếu có)</span></label>
+                <input name="bang_don" class="form-control" placeholder="VD: tên khách / tên đoàn" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'pickup_sign')) ?>">
+              </div>
+
+              <div class="col-6 col-md-4">
+                <label class="form-label">Họ tên khách</label>
+                <input name="ten_khach" class="form-control" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'customer_name')) ?>">
+              </div>
+              <div class="col-6 col-md-4">
+                <label class="form-label">SĐT khách</label>
+                <input name="sdt_khach" class="form-control" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'customer_phone')) ?>">
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label">Ghi chú khách <span class="text-muted">(nếu có)</span></label>
+                <input name="ghi_chu_khach" class="form-control" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'customer_note')) ?>">
+              </div>
             </div>
           </div>
         </div>
-        <?php endif; ?>
+      </div>
 
-        <div class="row g-2">
-          <div class="col-6 col-md-3">
-            <label class="form-label">Ngày chạy xe *</label>
-            <input type="date" name="ngay_chay" class="form-control" required <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'trip_date', date('Y-m-d'))) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Giờ đón khách</label>
-            <input type="time" name="gio_don" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'pickup_time')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Hành trình</label>
-            <input name="hanh_trinh" class="form-control" placeholder="VD: SG-MN" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'route')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Số lượng khách</label>
-            <input type="number" min="0" name="so_luong_khach" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'passenger_count')) ?>">
-          </div>
-
-          <div class="col-6 col-md-4">
-            <label class="form-label">Điểm đón</label>
-            <input name="dia_diem_don" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'pickup_location')) ?>">
-          </div>
-          <div class="col-6 col-md-4">
-            <label class="form-label">Điểm trả</label>
-            <input name="dia_diem_tra" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'dropoff_location')) ?>">
-          </div>
-          <div class="col-12 col-md-4">
-            <label class="form-label">Bảng đón khách <span class="text-muted">(nếu có)</span></label>
-            <input name="bang_don" class="form-control" placeholder="VD: tên khách / tên đoàn" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'pickup_sign')) ?>">
-          </div>
-
-          <div class="col-6 col-md-4">
-            <label class="form-label">Họ tên khách</label>
-            <input name="ten_khach" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'customer_name')) ?>">
-          </div>
-          <div class="col-6 col-md-4">
-            <label class="form-label">SĐT khách</label>
-            <input name="sdt_khach" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'customer_phone')) ?>">
-          </div>
-          <div class="col-12 col-md-4">
-            <label class="form-label">Ghi chú khách <span class="text-muted">(nếu có)</span></label>
-            <input name="ghi_chu_khach" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'customer_note')) ?>">
-          </div>
-        </div>
-      </fieldset>
-
-      <!-- 1b. Phan cong xe/tai xe & gia goi y -->
-      <fieldset class="nhom-truong">
-        <legend>2. Phân công xe &amp; giá</legend>
-        <div class="row g-2">
-          <div class="col-6 col-md-4">
-            <label class="form-label">Loại kèo</label>
-            <select name="id_loai_keo" id="oLoaiKeo" class="form-select" <?= $chiXemSel ?>>
-              <option value="">-- Chọn --</option>
-              <?php foreach ($dsLoaiKeo as $lk): ?>
-                <option value="<?= $lk['id'] ?>" data-ten="<?= h($lk['name']) ?>"
-                  <?= giaTri($chuyenXe, 'contract_type_id') == $lk['id'] ? 'selected' : '' ?>>
-                  <?= h($lk['name']) ?>
-                </option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-          <div class="col-6 col-md-4">
-            <label class="form-label">Tài xế</label>
-            <?php if (laTaiXe()): $txCuaToi = $dsTaiXe[0] ?? null; ?>
-              <!-- Tai xe tu tao: khoa cung la chinh minh -->
-              <input type="hidden" name="id_tai_xe" value="<?= h($txCuaToi['id'] ?? '') ?>">
-              <input class="form-control" value="<?= h($txCuaToi['full_name'] ?? '') ?>" readonly>
-            <?php else: ?>
-              <select name="id_tai_xe" id="oTaiXe" class="form-select" <?= $chiXemSel ?>>
-                <option value="">-- Chọn tài xế --</option>
-                <?php foreach ($dsTaiXe as $tx): ?>
-                  <option value="<?= $tx['id'] ?>" data-idxe="<?= h($tx['car_id']) ?>"
-                    <?= giaTri($chuyenXe, 'driver_id') == $tx['id'] ? 'selected' : '' ?>>
-                    <?= h($tx['full_name']) ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
-            <?php endif; ?>
-          </div>
-          <div class="col-6 col-md-4">
-            <label class="form-label">Xe</label>
-            <?php if (laTaiXe()): $xeCuaToi = $dsXe[0] ?? null; ?>
-              <!-- Tai xe tu tao: khoa cung xe cua minh, khong chon duoc xe khac -->
-              <input type="hidden" name="id_xe" value="<?= h($xeCuaToi['id'] ?? '') ?>">
-              <select id="oXe" class="form-select" disabled>
-                <?php if ($xeCuaToi): ?>
-                  <option data-socho="<?= h($xeCuaToi['seats']) ?>" selected>
-                    <?= h(trim($xeCuaToi['name'] . ' ' . $xeCuaToi['plate_number'])) ?> (<?= h($xeCuaToi['seats']) ?>)
-                  </option>
+      <!-- 2. Xe, tai xe & gia goi y - gap lai, tom tat xe/tai xe dang chon ngay tren tieu de -->
+      <div class="nhom-gap">
+        <button type="button" class="nhom-gap-dau" data-bs-toggle="collapse" data-bs-target="#gap2" aria-expanded="false">
+          <span class="nhom-gap-ten"><?= bieuTuong('steering-wheel') ?> Xe &amp; tài xế</span>
+          <span class="nhom-gap-tom-tat" data-tom-tat="xetaixe"></span>
+          <?= bieuTuong('chevron-down', 'nhom-gap-mui-ten') ?>
+        </button>
+        <div class="collapse" id="gap2">
+          <div class="nhom-gap-than">
+            <div class="row g-2">
+              <div class="col-6 col-md-4">
+                <label class="form-label">Loại kèo</label>
+                <select name="id_loai_keo" id="oLoaiKeo" class="form-select" <?= $chiXemSel ?>>
+                  <option value="">-- Chọn --</option>
+                  <?php foreach ($dsLoaiKeo as $lk): ?>
+                    <option value="<?= $lk['id'] ?>" data-ten="<?= h($lk['name']) ?>"
+                      <?= giaTri($chuyenXe, 'contract_type_id') == $lk['id'] ? 'selected' : '' ?>>
+                      <?= h($lk['name']) ?>
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+              <div class="col-6 col-md-4">
+                <label class="form-label">Tài xế</label>
+                <?php if (laTaiXe()): $txCuaToi = $dsTaiXe[0] ?? null; ?>
+                  <!-- Tai xe tu tao: khoa cung la chinh minh -->
+                  <input type="hidden" name="id_tai_xe" value="<?= h($txCuaToi['id'] ?? '') ?>">
+                  <input id="oTaiXe" class="form-control" value="<?= h($txCuaToi['full_name'] ?? '') ?>" readonly>
+                <?php else: ?>
+                  <select name="id_tai_xe" id="oTaiXe" class="form-select" <?= $chiXemSel ?>>
+                    <option value="">-- Chọn tài xế --</option>
+                    <?php foreach ($dsTaiXe as $tx): ?>
+                      <option value="<?= $tx['id'] ?>" data-idxe="<?= h($tx['car_id']) ?>"
+                        <?= giaTri($chuyenXe, 'driver_id') == $tx['id'] ? 'selected' : '' ?>>
+                        <?= h($tx['full_name']) ?>
+                      </option>
+                    <?php endforeach; ?>
+                  </select>
                 <?php endif; ?>
-              </select>
-            <?php else: ?>
-              <select name="id_xe" id="oXe" class="form-select" <?= $chiXemSel ?>>
-                <option value="">-- Chọn xe --</option>
-                <?php foreach ($dsXe as $xe): ?>
-                  <option value="<?= $xe['id'] ?>" data-socho="<?= h($xe['seats']) ?>"
-                    <?= giaTri($chuyenXe, 'car_id') == $xe['id'] ? 'selected' : '' ?>>
-                    <?= h(trim($xe['name'] . ' ' . $xe['plate_number'])) ?> (<?= h($xe['seats']) ?>)
-                  </option>
-                <?php endforeach; ?>
-              </select>
-              <div class="text-muted mt-1" style="font-size:12px">Tự chọn xe mặc định của tài xế, có thể đổi nếu tài xế chạy xe khác.</div>
-            <?php endif; ?>
-          </div>
+              </div>
+              <div class="col-6 col-md-4">
+                <label class="form-label">Xe</label>
+                <?php if (laTaiXe()): $xeCuaToi = $dsXe[0] ?? null; ?>
+                  <!-- Tai xe tu tao: khoa cung xe cua minh, khong chon duoc xe khac -->
+                  <input type="hidden" name="id_xe" value="<?= h($xeCuaToi['id'] ?? '') ?>">
+                  <select id="oXe" class="form-select" disabled>
+                    <?php if ($xeCuaToi): ?>
+                      <option data-socho="<?= h($xeCuaToi['seats']) ?>" selected>
+                        <?= h(trim($xeCuaToi['name'] . ' ' . $xeCuaToi['plate_number'])) ?> (<?= h($xeCuaToi['seats']) ?>)
+                      </option>
+                    <?php endif; ?>
+                  </select>
+                <?php else: ?>
+                  <select name="id_xe" id="oXe" class="form-select" <?= $chiXemSel ?>>
+                    <option value="">-- Chọn xe --</option>
+                    <?php foreach ($dsXe as $xe): ?>
+                      <option value="<?= $xe['id'] ?>" data-socho="<?= h($xe['seats']) ?>"
+                        <?= giaTri($chuyenXe, 'car_id') == $xe['id'] ? 'selected' : '' ?>>
+                        <?= h(trim($xe['name'] . ' ' . $xe['plate_number'])) ?> (<?= h($xe['seats']) ?>)
+                      </option>
+                    <?php endforeach; ?>
+                  </select>
+                  <div class="text-muted mt-1" style="font-size:12px">Tự chọn xe mặc định của tài xế, có thể đổi nếu tài xế chạy xe khác.</div>
+                <?php endif; ?>
+              </div>
 
-          <div class="col-12 col-md-6">
-            <label class="form-label">Gợi ý giá từ bảng giá</label>
-            <select id="oBangGia" class="form-select" <?= $chiXemSel ?>>
-              <option value="">-- Không dùng gợi ý --</option>
-              <?php foreach ($dsBangGia as $bg): ?>
-                <option value="<?= $bg['id'] ?>"><?= h($bg['route_name']) ?></option>
-              <?php endforeach; ?>
-            </select>
-            <div id="ghiChuGoiY" class="text-muted mt-1" style="font-size:12px"></div>
-          </div>
-          <div class="col-12 col-md-6">
-            <label class="form-label">Lưu ý từ công ty <span class="text-muted">(nếu có)</span></label>
-            <input name="luu_y_cty" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'company_note')) ?>">
+              <div class="col-12 col-md-6">
+                <label class="form-label">Gợi ý giá từ bảng giá</label>
+                <select id="oBangGia" class="form-select" <?= $chiXemSel ?>>
+                  <option value="">-- Không dùng gợi ý --</option>
+                  <?php foreach ($dsBangGia as $bg): ?>
+                    <option value="<?= $bg['id'] ?>"><?= h($bg['route_name']) ?></option>
+                  <?php endforeach; ?>
+                </select>
+                <div id="ghiChuGoiY" class="text-muted mt-1" style="font-size:12px"></div>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Lưu ý từ công ty <span class="text-muted">(nếu có)</span></label>
+                <input name="luu_y_cty" class="form-control" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'company_note')) ?>">
+              </div>
+            </div>
           </div>
         </div>
-      </fieldset>
+      </div>
 
-      <!-- 2. Doanh thu & tien tai (cong ty giao) -->
+      <!-- 3. Doanh thu & thu tien - gap lai, tom tat tong khach tra ngay tren tieu de -->
       <?php
         $coTienKhac  = ((float)giaTri($chuyenXe, 'revenue_usd', 0) > 0) || ((float)giaTri($chuyenXe, 'revenue_eur', 0) > 0);
         $phuPhiHienTai = (float)giaTri($chuyenXe, 'overnight_fee', 0);
@@ -214,194 +229,210 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
         if ($phuPhiHienTai == 200000) { $loaiPhuPhi = '200000'; }
         elseif ($phuPhiHienTai == 100000) { $loaiPhuPhi = '100000'; }
       ?>
-      <fieldset class="nhom-truong">
-        <legend>3. Doanh thu &amp; tiền tài</legend>
-        <div class="row g-2">
-          <div class="col-6 col-md-3">
-            <label class="form-label">Khách trả (VNĐ)</label>
-            <input type="text" name="thu_vnd" id="oThuVnd" class="form-control o-nhap-tien o-khach-tra" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'revenue_vnd')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Ai thu tiền khách</label>
-            <input name="ai_thu" class="form-control" placeholder="VD: tài xế / kế toán A" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'collector_name')) ?>">
-          </div>
-          <div class="col-12 col-md-6">
-            <label class="form-label">Ghi chú thu tiền</label>
-            <input name="ghi_chu_thu" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'collector_note')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Ảnh chuyển khoản của khách</label>
-            <?php if (!$khoaSua): ?>
-              <input type="file" name="anh_ck" class="form-control" accept="image/png,image/jpeg,image/webp">
-            <?php endif; ?>
-            <?php if (!empty($chuyenXe['transfer_proof_image'])): ?>
-              <a href="<?= duongDan($chuyenXe['transfer_proof_image']) ?>" target="_blank" class="d-inline-block mt-1">
-                <img src="<?= duongDan($chuyenXe['transfer_proof_image']) ?>" alt="Ảnh chuyển khoản" style="max-height:60px;border:1px solid #ddd;border-radius:4px">
-              </a>
-            <?php endif; ?>
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Chuyển khoản qua ai / tài khoản nào</label>
-            <input name="ck_qua_ai" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'transfer_note')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Tiền cuốc xe (trả tài xế)</label>
-            <input type="text" name="tien_cuoc_xe" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'trip_fee')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Chi phí kèo ngoài</label>
-            <input type="text" name="chi_phi_keo_ngoai" class="form-control o-nhap-tien o-chi-phi-ngoai" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'outsource_cost')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Mình nhận <span class="text-muted">(khách trả − kèo ngoài)</span></label>
-            <input type="text" class="form-control o-minh-nhan" placeholder="0" readonly tabindex="-1">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Tiền tài ứng trước</label>
-            <input type="text" name="tien_tai_ung" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'driver_advance')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Phụ phí</label>
-            <input type="text" name="luu_dem" class="form-control o-nhap-tien o-phu-phi" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'overnight_fee')) ?>">
-            <div class="btn-group btn-group-sm mt-1 o-phu-phi-nhanh" role="group">
-              <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhi === '0' ? 'active' : '' ?>" data-tien="0" <?= $chiXemSel ?>>Không có</button>
-              <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhi === '200000' ? 'active' : '' ?>" data-tien="200000" <?= $chiXemSel ?>>Lưu đêm</button>
-              <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhi === '100000' ? 'active' : '' ?>" data-tien="100000" <?= $chiXemSel ?>>Chạy khuya</button>
-            </div>
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Phí sân bay / đậu xe</label>
-            <input type="text" name="phi_san_bay" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'airport_fee')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Phát sinh khác</label>
-            <input type="text" name="phat_sinh_khac" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'other_fee')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Phụ phí khác <span class="text-muted">(phát sinh thực tế)</span></label>
-            <input type="text" name="phu_phi_khac" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'extra_surcharge')) ?>">
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Phụ phí khác do ai trả</label>
-            <select name="nguoi_tra_phu_phi_khac" class="form-select" <?= $chiXemSel ?>>
-              <option value="">-- Chọn --</option>
-              <option value="tai_xe" <?= giaTri($chuyenXe, 'extra_surcharge_payer') === 'tai_xe' ? 'selected' : '' ?>>Tài xế trả (cty hoàn lại)</option>
-              <option value="cong_ty" <?= giaTri($chuyenXe, 'extra_surcharge_payer') === 'cong_ty' ? 'selected' : '' ?>>Công ty trả trực tiếp</option>
-            </select>
-          </div>
-          <div class="col-12 col-md-6">
-            <label class="form-label">Ghi chú phụ phí khác</label>
-            <input name="ghi_chu_phu_phi_khac" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'extra_surcharge_note')) ?>">
-          </div>
-
-          <div class="col-12">
-            <?php if (!$khoaSua): ?>
-              <button type="button" class="btn btn-sm btn-outline-secondary nut-them-tien-khac"
-                      data-target="khoiTienKhac" data-nhan-mo="+ Thêm loại tiền khác (USD/EUR)">
-                <?= $coTienKhac ? '− Ẩn loại tiền khác' : '+ Thêm loại tiền khác (USD/EUR)' ?>
-              </button>
-            <?php endif; ?>
-          </div>
-          <div class="col-12" id="khoiTienKhac" <?= $coTienKhac ? '' : 'hidden' ?>>
-            <div class="row g-2 mt-1">
+      <div class="nhom-gap">
+        <button type="button" class="nhom-gap-dau" data-bs-toggle="collapse" data-bs-target="#gap3" aria-expanded="false">
+          <span class="nhom-gap-ten"><?= bieuTuong('cash') ?> Doanh thu &amp; thu tiền</span>
+          <span class="nhom-gap-tom-tat" data-tom-tat="doanhthu"></span>
+          <?= bieuTuong('chevron-down', 'nhom-gap-mui-ten') ?>
+        </button>
+        <div class="collapse" id="gap3">
+          <div class="nhom-gap-than">
+            <div class="row g-2">
               <div class="col-6 col-md-3">
-                <label class="form-label">Khách trả USD</label>
-                <input type="number" step="0.01" name="thu_usd" class="form-control" placeholder="0.00" <?= $chiXem ?>
-                       value="<?= (float)giaTri($chuyenXe, 'revenue_usd', 0) > 0 ? h(giaTri($chuyenXe, 'revenue_usd')) : '' ?>">
+                <label class="form-label">Khách trả (VNĐ)</label>
+                <input type="text" name="thu_vnd" id="oThuVnd" class="form-control o-nhap-tien o-khach-tra" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'revenue_vnd')) ?>">
               </div>
               <div class="col-6 col-md-3">
-                <label class="form-label">Khách trả EUR</label>
-                <input type="number" step="0.01" name="thu_eur" class="form-control" placeholder="0.00" <?= $chiXem ?>
-                       value="<?= (float)giaTri($chuyenXe, 'revenue_eur', 0) > 0 ? h(giaTri($chuyenXe, 'revenue_eur')) : '' ?>">
+                <label class="form-label">Ai thu tiền khách</label>
+                <input name="ai_thu" class="form-control" placeholder="VD: tài xế / kế toán A" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'collector_name')) ?>">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Ghi chú thu tiền</label>
+                <input name="ghi_chu_thu" class="form-control" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'collector_note')) ?>">
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Ảnh chuyển khoản của khách</label>
+                <?php if (!$khoaSua): ?>
+                  <input type="file" name="anh_ck" class="form-control" accept="image/png,image/jpeg,image/webp">
+                <?php endif; ?>
+                <?php if (!empty($chuyenXe['transfer_proof_image'])): ?>
+                  <a href="<?= duongDan($chuyenXe['transfer_proof_image']) ?>" target="_blank" class="d-inline-block mt-1">
+                    <img src="<?= duongDan($chuyenXe['transfer_proof_image']) ?>" alt="Ảnh chuyển khoản" style="max-height:60px;border:1px solid #ddd;border-radius:4px">
+                  </a>
+                <?php endif; ?>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Chuyển khoản qua ai / tài khoản nào</label>
+                <input name="ck_qua_ai" class="form-control" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'transfer_note')) ?>">
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Tiền cuốc xe (trả tài xế)</label>
+                <input type="text" name="tien_cuoc_xe" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'trip_fee')) ?>">
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Chi phí kèo ngoài</label>
+                <input type="text" name="chi_phi_keo_ngoai" class="form-control o-nhap-tien o-chi-phi-ngoai" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'outsource_cost')) ?>">
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Mình nhận <span class="text-muted">(khách trả − kèo ngoài)</span></label>
+                <input type="text" class="form-control o-minh-nhan" placeholder="0" readonly tabindex="-1">
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Tiền tài ứng trước</label>
+                <input type="text" name="tien_tai_ung" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'driver_advance')) ?>">
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Phụ phí</label>
+                <input type="text" name="luu_dem" class="form-control o-nhap-tien o-phu-phi" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'overnight_fee')) ?>">
+                <div class="btn-group btn-group-sm mt-1 o-phu-phi-nhanh" role="group">
+                  <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhi === '0' ? 'active' : '' ?>" data-tien="0" <?= $chiXemSel ?>>Không có</button>
+                  <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhi === '200000' ? 'active' : '' ?>" data-tien="200000" <?= $chiXemSel ?>>Lưu đêm</button>
+                  <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhi === '100000' ? 'active' : '' ?>" data-tien="100000" <?= $chiXemSel ?>>Chạy khuya</button>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Phí sân bay / đậu xe</label>
+                <input type="text" name="phi_san_bay" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'airport_fee')) ?>">
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Phát sinh khác</label>
+                <input type="text" name="phat_sinh_khac" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'other_fee')) ?>">
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Phụ phí khác <span class="text-muted">(phát sinh thực tế)</span></label>
+                <input type="text" name="phu_phi_khac" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'extra_surcharge')) ?>">
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label">Phụ phí khác do ai trả</label>
+                <select name="nguoi_tra_phu_phi_khac" class="form-select" <?= $chiXemSel ?>>
+                  <option value="">-- Chọn --</option>
+                  <option value="tai_xe" <?= giaTri($chuyenXe, 'extra_surcharge_payer') === 'tai_xe' ? 'selected' : '' ?>>Tài xế trả (cty hoàn lại)</option>
+                  <option value="cong_ty" <?= giaTri($chuyenXe, 'extra_surcharge_payer') === 'cong_ty' ? 'selected' : '' ?>>Công ty trả trực tiếp</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Ghi chú phụ phí khác</label>
+                <input name="ghi_chu_phu_phi_khac" class="form-control" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'extra_surcharge_note')) ?>">
+              </div>
+
+              <div class="col-12">
+                <?php if (!$khoaSua): ?>
+                  <button type="button" class="btn btn-sm btn-outline-secondary nut-them-tien-khac"
+                          data-target="khoiTienKhac" data-nhan-mo="+ Thêm loại tiền khác (USD/EUR)">
+                    <?= $coTienKhac ? '− Ẩn loại tiền khác' : '+ Thêm loại tiền khác (USD/EUR)' ?>
+                  </button>
+                <?php endif; ?>
+              </div>
+              <div class="col-12" id="khoiTienKhac" <?= $coTienKhac ? '' : 'hidden' ?>>
+                <div class="row g-2 mt-1">
+                  <div class="col-6 col-md-3">
+                    <label class="form-label">Khách trả USD</label>
+                    <input type="number" step="0.01" name="thu_usd" class="form-control" placeholder="0.00" <?= $chiXem ?>
+                           value="<?= (float)giaTri($chuyenXe, 'revenue_usd', 0) > 0 ? h(giaTri($chuyenXe, 'revenue_usd')) : '' ?>">
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <label class="form-label">Khách trả EUR</label>
+                    <input type="number" step="0.01" name="thu_eur" class="form-control" placeholder="0.00" <?= $chiXem ?>
+                           value="<?= (float)giaTri($chuyenXe, 'revenue_eur', 0) > 0 ? h(giaTri($chuyenXe, 'revenue_eur')) : '' ?>">
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </fieldset>
+      </div>
 
-      <!-- 3. Chi phi thuc te (tai xe nhap) -->
-      <fieldset class="nhom-truong">
-        <legend>4. Chi phí thực tế</legend>
-        <div class="row g-2">
-          <div class="col-6 col-md-2">
-            <label class="form-label">Xăng dầu</label>
-            <input type="text" name="xang_dau" class="form-control o-nhap-tien o-xang-dau" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'fuel_cost')) ?>">
-          </div>
-          <div class="col-6 col-md-2">
-            <label class="form-label">VAT 10% xăng/dầu</label>
-            <input type="text" name="vat_xang_dau" class="form-control o-nhap-tien o-vat-xang-dau" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'fuel_vat')) ?>">
-          </div>
-          <div class="col-6 col-md-2">
-            <label class="form-label">Người trả xăng dầu</label>
-            <input name="nguoi_tra_xang_dau" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'fuel_payer')) ?>">
-          </div>
-          <?php if (!laTaiXe()): ?>
-          <div class="col-6 col-md-2">
-            <label class="form-label">VETC</label>
-            <input type="text" name="vetc" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'vetc')) ?>">
-          </div>
-          <?php endif; ?>
-          <div class="col-6 col-md-2">
-            <label class="form-label">Bảo dưỡng xe</label>
-            <input type="text" name="bao_duong" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'maintenance')) ?>">
-          </div>
-          <div class="col-6 col-md-2">
-            <label class="form-label">Phạt</label>
-            <input type="text" name="phat" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'fine')) ?>">
-          </div>
-          <div class="col-6 col-md-2">
-            <label class="form-label">Tạm ứng</label>
-            <input type="text" name="tam_ung" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'cash_advance')) ?>">
-          </div>
-          <div class="col-6 col-md-2">
-            <label class="form-label">Hoàn tiền VNĐ</label>
-            <input type="text" name="hoan_tien_vnd" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'refund_vnd')) ?>">
-          </div>
-          <div class="col-6 col-md-2">
-            <label class="form-label">Hoàn tiền USD</label>
-            <input type="number" step="0.01" name="hoan_tien_usd" class="form-control" placeholder="0.00" <?= $chiXem ?>
-                   value="<?= (float)giaTri($chuyenXe, 'refund_usd', 0) > 0 ? h(giaTri($chuyenXe, 'refund_usd')) : '' ?>">
-          </div>
-          <div class="col-6 col-md-2">
-            <label class="form-label">Khách TT trực tiếp cty</label>
-            <input type="text" name="khach_tt_truc_tiep" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
-                   value="<?= h(giaTriTienForm($chuyenXe, 'direct_payment')) ?>">
-          </div>
-          <div class="col-12 col-md-6">
-            <label class="form-label">Ghi chú</label>
-            <input name="ghi_chu" class="form-control" <?= $chiXem ?>
-                   value="<?= h(giaTri($chuyenXe, 'note')) ?>">
+      <!-- 4. Chi phi thuc te - gap lai, tom tat xang dau/phat ngay tren tieu de -->
+      <div class="nhom-gap">
+        <button type="button" class="nhom-gap-dau" data-bs-toggle="collapse" data-bs-target="#gap4" aria-expanded="false">
+          <span class="nhom-gap-ten"><?= bieuTuong('receipt-2') ?> Chi phí thực tế</span>
+          <span class="nhom-gap-tom-tat" data-tom-tat="chiphi"></span>
+          <?= bieuTuong('chevron-down', 'nhom-gap-mui-ten') ?>
+        </button>
+        <div class="collapse" id="gap4">
+          <div class="nhom-gap-than">
+            <div class="row g-2">
+              <div class="col-6 col-md-2">
+                <label class="form-label">Xăng dầu</label>
+                <input type="text" name="xang_dau" class="form-control o-nhap-tien o-xang-dau" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'fuel_cost')) ?>">
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">VAT 10% xăng/dầu</label>
+                <input type="text" name="vat_xang_dau" class="form-control o-nhap-tien o-vat-xang-dau" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'fuel_vat')) ?>">
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">Người trả xăng dầu</label>
+                <input name="nguoi_tra_xang_dau" class="form-control" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'fuel_payer')) ?>">
+              </div>
+              <?php if (!laTaiXe()): ?>
+              <div class="col-6 col-md-2">
+                <label class="form-label">VETC</label>
+                <input type="text" name="vetc" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'vetc')) ?>">
+              </div>
+              <?php endif; ?>
+              <div class="col-6 col-md-2">
+                <label class="form-label">Bảo dưỡng xe</label>
+                <input type="text" name="bao_duong" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'maintenance')) ?>">
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">Phạt</label>
+                <input type="text" name="phat" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'fine')) ?>">
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">Tạm ứng</label>
+                <input type="text" name="tam_ung" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'cash_advance')) ?>">
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">Hoàn tiền VNĐ</label>
+                <input type="text" name="hoan_tien_vnd" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'refund_vnd')) ?>">
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">Hoàn tiền USD</label>
+                <input type="number" step="0.01" name="hoan_tien_usd" class="form-control" placeholder="0.00" <?= $chiXem ?>
+                       value="<?= (float)giaTri($chuyenXe, 'refund_usd', 0) > 0 ? h(giaTri($chuyenXe, 'refund_usd')) : '' ?>">
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label">Khách TT trực tiếp cty</label>
+                <input type="text" name="khach_tt_truc_tiep" class="form-control o-nhap-tien" placeholder="0" <?= $chiXem ?>
+                       value="<?= h(giaTriTienForm($chuyenXe, 'direct_payment')) ?>">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Ghi chú</label>
+                <input name="ghi_chu" class="form-control" <?= $chiXem ?>
+                       value="<?= h(giaTri($chuyenXe, 'note')) ?>">
+              </div>
+            </div>
           </div>
         </div>
-      </fieldset>
+      </div>
 
-      <div class="d-flex gap-2">
+      <div class="d-flex gap-2 thanh-hanh-dong-form">
         <?php if (!$khoaSua): $nhanNut = $dangSua
               ? (bieuTuong('device-floppy') . ' Cập nhật')
               : (laTaiXe() ? (bieuTuong('plus') . ' Tạo chuyến xe') : (bieuTuong('plus') . ' Thêm & giao cho tài xế')); ?>
-          <button class="btn btn-primary"><?= $nhanNut ?></button>
+          <button class="btn btn-primary flex-fill"><?= $nhanNut ?></button>
         <?php endif; ?>
-        <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light">Quay lại danh sách</a>
+        <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light">Quay lại</a>
       </div>
     </div>
   </div>
@@ -413,7 +444,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
 (function () {
   var oTaiXe = document.getElementById('oTaiXe');
   var oXe    = document.getElementById('oXe');
-  if (!oTaiXe || !oXe) return;
+  if (!oTaiXe || !oXe || oTaiXe.tagName !== 'SELECT') return;
 
   oTaiXe.addEventListener('change', function () {
     var chon = oTaiXe.options[oTaiXe.selectedIndex];
@@ -479,5 +510,57 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
   oBangGia.addEventListener('change', apDung);
   if (oXe) oXe.addEventListener('change', function () { if (oBangGia.value) apDung(); });
   if (oLoaiKeo) oLoaiKeo.addEventListener('change', function () { if (oBangGia.value) apDung(); });
+})();
+
+// Tom tat ngay tren tieu de tung nhom (gap lai van biet dang co gi ben trong)
+(function () {
+  var oHanhTrinh = document.getElementById('oHanhTrinh');
+  var oTaiXe     = document.getElementById('oTaiXe');
+  var oXe        = document.getElementById('oXe');
+  var oThuVnd    = document.getElementById('oThuVnd');
+  var form       = document.querySelector('form[action*="chuyenxe/luu"]');
+  if (!form) return;
+
+  function layTen(el) {
+    if (!el) return '';
+    if (el.tagName === 'SELECT') {
+      var o = el.options[el.selectedIndex];
+      return (o && o.value) ? o.text : '';
+    }
+    return el.value || '';
+  }
+
+  function layTruong(ten) {
+    var o = form.querySelector('[name="' + ten + '"]');
+    return o ? o.value : '';
+  }
+
+  function capNhat() {
+    var oChuyenDi = form.querySelector('[data-tom-tat="chuyendi"]');
+    if (oChuyenDi) oChuyenDi.textContent = layTruong('hanh_trinh') || '';
+
+    var oXeTaiXe = form.querySelector('[data-tom-tat="xetaixe"]');
+    if (oXeTaiXe) oXeTaiXe.textContent = [layTen(oXe), layTen(oTaiXe)].filter(Boolean).join(' · ');
+
+    var oDoanhThu = form.querySelector('[data-tom-tat="doanhthu"]');
+    if (oDoanhThu) {
+      var thu = (oThuVnd && oThuVnd.value) ? oThuVnd.value + 'đ' : '';
+      oDoanhThu.textContent = thu ? ('Khách trả ' + thu) : '';
+    }
+
+    var oChiPhi = form.querySelector('[data-tom-tat="chiphi"]');
+    if (oChiPhi) {
+      var xang = layTruong('xang_dau');
+      var phat = layTruong('phat');
+      var phan = [];
+      if (xang) phan.push('Xăng dầu ' + xang + 'đ');
+      if (phat) phan.push('Phạt ' + phat + 'đ');
+      oChiPhi.textContent = phan.join(' · ');
+    }
+  }
+
+  form.addEventListener('input', capNhat);
+  form.addEventListener('change', capNhat);
+  capNhat();
 })();
 </script>

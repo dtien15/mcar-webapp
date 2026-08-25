@@ -428,6 +428,71 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
   margin-bottom: 8px;
 }
 
+/* Nhom truong gap/mo (form them/sua chuyen xe) - gon lai, chi mo khi can xem/sua */
+.nhom-gap {
+  border: 1px solid var(--mau-vien);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+.nhom-gap-dau {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: none;
+  padding: 13px 14px;
+  min-height: 48px;
+  cursor: pointer;
+  text-align: left;
+}
+.nhom-gap-dau:hover { background: #f1f5f9; }
+.nhom-gap-ten {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mau-chinh);
+  flex-shrink: 0;
+}
+.nhom-gap-tom-tat {
+  font-size: 12px;
+  color: var(--mau-chu-nhat);
+  font-weight: 400;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  margin-right: 2px;
+}
+.nhom-gap-mui-ten { color: var(--mau-chu-nhat); flex-shrink: 0; transition: transform .2s; }
+.nhom-gap-dau[aria-expanded="true"] .nhom-gap-mui-ten { transform: rotate(180deg); }
+.nhom-gap-than { padding: 14px; border-top: 1px solid var(--mau-vien); }
+@media (max-width: 480px) {
+  .nhom-gap-tom-tat { display: none; }
+  .nhom-gap-ten { font-size: 13px; }
+  .nhom-gap-dau { padding: 12px; }
+  .nhom-gap-than { padding: 12px; }
+}
+
+/* Thanh Luu/Quay lai dinh o day man hinh tren dien thoai - do khoi phai cuon het xuong */
+@media (max-width: 767px) {
+  .thanh-hanh-dong-form {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    padding: 10px 18px;
+    margin: 0 -18px -18px;
+    border-top: 1px solid var(--mau-vien);
+    z-index: 5;
+  }
+}
+
 .btn { font-size: 13px; }
 .btn-primary { background: var(--mau-chinh); border-color: var(--mau-chinh); }
 .btn-primary:hover { background: var(--mau-chinh-dam); border-color: var(--mau-chinh-dam); }
