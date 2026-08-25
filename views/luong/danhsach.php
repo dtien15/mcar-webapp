@@ -1,4 +1,26 @@
-<?php $namHienTai = (int)date('Y'); ?>
+<?php
+$namHienTai = (int)date('Y');
+
+/** Chu cai dau cua 1-2 tu dau tien trong ten, dung lam avatar */
+function chuCaiDauTen($ten)
+{
+    $tu = preg_split('/\s+/u', trim($ten));
+    $tu = array_filter($tu);
+    if (!$tu) return '?';
+    $dau = mb_substr(reset($tu), 0, 1, 'UTF-8');
+    if (count($tu) > 1) {
+        $dau .= mb_substr(end($tu), 0, 1, 'UTF-8');
+    }
+    return mb_strtoupper($dau, 'UTF-8');
+}
+
+$tongLuong = 0; $tongConLai = 0; $tongCuoc = 0;
+foreach ($bangLuong as $dong) {
+    $tongLuong  += (float)$dong['total_salary'];
+    $tongConLai += (float)$dong['remaining'];
+    $tongCuoc   += (int)$dong['trip_count'];
+}
+?>
 
 <div class="the">
   <div class="the-than d-flex flex-wrap gap-3 align-items-end">
@@ -34,6 +56,23 @@
   </div>
 </div>
 
+<?php if ($bangLuong): ?>
+<div class="luoi-thong-ke mb-3">
+  <div class="o-thong-ke">
+    <div class="bieu-tuong nen-xanh"><?= bieuTuong('route') ?></div>
+    <div><div class="nhan">Tổng số cuốc</div><div class="gia-tri"><?= $tongCuoc ?></div></div>
+  </div>
+  <div class="o-thong-ke">
+    <div class="bieu-tuong nen-tim"><?= bieuTuong('report-money') ?></div>
+    <div><div class="nhan">Tổng lương kỳ này</div><div class="gia-tri"><?= dinhDangTien($tongLuong) ?> <span class="don-vi">₫</span></div></div>
+  </div>
+  <div class="o-thong-ke">
+    <div class="bieu-tuong <?= $tongConLai < 0 ? 'nen-cam' : 'nen-luc' ?>"><?= bieuTuong('scale') ?></div>
+    <div><div class="nhan">Tổng còn lại</div><div class="gia-tri <?= $tongConLai < 0 ? 'so-am' : 'so-duong' ?>"><?= dinhDangTien($tongConLai) ?> <span class="don-vi">₫</span></div></div>
+  </div>
+</div>
+<?php endif; ?>
+
 <div class="the">
   <div class="the-dau">
     <span><?= bieuTuong('report-money') ?> Bảng lương tháng <?= (int)$thang ?>/<?= (int)$nam ?></span>
@@ -41,54 +80,39 @@
       Còn lại &gt; 0: công ty còn nợ tài xế · &lt; 0: tài xế còn nợ công ty
     </span>
   </div>
-  <div class="the-than the-than-khong-dem bang-cuon">
-    <table class="bang">
-      <thead>
-        <tr>
-          <th>Tài xế</th>
-          <th class="canh-phai">Số cuốc</th>
-          <th class="canh-phai">Lương CB</th>
-          <th class="canh-phai">Lưu đêm</th>
-          <th class="canh-phai">Tiền cuốc xe</th>
-          <th class="canh-phai">Phạt</th>
-          <th class="canh-phai">Tổng lương</th>
-          <th class="canh-phai">Thu của khách</th>
-          <th class="canh-phai">Kỳ trước</th>
-          <th class="canh-phai">Cty đã trả</th>
-          <th class="canh-phai">Còn lại</th>
-          <th>Tình trạng</th>
-          <th class="canh-phai">Thao tác</th>
-        </tr>
-      </thead>
-      <tbody>
-      <?php
-        $tongLuong = 0; $tongConLai = 0; $tongCuoc = 0;
-        foreach ($bangLuong as $dong):
-          $tongLuong  += (float)$dong['total_salary'];
-          $tongConLai += (float)$dong['remaining'];
-          $tongCuoc   += (int)$dong['trip_count'];
-      ?>
-        <tr>
-          <td><strong><?= h($dong['ten_tai_xe']) ?></strong></td>
-          <td class="canh-phai"><?= (int)$dong['trip_count'] ?></td>
-          <td class="canh-phai"><?= dinhDangTien($dong['luong_co_ban']) ?></td>
-          <td class="canh-phai"><?= dinhDangTien($dong['total_overnight']) ?></td>
-          <td class="canh-phai"><?= dinhDangTien($dong['total_fee']) ?></td>
-          <td class="canh-phai"><?= dinhDangTien($dong['total_fine']) ?></td>
-          <td class="canh-phai"><strong><?= dinhDangTien($dong['total_salary']) ?></strong></td>
-          <td class="canh-phai"><?= dinhDangTien($dong['total_collected']) ?></td>
-          <td class="canh-phai"><?= dinhDangTien($dong['prev_balance']) ?></td>
-          <td class="canh-phai"><?= dinhDangTien($dong['company_paid']) ?></td>
-          <td class="canh-phai <?= $dong['remaining'] < 0 ? 'so-am' : 'so-duong' ?>">
-            <?= dinhDangTien($dong['remaining']) ?>
-          </td>
-          <td>
-            <span class="huy-hieu-trang-thai tt-<?= $dong['remaining'] < 0 ? 'danger' : ($dong['remaining'] > 0 ? 'warning' : 'success') ?>">
-              <?= h($dong['status']) ?>
-            </span>
-          </td>
-          <td class="canh-phai">
-            <div class="d-flex gap-1 justify-content-end">
+  <div class="the-than">
+    <?php if (!$bangLuong): ?>
+      <div class="khong-co-du-lieu">
+        Chưa có dữ liệu lương kỳ này.
+        <?php if (laQuanLy()): ?>Bấm nút <strong>"Tính lại lương"</strong> ở trên để tạo.<?php endif; ?>
+      </div>
+    <?php else: ?>
+      <div class="luoi-luong">
+        <?php foreach ($bangLuong as $dong):
+          $mauTrangThai = $dong['remaining'] < 0 ? 'danger' : ($dong['remaining'] > 0 ? 'warning' : 'success');
+        ?>
+          <div class="the-luong">
+            <div class="the-luong-dau">
+              <div class="the-luong-avatar"><?= h(chuCaiDauTen($dong['ten_tai_xe'])) ?></div>
+              <div class="the-luong-ten-khoi">
+                <div class="the-luong-ten"><?= h($dong['ten_tai_xe']) ?></div>
+                <div class="the-luong-so-cuoc"><?= (int)$dong['trip_count'] ?> cuốc trong kỳ</div>
+              </div>
+              <span class="huy-hieu-trang-thai tt-<?= $mauTrangThai ?>"><?= h($dong['status']) ?></span>
+            </div>
+
+            <div class="the-luong-so-lieu">
+              <div class="the-luong-o-so">
+                <div class="nhan">Tổng lương</div>
+                <div class="gt"><?= dinhDangTien($dong['total_salary']) ?></div>
+              </div>
+              <div class="the-luong-o-so">
+                <div class="nhan">Còn lại</div>
+                <div class="gt <?= $dong['remaining'] < 0 ? 'so-am' : 'so-duong' ?>"><?= dinhDangTien($dong['remaining']) ?></div>
+              </div>
+            </div>
+
+            <div class="the-luong-chan">
               <a href="<?= duongDan('luong/phieu/' . $dong['driver_id'] . '/' . (int)$thang . '/' . (int)$nam) ?>"
                  class="btn btn-sm btn-outline-secondary"><?= bieuTuong('file-invoice') ?> Phiếu lương</a>
               <?php if (laQuanLy()): ?>
@@ -96,34 +120,10 @@
                         data-bs-toggle="modal" data-bs-target="#thanhToan<?= $dong['id'] ?>"><?= bieuTuong('tag') ?> Thanh toán</button>
               <?php endif; ?>
             </div>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-
-      <?php if (!$bangLuong): ?>
-        <tr>
-          <td colspan="13" class="khong-co-du-lieu">
-            Chưa có dữ liệu lương kỳ này.
-            <?php if (laQuanLy()): ?>Bấm nút <strong>"Tính lại lương"</strong> ở trên để tạo.<?php endif; ?>
-          </td>
-        </tr>
-      <?php endif; ?>
-      </tbody>
-
-      <?php if ($bangLuong): ?>
-      <tfoot>
-        <tr>
-          <td>TỔNG CỘNG</td>
-          <td class="canh-phai"><?= $tongCuoc ?></td>
-          <td colspan="4"></td>
-          <td class="canh-phai"><?= dinhDangTien($tongLuong) ?></td>
-          <td colspan="3"></td>
-          <td class="canh-phai <?= $tongConLai < 0 ? 'so-am' : 'so-duong' ?>"><?= dinhDangTien($tongConLai) ?></td>
-          <td colspan="2"></td>
-        </tr>
-      </tfoot>
-      <?php endif; ?>
-    </table>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
   </div>
 </div>
 
