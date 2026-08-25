@@ -39,10 +39,9 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
     <?php if (!empty($chuyen['customer_name'])): ?>
       <div><span class="nhan">Khách</span><span class="gt"><?= h($chuyen['customer_name']) ?></span></div>
     <?php endif; ?>
-    <div><span class="nhan">Loại kèo</span><span class="gt"><?= h($chuyen['ten_loai_keo']) ?></span></div>
     <div><span class="nhan">Khách trả</span><span class="gt"><?= dinhDangTien($chuyen['revenue_vnd']) ?>đ</span></div>
     <div><span class="nhan">Tiền cuốc</span><span class="gt nhan-manh"><?= dinhDangTien($chuyen['trip_fee']) ?>đ</span></div>
-    <?php if ($chuyen['fuel_cost'] > 0): ?>
+    <?php if (laTaiXe() && $chuyen['fuel_cost'] > 0): ?>
       <div><span class="nhan">Xăng dầu</span><span class="gt"><?= dinhDangTien($chuyen['fuel_cost']) ?>đ</span></div>
     <?php endif; ?>
   </div>

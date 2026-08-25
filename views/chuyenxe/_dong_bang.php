@@ -9,7 +9,7 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
 ?>
 <tr>
   <td><?= dinhDangNgay($chuyen['trip_date']) ?></td>
-  <td><?= h($chuyen['pickup_time']) ?></td>
+  <?php if (laTaiXe()): ?><td><?= h($chuyen['pickup_time']) ?></td><?php endif; ?>
   <td>
     <?= h($chuyen['route']) ?>
     <?php if (!empty($chuyen['pickup_dropoff'])): ?>
@@ -19,11 +19,10 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
     <?php endif; ?>
   </td>
   <td><?= h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?></td>
-  <td><?= h($chuyen['ten_tai_xe']) ?></td>
-  <td><?= h($chuyen['ten_loai_keo']) ?></td>
+  <?php if (laQuanLy()): ?><td><?= h($chuyen['ten_tai_xe']) ?></td><?php endif; ?>
   <td class="canh-phai"><?= dinhDangTien($chuyen['revenue_vnd']) ?></td>
   <td class="canh-phai"><?= dinhDangTien($chuyen['trip_fee']) ?></td>
-  <td class="canh-phai"><?= dinhDangTien($chuyen['fuel_cost']) ?></td>
+  <?php if (laTaiXe()): ?><td class="canh-phai"><?= dinhDangTien($chuyen['fuel_cost']) ?></td><?php endif; ?>
   <td>
     <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
     <?php if ($chuyen['cash_remitted']): ?>

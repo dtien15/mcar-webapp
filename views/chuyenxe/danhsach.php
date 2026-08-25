@@ -162,18 +162,25 @@ $dsTab = [
     <span>Danh sách chuyến xe (<?= (int)$tongSo ?> dòng)</span>
   </div>
   <div class="the-than the-than-khong-dem bang-cuon">
+    <?php
+      // Quan ly can thay ai chay xe gi giua nhieu tai xe/xe -> giu cot Tai xe,
+      // bo Gio/Loai keo/Xang dau (xem trong Sua/Chi tiet, xang dau da co o tong hop).
+      // Tai xe chi xem chuyen cua chinh minh -> bo cot Tai xe (thua), giu Gio +
+      // Xang dau de tu theo doi thu nhap/chi phi nhanh khong can mo Chi tiet.
+      $soCotDauBang  = 4; // Ngay + Hanh trinh + Xe + (Gio hoac Tai xe tuy vai tro)
+      $soCotTaiChinh = laQuanLy() ? 2 : 3; // Thu VND + Tien cuoc (+ Xang dau rieng cho tai xe)
+    ?>
     <table class="bang">
       <thead>
         <tr>
           <th>Ngày</th>
-          <th>Giờ</th>
+          <?php if (laTaiXe()): ?><th>Giờ</th><?php endif; ?>
           <th>Hành trình</th>
           <th>Xe</th>
-          <th>Tài xế</th>
-          <th>Loại kèo</th>
+          <?php if (laQuanLy()): ?><th>Tài xế</th><?php endif; ?>
           <th class="canh-phai">Thu VNĐ</th>
           <th class="canh-phai">Tiền cuốc</th>
-          <th class="canh-phai">Xăng dầu</th>
+          <?php if (laTaiXe()): ?><th class="canh-phai">Xăng dầu</th><?php endif; ?>
           <th>Trạng thái</th>
           <th class="canh-phai">Thao tác</th>
         </tr>
@@ -182,16 +189,16 @@ $dsTab = [
       <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_dong_bang.php'; endforeach; ?>
 
       <?php if (!$danhSach): ?>
-        <tr><td colspan="11" class="khong-co-du-lieu">Không có chuyến xe nào phù hợp bộ lọc</td></tr>
+        <tr><td colspan="<?= $soCotDauBang + $soCotTaiChinh + 2 ?>" class="khong-co-du-lieu">Không có chuyến xe nào phù hợp bộ lọc</td></tr>
       <?php endif; ?>
       </tbody>
       <?php if ($danhSach): ?>
       <tfoot>
         <tr>
-          <td colspan="6">TỔNG CỘNG</td>
+          <td colspan="<?= $soCotDauBang ?>">TỔNG CỘNG</td>
           <td class="canh-phai"><?= dinhDangTien($tongHop['thu_vnd']) ?></td>
           <td class="canh-phai"><?= dinhDangTien($tongHop['tien_tai']) ?></td>
-          <td class="canh-phai"><?= dinhDangTien($tongHop['xang_dau']) ?></td>
+          <?php if (laTaiXe()): ?><td class="canh-phai"><?= dinhDangTien($tongHop['xang_dau']) ?></td><?php endif; ?>
           <td colspan="2"></td>
         </tr>
       </tfoot>
