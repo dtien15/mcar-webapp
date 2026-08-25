@@ -21,6 +21,7 @@ class Router
         'nguoidung' => 'NguoiDungController',
         'thongbao'  => 'ThongBaoController',
         'chuyen-xe' => 'GuiChuyenController',
+        'caidat'    => 'CaiDatController',
     ];
 
     public function chay()

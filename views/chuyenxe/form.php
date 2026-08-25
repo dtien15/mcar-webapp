@@ -53,10 +53,21 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               <?= bieuTuong('clipboard-text') ?> Dán tin nhắn Zalo <span class="text-muted">(tự động điền các trường bên dưới - nhớ kiểm tra lại)</span>
             </label>
             <textarea id="oDanNhanh" class="form-control" rows="3"
-                      placeholder="Dán nguyên đoạn tin nhắn giao chuyến vào đây rồi bấm Phân tích..."></textarea>
-            <button type="button" id="nutPhanTich" class="btn btn-sm btn-outline-primary mt-1">
-              <?= bieuTuong('wand') ?> Phân tích &amp; điền tự động
-            </button>
+                      placeholder="Dán nguyên đoạn tin nhắn giao chuyến vào đây, hoặc dán/đính kèm ảnh lịch trình rồi bấm Phân tích..."></textarea>
+            <div class="d-flex flex-wrap gap-2 align-items-center mt-1">
+              <button type="button" id="nutPhanTich" class="btn btn-sm btn-outline-primary">
+                <?= bieuTuong('wand') ?> Phân tích &amp; điền tự động
+              </button>
+              <button type="button" id="nutPhanTichAi" class="btn btn-sm btn-outline-success"
+                      data-url="<?= duongDan('chuyenxe/phantichai') ?>">
+                <?= bieuTuong('sparkles') ?> Phân tích bằng AI
+              </button>
+              <label class="btn btn-sm btn-outline-secondary mb-0" style="cursor:pointer">
+                <?= bieuTuong('paperclip') ?> Đính kèm ảnh
+                <input type="file" id="oAnhPhanTich" accept="image/png,image/jpeg,image/webp" hidden>
+              </label>
+              <span id="tenAnhDaChon" class="text-muted" style="font-size:12px"></span>
+            </div>
           </div>
         </div>
         <?php endif; ?>

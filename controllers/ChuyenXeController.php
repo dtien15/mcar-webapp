@@ -294,6 +294,107 @@ class ChuyenXeController extends Controller
         chuyenTrang('chuyenxe');
     }
 
+    /**
+     * Phan tich anh lich trinh hoac doan tin nhan dat xe bang AI (OpenAI), tra
+     * ve cac truong nhan dien duoc de JS tu dien vao form Them/Sua chuyen xe.
+     * Best-effort giong "Dan tin nhan Zalo" - luon can nguoi dung kiem tra lai
+     * truoc khi luu. Ho tro nhieu chang trong 1 anh/tin nhan (vd lich trinh
+     * nhieu ngay), tra ve mang de JS cho chon chang can dien.
+     */
+    public function phantichai()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan', 'taixe']);
+        $this->yeuCauPost();
+        header('Content-Type: application/json; charset=utf-8');
+
+        require_once DUONG_DAN_GOC . '/helpers/OpenAiClient.php';
+        $caiDatModel = $this->model('CaiDatModel');
+        $apiKey = $caiDatModel->layOpenAiApiKey();
+        $model  = $caiDatModel->layOpenAiModel();
+
+        if (!$apiKey) {
+            echo json_encode(['ok' => false, 'loi' => 'Chưa cấu hình API key OpenAI. Vào menu "Cài đặt AI" (quản trị viên) để nhập trước.']);
+            exit;
+        }
+
+        if (!empty($_FILES['anh']) && $_FILES['anh']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $anhBase64 = $this->docAnhBase64($_FILES['anh']);
+            if (!$anhBase64) {
+                echo json_encode(['ok' => false, 'loi' => 'Ảnh không hợp lệ (phải là JPG/PNG/WEBP, tối đa 5MB).']);
+                exit;
+            }
+            $noiDungNguoiDung = [
+                ['type' => 'text', 'text' => 'Đọc ảnh lịch trình/tin nhắn đặt xe sau và trích xuất thông tin theo đúng định dạng JSON đã yêu cầu.'],
+                ['type' => 'image_url', 'image_url' => ['url' => $anhBase64]],
+            ];
+        } else {
+            $vanBan = trim($this->chuTuForm('noi_dung'));
+            if ($vanBan === '') {
+                echo json_encode(['ok' => false, 'loi' => 'Chưa có ảnh hoặc tin nhắn để phân tích.']);
+                exit;
+            }
+            $noiDungNguoiDung = $vanBan;
+        }
+
+        $ketQua = OpenAiClient::goiChat($apiKey, $model, [
+            ['role' => 'system', 'content' => $this->huongDanPhanTichAi()],
+            ['role' => 'user', 'content' => $noiDungNguoiDung],
+        ], true, 1500);
+
+        if (!$ketQua['ok']) {
+            echo json_encode(['ok' => false, 'loi' => $ketQua['loi']]);
+            exit;
+        }
+
+        $duLieu   = json_decode($ketQua['noi_dung'], true);
+        $dsChuyen = is_array($duLieu['chuyen'] ?? null) ? $duLieu['chuyen'] : [];
+
+        if (!$dsChuyen) {
+            echo json_encode(['ok' => false, 'loi' => 'AI không nhận diện được thông tin chuyến xe nào trong nội dung này.']);
+            exit;
+        }
+
+        echo json_encode(['ok' => true, 'chuyen' => $dsChuyen], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    /** Huong dan (system prompt) cho AI phan tich anh/tin nhan thanh cac truong chuyen xe */
+    private function huongDanPhanTichAi()
+    {
+        $homNay = date('Y-m-d');
+        return "Bạn là trợ lý trích xuất dữ liệu cho phần mềm điều xe du lịch tại Việt Nam. "
+            . "Đọc nội dung người dùng gửi (có thể là ảnh chụp lịch trình/email đặt xe, hoặc đoạn tin nhắn Zalo tiếng Việt) "
+            . "và trả về DUY NHẤT 1 object JSON dạng {\"chuyen\": [ {...}, {...} ]} - mảng \"chuyen\" gồm 1 phần tử "
+            . "cho mỗi chặng đón/trả khách riêng biệt tìm thấy (chỉ có 1 chặng thì mảng có đúng 1 phần tử). "
+            . "Mỗi phần tử là object, CHỈ gồm các khóa sau, bỏ hẳn khóa nào không xác định được (không bịa số liệu):\n"
+            . "- ngay_chay: ngày chạy xe, định dạng YYYY-MM-DD. Hôm nay là {$homNay}; nếu chỉ thấy ngày/tháng không có năm thì suy ra năm gần với hôm nay nhất.\n"
+            . "- gio_don: giờ đón khách, định dạng HH:MM 24 giờ.\n"
+            . "- hanh_trinh: tên tuyến ngắn gọn, ví dụ \"SG - MN\" hoặc \"Sân bay Tân Sơn Nhất - Mũi Né\".\n"
+            . "- dia_diem_don: địa điểm/tên nơi đón khách.\n"
+            . "- dia_diem_tra: địa điểm/tên nơi trả khách.\n"
+            . "- ten_khach: tên khách hàng nếu có.\n"
+            . "- sdt_khach: số điện thoại khách nếu có.\n"
+            . "- so_luong_khach: số lượng khách, số nguyên, ví dụ suy ra từ \"5 pax\".\n"
+            . "- thu_vnd: số tiền khách phải trả bằng VNĐ, CHỈ là số nguyên (bỏ hết dấu chấm/phẩy/chữ/ký hiệu tiền tệ); bỏ qua khóa này nếu không thấy giá bằng VNĐ.\n"
+            . "- ghi_chu_khach: các thông tin quan trọng còn lại chưa xếp được vào các trường trên (ví dụ số hiệu chuyến bay, giờ bay, tên khách sạn, ghi chú đặc biệt).\n"
+            . "Chỉ trả về JSON theo đúng khuôn trên, không giải thích gì thêm.";
+    }
+
+    /** Doc file anh upload thanh chuoi data URL base64 de gui cho OpenAI (khong luu vao dia, chi dung tam thoi) */
+    private function docAnhBase64($tapTin)
+    {
+        if ($tapTin['error'] !== UPLOAD_ERR_OK || $tapTin['size'] > 5 * 1024 * 1024) {
+            return null;
+        }
+        $thongTinAnh   = @getimagesize($tapTin['tmp_name']);
+        $dsMimeChoPhep = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!$thongTinAnh || !in_array($thongTinAnh['mime'], $dsMimeChoPhep, true)) {
+            return null;
+        }
+        $noiDung = file_get_contents($tapTin['tmp_name']);
+        return 'data:' . $thongTinAnh['mime'] . ';base64,' . base64_encode($noiDung);
+    }
+
     /** Xem chi tiet 1 chuyen xe (tai xe xem lai phieu cua minh, quan ly xem bat ky chuyen nao) */
     public function chitiet($id = 0)
     {

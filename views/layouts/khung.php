@@ -31,6 +31,7 @@ $menu = [
     ['route' => 'banggia',   'nhan' => 'Bảng giá',            'icon' => 'tag',              'quyen' => ['admin','ketoan']],
     ['nhom'  => 'HỆ THỐNG',  'quyen' => ['admin']],
     ['route' => 'nguoidung', 'nhan' => 'Người dùng',          'icon' => 'users',            'quyen' => ['admin']],
+    ['route' => 'caidat',    'nhan' => 'Cài đặt AI',          'icon' => 'sparkles',         'quyen' => ['admin']],
 ];
 
 ?>
@@ -159,6 +160,7 @@ $menu = [
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="<?= duongDan('assets/js/tien.js') ?>"></script>
 <script src="<?= duongDan('assets/js/dan-nhanh.js') ?>"></script>
+<script src="<?= duongDan('assets/js/phan-tich-ai.js') ?>"></script>
 <script>
 // ---------------------------------------------------------------
 // Mo/dong thanh ben tren dien thoai
