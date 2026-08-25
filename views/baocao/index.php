@@ -32,6 +32,11 @@ foreach ($theoThang as $t => $d) { $tenThang[] = 'Th ' . $t; }
   </div>
 </div>
 
+<div class="text-muted mb-2" style="font-size:12px">
+  <?= bieuTuong('info-circle') ?> Báo cáo chỉ tính chuyến xe đã <strong>Hoàn thành</strong> (đã được công ty chốt sổ) -
+  chuyến còn "Mới giao" hoặc "Tài xế đã xác nhận" chưa chốt sẽ chưa tính vào số liệu dưới đây.
+</div>
+
 <?php if ($coCanhBaoTyGia): ?>
 <div class="alert alert-warning" style="font-size:13px">
   <?= bieuTuong('alert-triangle') ?> Có khách trả bằng ngoại tệ trong kỳ này nhưng <strong>chưa cấu hình tỷ giá</strong> —

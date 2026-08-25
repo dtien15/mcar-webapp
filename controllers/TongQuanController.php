@@ -35,10 +35,12 @@ class TongQuanController extends Controller
             $tongCongNo += (float)$no['remaining'];
         }
 
+        // O thong ke chi phi: chi tinh chuyen da "Hoan thanh" (da chot), giong nguyen
+        // tac ap dung cho luong/bao cao doanh thu - chuyen chua chot chi la tam thoi.
         $this->view('tongquan/index', [
             'thang'        => $thang,
             'nam'          => $nam,
-            'tongHop'      => $chuyenXeModel->tongHopTheoLoc($loc),
+            'tongHop'      => $chuyenXeModel->tongHopTheoLoc($loc + ['trang_thai' => 'hoan_thanh']),
             'tongCongNo'   => $tongCongNo,
             'choXacNhan'   => $chuyenXeModel->demChoXacNhan(),
             'choChot'      => $chuyenXeModel->demChoChot(),

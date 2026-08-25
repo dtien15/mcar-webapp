@@ -345,7 +345,7 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(revenue_eur),0) AS doanh_thu_eur,
                     COALESCE(SUM(fuel_cost),0)   AS xang_dau,
                     COALESCE(SUM(trip_fee),0)    AS tien_tai
-             FROM trips WHERE YEAR(trip_date) = ?
+             FROM trips WHERE YEAR(trip_date) = ? AND status = 'hoan_thanh'
              GROUP BY MONTH(trip_date) ORDER BY thang",
             [(int)$nam]
         );
@@ -382,7 +382,7 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(t.maintenance),0) AS bao_duong,
                     COALESCE(SUM(t.trip_fee),0)    AS tien_tai
              FROM cars c
-             LEFT JOIN trips t ON t.car_id = c.id AND t.trip_date BETWEEN ? AND ?
+             LEFT JOIN trips t ON t.car_id = c.id AND t.trip_date BETWEEN ? AND ? AND t.status = 'hoan_thanh'
              GROUP BY c.id ORDER BY doanh_thu DESC",
             [$tuNgay, $denNgay]
         );
@@ -401,7 +401,7 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(t.overnight_fee),0) AS luu_dem,
                     COALESCE(SUM(t.fine),0)          AS phat
              FROM drivers d
-             LEFT JOIN trips t ON t.driver_id = d.id AND t.trip_date BETWEEN ? AND ?
+             LEFT JOIN trips t ON t.driver_id = d.id AND t.trip_date BETWEEN ? AND ? AND t.status = 'hoan_thanh'
              GROUP BY d.id ORDER BY doanh_thu DESC",
             [$tuNgay, $denNgay]
         );
@@ -417,13 +417,18 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(t.revenue_usd),0) AS doanh_thu_usd,
                     COALESCE(SUM(t.revenue_eur),0) AS doanh_thu_eur
              FROM contract_types ct
-             LEFT JOIN trips t ON t.contract_type_id = ct.id AND t.trip_date BETWEEN ? AND ?
+             LEFT JOIN trips t ON t.contract_type_id = ct.id AND t.trip_date BETWEEN ? AND ? AND t.status = 'hoan_thanh'
              GROUP BY ct.id ORDER BY doanh_thu DESC",
             [$tuNgay, $denNgay]
         );
     }
 
-    /** So lieu tong hop cua 1 tai xe trong ky (dung de tinh luong) */
+    /**
+     * So lieu tong hop cua 1 tai xe trong ky (dung de tinh luong).
+     * CHI tinh chuyen da "Hoan thanh" (da duoc cong ty chot) - chuyen con
+     * "Moi giao"/"Tai xe da xac nhan" chua chot thi chua tinh vao luong,
+     * tranh so lieu tam thoi/chua chac chan lam lech cong no.
+     */
     public function tongHopTaiXeTheoKy($idTaiXe, $tuNgay, $denNgay)
     {
         return $this->motDong(
@@ -447,12 +452,16 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(refund_usd),0)    AS hoan_tien_usd,
                     COALESCE(SUM(cash_advance),0)  AS tam_ung,
                     COALESCE(SUM(fuel_cost),0)     AS xang_dau
-             FROM trips WHERE driver_id = ? AND trip_date BETWEEN ? AND ?",
+             FROM trips WHERE driver_id = ? AND trip_date BETWEEN ? AND ? AND status = 'hoan_thanh'",
             [(int)$idTaiXe, $tuNgay, $denNgay]
         );
     }
 
-    /** Chi tiet chuyen xe cua 1 tai xe trong ky (dung cho phieu luong) */
+    /**
+     * Chi tiet chuyen xe cua 1 tai xe trong ky (dung cho phieu luong).
+     * Chi lay chuyen "Hoan thanh" - khop voi so lieu tinh luong o tongHopTaiXeTheoKy(),
+     * tranh phieu luong liet ke chuyen ma tien khong duoc cong vao tong phia tren.
+     */
     public function chuyenXeCuaTaiXeTheoKy($idTaiXe, $tuNgay, $denNgay)
     {
         return $this->truyVan(
@@ -460,7 +469,7 @@ class ChuyenXeModel extends Model
              FROM trips t
              LEFT JOIN cars c ON c.id = t.car_id
              LEFT JOIN contract_types ct ON ct.id = t.contract_type_id
-             WHERE t.driver_id = ? AND t.trip_date BETWEEN ? AND ?
+             WHERE t.driver_id = ? AND t.trip_date BETWEEN ? AND ? AND t.status = 'hoan_thanh'
              ORDER BY t.trip_date, t.id",
             [(int)$idTaiXe, $tuNgay, $denNgay]
         );

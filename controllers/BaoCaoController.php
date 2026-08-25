@@ -24,7 +24,10 @@ class BaoCaoController extends Controller
         $theoXe      = $chuyenXeModel->thongKeTheoXe($tuNgay, $denNgay);
         $theoTaiXe   = $chuyenXeModel->thongKeTheoTaiXe($tuNgay, $denNgay);
         $theoLoaiKeo = $chuyenXeModel->thongKeTheoLoaiKeo($tuNgay, $denNgay);
-        $tongHop     = $chuyenXeModel->tongHopTheoLoc(['tu_ngay' => $tuNgay, 'den_ngay' => $denNgay]);
+        // Chi tinh chuyen da "Hoan thanh" (da chot) vao bao cao - chuyen con "Moi"/"Tai
+        // xe da xac nhan" chua chot thi chua dua vao so lieu chinh thuc, tranh lech neu
+        // chuyen do con bi sua/huy truoc khi chot.
+        $tongHop     = $chuyenXeModel->tongHopTheoLoc(['tu_ngay' => $tuNgay, 'den_ngay' => $denNgay, 'trang_thai' => 'hoan_thanh']);
 
         // Them "doanh_thu_quy_doi" (VND+USD+EUR quy het ra VND) vao moi dong,
         // vi bao cao truoc gio chi tinh VND rieng, bo qua het khach tra ngoai te.

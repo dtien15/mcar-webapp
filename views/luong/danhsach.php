@@ -86,7 +86,8 @@ foreach ($bangLuong as $dong) {
   <div class="the-dau">
     <span><?= bieuTuong('report-money') ?> Bảng lương tháng <?= (int)$thang ?>/<?= (int)$nam ?></span>
     <span class="text-muted" style="font-size:12px">
-      Còn lại &gt; 0: công ty còn nợ tài xế · &lt; 0: tài xế còn nợ công ty
+      Còn lại &gt; 0: công ty còn nợ tài xế · &lt; 0: tài xế còn nợ công ty ·
+      chỉ tính chuyến đã <strong>Hoàn thành</strong> (đã chốt)
     </span>
   </div>
   <div class="the-than">
