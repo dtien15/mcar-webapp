@@ -136,12 +136,12 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
 
       <!-- 2. Xe, tai xe & gia goi y - gap lai, tom tat xe/tai xe dang chon ngay tren tieu de -->
       <div class="nhom-gap">
-        <button type="button" class="nhom-gap-dau" data-bs-toggle="collapse" data-bs-target="#gap2" aria-expanded="false">
+        <button type="button" class="nhom-gap-dau" data-bs-toggle="collapse" data-bs-target="#gap2" aria-expanded="true">
           <span class="nhom-gap-ten"><?= bieuTuong('steering-wheel') ?> Xe &amp; tài xế</span>
           <span class="nhom-gap-tom-tat" data-tom-tat="xetaixe"></span>
           <?= bieuTuong('chevron-down', 'nhom-gap-mui-ten') ?>
         </button>
-        <div class="collapse" id="gap2">
+        <div class="collapse show" id="gap2">
           <div class="nhom-gap-than">
             <div class="row g-2">
               <div class="col-6 col-md-4">
