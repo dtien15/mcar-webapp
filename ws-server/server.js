@@ -90,13 +90,20 @@ function guiNhac(ws) {
 // HTTP server: trang kiem tra song + API noi bo /broadcast cho PHP goi
 // -----------------------------------------------------------------
 const mayChu = http.createServer((req, res) => {
-  if (req.method === 'GET' && (req.url === '/' || req.url === '/health')) {
+  // cPanel Node.js Selector (Passenger) mount app o 1 duong dan con (vd
+  // /realtime) nhung KHONG cat bo tien to do truoc khi chuyen request vao
+  // day - req.url luc do la "/realtime/health" chu khong phai "/health".
+  // Dung endsWith() de khop dung bat ke app dang mount o goc hay o 1
+  // duong dan con nao.
+  const duongDan = req.url.split('?')[0];
+
+  if (req.method === 'GET' && (duongDan === '/' || duongDan.endsWith('/health'))) {
     res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end(`MCAR realtime OK - ${ketNoiTheoNguoiDung.size} tai khoan dang ket noi`);
     return;
   }
 
-  if (req.method === 'POST' && req.url === '/broadcast') {
+  if (req.method === 'POST' && duongDan.endsWith('/broadcast')) {
     if (req.headers['x-ws-secret'] !== BI_MAT) {
       res.writeHead(401, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: false, loi: 'Sai khoa bi mat' }));
