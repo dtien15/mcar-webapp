@@ -46,11 +46,12 @@ foreach ($bangLuong as $dong) {
 
     <?php if (laQuanLy()): ?>
       <form method="post" action="<?= duongDan('luong/tinh') ?>"
-            onsubmit="return confirm('Tính lại lương toàn bộ tài xế trong kỳ <?= (int)$thang ?>/<?= (int)$nam ?>?');">
+            onsubmit="return confirm('Tính lại toàn bộ lương trong kỳ <?= (int)$thang ?>/<?= (int)$nam ?>?');"
+            title="Chuyến chốt xong đã tự tính lương rồi - chỉ cần bấm nút này khi đổi tỷ giá/bảo hiểm và cần tính lại hàng loạt">
         <?php truongToken(); ?>
         <input type="hidden" name="thang" value="<?= (int)$thang ?>">
         <input type="hidden" name="nam" value="<?= (int)$nam ?>">
-        <button class="btn btn-success btn-sm"><?= bieuTuong('refresh') ?> Tính lại lương kỳ <?= (int)$thang ?>/<?= (int)$nam ?></button>
+        <button class="btn btn-outline-success btn-sm"><?= bieuTuong('refresh') ?> Tính lại toàn bộ kỳ <?= (int)$thang ?>/<?= (int)$nam ?></button>
       </form>
     <?php endif; ?>
   </div>
@@ -93,8 +94,8 @@ foreach ($bangLuong as $dong) {
   <div class="the-than">
     <?php if (!$bangLuong): ?>
       <div class="khong-co-du-lieu">
-        Chưa có dữ liệu lương kỳ này.
-        <?php if (laQuanLy()): ?>Bấm nút <strong>"Tính lại lương"</strong> ở trên để tạo.<?php endif; ?>
+        Chưa có chuyến xe nào được chốt trong kỳ này nên chưa có dữ liệu lương
+        (chuyến chốt xong sẽ tự động lên đây, không cần bấm gì thêm).
       </div>
     <?php else: ?>
       <div class="luoi-luong">
