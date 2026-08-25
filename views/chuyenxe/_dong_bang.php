@@ -7,7 +7,7 @@ $tt          = nhanTrangThaiChuyen($chuyen['status']);
 $cuaToi      = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
 $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
 ?>
-<tr <?php if ($cuaToi): ?>data-cua-toi="1" data-dang-dinh-vi="<?= (int)$chuyen['dang_dinh_vi'] ?>" data-id-chuyen="<?= $chuyen['id'] ?>"<?php endif; ?>>
+<tr>
   <td><?= dinhDangNgay($chuyen['trip_date']) ?></td>
   <td><?= h($chuyen['pickup_time']) ?></td>
   <td>
@@ -30,9 +30,6 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
       <span class="huy-hieu-trang-thai tt-success" title="Tài xế đã nộp lại tiền cho công ty"><?= bieuTuong('cash') ?> Đã nộp lại</span>
     <?php elseif (in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
       <span class="huy-hieu-trang-thai tt-warning" title="Tài xế đang cầm tiền của khách, chưa nộp lại"><?= bieuTuong('cash') ?> Chưa nộp lại</span>
-    <?php endif; ?>
-    <?php if ($chuyen['dang_dinh_vi']): ?>
-      <span class="huy-hieu-dinh-vi" title="Đang gửi vị trí"><span class="cham-nhap-nhay"></span> GPS</span>
     <?php endif; ?>
   </td>
   <td class="canh-phai">
@@ -78,19 +75,6 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
 
       <?php elseif ($cuaToi): ?>
         <?php if ($chuyen['status'] !== 'hoan_thanh'): ?>
-          <?php if (!$chuyen['dang_dinh_vi']): ?>
-            <form method="post" action="<?= duongDan('chuyenxe/batdauhanhtrinh') ?>">
-              <?php truongToken(); ?>
-              <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-              <button class="btn btn-sm btn-outline-success"><?= bieuTuong('player-play') ?> Bắt đầu</button>
-            </form>
-          <?php else: ?>
-            <form method="post" action="<?= duongDan('chuyenxe/ketthuchanhtrinh') ?>">
-              <?php truongToken(); ?>
-              <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-              <button class="btn btn-sm btn-outline-danger"><?= bieuTuong('player-stop') ?> Kết thúc</button>
-            </form>
-          <?php endif; ?>
           <?php if ($duocXacNhan): ?>
             <button type="button" class="btn btn-sm btn-primary"
                     data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">

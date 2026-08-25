@@ -7,8 +7,7 @@ $tt          = nhanTrangThaiChuyen($chuyen['status']);
 $cuaToi      = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
 $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
 ?>
-<div class="the-chuyen-xe <?= $duocXacNhan ? 'can-xac-nhan' : '' ?>"
-     <?php if ($cuaToi): ?>data-cua-toi="1" data-dang-dinh-vi="<?= (int)$chuyen['dang_dinh_vi'] ?>" data-id-chuyen="<?= $chuyen['id'] ?>"<?php endif; ?>>
+<div class="the-chuyen-xe <?= $duocXacNhan ? 'can-xac-nhan' : '' ?>">
   <div class="dau-the">
     <div>
       <div class="ngay"><?= bieuTuong('calendar') ?> <?= dinhDangNgay($chuyen['trip_date']) ?>
@@ -24,9 +23,6 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
         <span class="huy-hieu-trang-thai tt-success" title="Tài xế đã nộp lại tiền cho công ty"><?= bieuTuong('cash') ?> Đã nộp lại</span>
       <?php elseif (in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
         <span class="huy-hieu-trang-thai tt-warning" title="Tài xế đang cầm tiền của khách, chưa nộp lại"><?= bieuTuong('cash') ?> Chưa nộp lại</span>
-      <?php endif; ?>
-      <?php if ($chuyen['dang_dinh_vi']): ?>
-        <span class="huy-hieu-dinh-vi" title="Đang gửi vị trí"><span class="cham-nhap-nhay"></span> GPS</span>
       <?php endif; ?>
     </div>
   </div>
@@ -78,19 +74,6 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
       <?php endif; ?>
     <?php elseif ($cuaToi): ?>
       <?php if ($chuyen['status'] !== 'hoan_thanh'): ?>
-        <?php if (!$chuyen['dang_dinh_vi']): ?>
-          <form method="post" action="<?= duongDan('chuyenxe/batdauhanhtrinh') ?>" class="w-100">
-            <?php truongToken(); ?>
-            <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-            <button class="btn btn-outline-success w-100"><?= bieuTuong('player-play') ?> Bắt đầu hành trình</button>
-          </form>
-        <?php else: ?>
-          <form method="post" action="<?= duongDan('chuyenxe/ketthuchanhtrinh') ?>" class="w-100">
-            <?php truongToken(); ?>
-            <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-            <button class="btn btn-outline-danger w-100"><?= bieuTuong('player-stop') ?> Kết thúc hành trình</button>
-          </form>
-        <?php endif; ?>
         <?php if ($duocXacNhan): ?>
           <button type="button" class="btn btn-primary w-100"
                   data-bs-toggle="modal" data-bs-target="#xacNhan<?= $chuyen['id'] ?>">

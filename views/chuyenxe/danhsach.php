@@ -263,9 +263,6 @@ $dsTab = [
           document.getElementById('khoiXemThem').setAttribute('hidden', '');
         }
         dangTai = false;
-
-        // Neu tai xe dang o trang nay va co chuyen moi tai them dang chay GPS,
-        // khong can xu ly gi them - script gui vi tri chi chay 1 lan luc tai trang.
       })
       .catch(function () {
         dangTai = false;
@@ -275,56 +272,3 @@ $dsTab = [
   });
 })();
 </script>
-
-<?php if (laTaiXe()): ?>
-<script>
-// ---------------------------------------------------------------
-// Dinh vi hanh trinh: gui vi tri len may chu trong khi dang chay xe
-// ---------------------------------------------------------------
-(function () {
-  var URL_CAP_NHAT = '<?= duongDan('chuyenxe/capnhatvitri') ?>';
-  var GIAY_TOI_THIEU_GIUA_2_LAN = 15;
-
-  var dsIdDangChay = [...document.querySelectorAll('[data-cua-toi="1"][data-dang-dinh-vi="1"]')]
-    .map(function (el) { return el.getAttribute('data-id-chuyen'); })
-    .filter(function (v, i, mang) { return v && mang.indexOf(v) === i; }); // bo trung (the + bang cung ton tai trong DOM)
-
-  if (!dsIdDangChay.length) return;
-
-  if (!('geolocation' in navigator)) {
-    console.warn('Trình duyệt này không hỗ trợ định vị.');
-    return;
-  }
-
-  var lanGuiCuoi = 0;
-
-  function guiViTri(vitri) {
-    var bayGio = Date.now();
-    if (bayGio - lanGuiCuoi < GIAY_TOI_THIEU_GIUA_2_LAN * 1000) return;
-    lanGuiCuoi = bayGio;
-
-    dsIdDangChay.forEach(function (id) {
-      fetch(URL_CAP_NHAT, {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: id,
-          lat: vitri.coords.latitude,
-          lng: vitri.coords.longitude,
-          do_chinh_xac: Math.round(vitri.coords.accuracy || 0)
-        })
-      }).catch(function () { /* mat mang thi bo qua, lan sau gui lai */ });
-    });
-  }
-
-  navigator.geolocation.watchPosition(guiViTri, function (loi) {
-    console.warn('Không lấy được vị trí:', loi.message);
-  }, {
-    enableHighAccuracy: true,
-    maximumAge: 10000,
-    timeout: 20000
-  });
-})();
-</script>
-<?php endif; ?>
