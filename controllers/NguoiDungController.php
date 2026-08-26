@@ -91,6 +91,7 @@ class NguoiDungController extends Controller
             datThongBao('Đã tạo tài khoản mới.');
         }
 
+        baoThucRealtimeQuanLy();
         chuyenTrang('nguoidung');
     }
 
@@ -110,6 +111,7 @@ class NguoiDungController extends Controller
         $this->model('NguoiDungModel')->xoa($id);
 
         datThongBao('Đã xóa tài khoản.');
+        baoThucRealtimeQuanLy();
         chuyenTrang('nguoidung');
     }
 }

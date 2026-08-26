@@ -499,5 +499,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
     .catch(function () {});
 }
 </script>
+<!-- Bong chat noi: hien o moi trang sau khi dang nhap -->
+<?php if (taiKhoanHienTai()) { require DUONG_DAN_GOC . '/views/layouts/_bong_chat.php'; } ?>
 </body>
 </html>

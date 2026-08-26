@@ -1,46 +1,80 @@
 <?php
 // =====================================================================
-// ChatController - Chat gan lien voi 1 chuyen xe cu the (quan ly <-> tai xe)
+// ChatController - Chat giua quan ly (admin/ke toan) va tai xe.
+// Moi tai xe la 1 cuoc hoi thoai lien tuc; tin nhan co the gan kem 1
+// chuyen xe cu the de tra cuu lai (khong bat buoc).
 // =====================================================================
 
 class ChatController extends Controller
 {
-    /** Lay toan bo tin nhan cua 1 chuyen xe (JSON) - vua load trang vua dung cho realtime tai lai */
-    public function lay($idChuyen = 0)
+    /** Danh sach cuoc hoi thoai (chi quan ly) - de ve danh sach trong bong chat */
+    public function hoiThoai()
     {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
         header('Content-Type: application/json; charset=utf-8');
 
-        $chuyen = $this->kiemTraQuyenTrenChuyen((int)$idChuyen);
-        if (!$chuyen) {
-            http_response_code(403);
-            echo json_encode(['ok' => false, 'loi' => 'Không có quyền xem chuyến xe này.']);
-            exit;
-        }
+        $ds = $this->model('ChatModel')->layDanhSachHoiThoai(taiKhoanHienTai()['id']);
+        $dsOnline = layTaiXeDangOnline();
 
-        $chatModel = $this->model('ChatModel');
-        $chatModel->danhDauDaXem($idChuyen, taiKhoanHienTai()['id']);
-
-        $dsTinNhan = array_map(function ($tn) {
+        echo json_encode(['ok' => true, 'hoi_thoai' => array_map(function ($d) use ($dsOnline) {
             return [
-                'id'          => (int)$tn['id'],
-                'noi_dung'    => $tn['content'],
-                'cua_toi'     => (int)$tn['sender_id'] === (int)taiKhoanHienTai()['id'],
-                'ten_nguoi_gui' => $tn['ten_nguoi_gui'],
-                'thoi_gian'   => thoiGianTuongDoi($tn['created_at']),
+                'id_tai_xe' => (int)$d['driver_id'],
+                'ten'       => $d['ten_tai_xe'],
+                'tin_cuoi'  => $d['tin_cuoi'] ?: '',
+                'thoi_gian' => $d['luc_cuoi'] ? thoiGianTuongDoi($d['luc_cuoi']) : '',
+                'chua_doc'  => (int)$d['chua_doc'],
+                'online'    => in_array((int)$d['driver_id'], $dsOnline, true),
             ];
-        }, $chatModel->layTinNhanTheoChuyen($idChuyen));
-
-        echo json_encode([
-            'ok'         => true,
-            'tin_nhan'   => $dsTinNhan,
-            // Chuyen da chot xong thi khong con nhan tin them duoc nua (van
-            // xem lai duoc lich su cu) - khong con gi can trao doi sau khi chot.
-            'co_the_gui' => $chuyen['status'] !== 'hoan_thanh',
-        ]);
+        }, $ds)], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
-    /** Gui 1 tin nhan moi trong chuyen xe */
+    /**
+     * Lay toan bo tin nhan trong 1 cuoc hoi thoai.
+     * Quan ly truyen $idTaiXe; tai xe khong can truyen (tu lay cua chinh minh).
+     */
+    public function lay($idTaiXe = 0)
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $idTaiXe = $this->layIdTaiXeHopLe($idTaiXe);
+        if (!$idTaiXe) {
+            http_response_code(403);
+            echo json_encode(['ok' => false, 'loi' => 'Không có quyền xem cuộc trò chuyện này.']);
+            exit;
+        }
+
+        $chatModel  = $this->model('ChatModel');
+        $idTaiKhoan = taiKhoanHienTai()['id'];
+        $chatModel->danhDauDaXem($idTaiXe, $idTaiKhoan);
+
+        $dsTinNhan = array_map(function ($tn) use ($idTaiKhoan) {
+            return [
+                'id'            => (int)$tn['id'],
+                'noi_dung'      => $tn['content'],
+                'cua_toi'       => (int)$tn['sender_id'] === (int)$idTaiKhoan,
+                'ten_nguoi_gui' => $tn['ten_nguoi_gui'],
+                'thoi_gian'     => thoiGianTuongDoi($tn['created_at']),
+                // Tin nay noi ve cuoc xe nao (neu duoc gui tu trong 1 cuoc cu the)
+                'cuoc'          => $tn['trip_id'] ? [
+                    'id'    => (int)$tn['trip_id'],
+                    'nhan'  => 'Cuốc ' . dinhDangNgay($tn['trip_date']) . ($tn['route'] ? ' · ' . $tn['route'] : ''),
+                ] : null,
+            ];
+        }, $chatModel->layTinNhanTheoTaiXe($idTaiXe));
+
+        $taiXe = $this->model('TaiXeModel')->layTheoId($idTaiXe);
+
+        echo json_encode([
+            'ok'         => true,
+            'id_tai_xe'  => $idTaiXe,
+            'ten_tai_xe' => $taiXe['full_name'] ?? '',
+            'tin_nhan'   => $dsTinNhan,
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    /** Gui 1 tin nhan moi */
     public function gui()
     {
         header('Content-Type: application/json; charset=utf-8');
@@ -52,17 +86,13 @@ class ChatController extends Controller
             exit;
         }
 
-        $idChuyen = (int)($_POST['id_chuyen'] ?? 0);
+        $idTaiXe  = $this->layIdTaiXeHopLe((int)($_POST['id_tai_xe'] ?? 0));
         $noiDung  = trim($_POST['noi_dung'] ?? '');
+        $idChuyen = (int)($_POST['id_chuyen'] ?? 0) ?: null;
 
-        $chuyen = $this->kiemTraQuyenTrenChuyen($idChuyen);
-        if (!$chuyen) {
+        if (!$idTaiXe) {
             http_response_code(403);
-            echo json_encode(['ok' => false, 'loi' => 'Không có quyền nhắn tin trong chuyến xe này.']);
-            exit;
-        }
-        if ($chuyen['status'] === 'hoan_thanh') {
-            echo json_encode(['ok' => false, 'loi' => 'Chuyến xe này đã chốt xong, không thể nhắn tin thêm.']);
+            echo json_encode(['ok' => false, 'loi' => 'Không có quyền nhắn tin cho tài xế này.']);
             exit;
         }
         if ($noiDung === '') {
@@ -74,38 +104,35 @@ class ChatController extends Controller
             exit;
         }
 
-        $taiKhoan   = taiKhoanHienTai();
-        $idNguoiGui = $taiKhoan['id'];
-        $this->model('ChatModel')->guiTinNhan($idChuyen, $idNguoiGui, $noiDung);
+        // Chi gan cuoc xe neu cuoc do that su thuoc dung tai xe nay
+        if ($idChuyen) {
+            $chuyen = $this->model('ChuyenXeModel')->layTheoId($idChuyen);
+            if (!$chuyen || (int)$chuyen['driver_id'] !== $idTaiXe) {
+                $idChuyen = null;
+            }
+        }
 
-        // Tao THONG BAO THAT (khong chi "nhac" WebSocket suong) - de con dau ben
-        // kia thay ngay o chuong thong bao, va nhat la nhan duoc PUSH NOTIFICATION
-        // ngay ca khi ho khong mo web/tat trinh duyet. baoThucRealtime*() ben
-        // trong ThongBaoModel se tu lo phan "nhac tuc thi" cho ben dang mo web.
-        // Tro ve trang danh sach kem tham so mo_chat de JS tu mo dung modal chat
-        // cua chuyen nay (khong con panel chat rieng o trang chi tiet nua).
-        $duongDanChuyen = 'chuyenxe?mo_chat=' . $idChuyen;
-        $noiDungRutGon  = mb_strlen($noiDung) > 80 ? mb_substr($noiDung, 0, 80) . '…' : $noiDung;
+        $taiKhoan = taiKhoanHienTai();
+        $this->model('ChatModel')->guiTinNhan($idTaiXe, $taiKhoan['id'], $noiDung, $idChuyen);
+
+        // Tao THONG BAO THAT cho ben con lai (hien o chuong + push ve dien
+        // thoai ngay ca khi ho da tat app), khong chi "nhac" WebSocket suong.
+        $noiDungRutGon = mb_strlen($noiDung) > 80 ? mb_substr($noiDung, 0, 80) . '…' : $noiDung;
 
         if (laQuanLy()) {
-            if ($chuyen['driver_id']) {
-                $taiKhoanTaiXe = $this->model('NguoiDungModel')->layTheoDriverId($chuyen['driver_id']);
-                if ($taiKhoanTaiXe) {
-                    $this->model('ThongBaoModel')->guiChoTaiXe(
-                        $chuyen['driver_id'],
-                        $taiKhoan['ho_ten'] . ' nhắn tin về chuyến ngày ' . dinhDangNgay($chuyen['trip_date']),
-                        $noiDungRutGon,
-                        $duongDanChuyen,
-                        'chat_moi',
-                        $idChuyen
-                    );
-                }
-            }
+            $this->model('ThongBaoModel')->guiChoTaiXe(
+                $idTaiXe,
+                $taiKhoan['ho_ten'] . ' nhắn tin cho bạn',
+                $noiDungRutGon,
+                'chuyenxe?mo_chat=1',
+                'chat_moi',
+                $idChuyen
+            );
         } else {
             $this->model('ThongBaoModel')->guiChoQuanLy(
-                $taiKhoan['ho_ten'] . ' nhắn tin về chuyến ngày ' . dinhDangNgay($chuyen['trip_date']),
+                $taiKhoan['ho_ten'] . ' nhắn tin cho công ty',
                 $noiDungRutGon,
-                $duongDanChuyen,
+                'chuyenxe?mo_chat=' . $idTaiXe,
                 'chat_moi',
                 $idChuyen
             );
@@ -115,26 +142,40 @@ class ChatController extends Controller
         exit;
     }
 
-    /**
-     * Kiem tra tai khoan dang nhap co duoc xem/nhan tin trong chuyen xe $idChuyen
-     * khong: quan ly (admin/ke toan) xem duoc moi chuyen; tai xe chi xem duoc
-     * chuyen cua chinh minh. Tra ve ban ghi chuyen neu hop le, null neu khong.
-     */
-    private function kiemTraQuyenTrenChuyen($idChuyen)
+    /** Tong so tin chua doc - de hien so tren bong chat, goi khi co nudge */
+    public function soChuaDoc()
     {
-        if (!taiKhoanHienTai() || !$idChuyen) {
-            return null;
+        header('Content-Type: application/json; charset=utf-8');
+        if (!taiKhoanHienTai()) {
+            echo json_encode(['ok' => false]);
+            exit;
         }
-        $chuyen = $this->model('ChuyenXeModel')->layTheoId($idChuyen);
-        if (!$chuyen) {
-            return null;
+        $idTaiXe = laTaiXe() ? (int)(taiKhoanHienTai()['id_tai_xe'] ?? 0) : null;
+        echo json_encode([
+            'ok'       => true,
+            'chua_doc' => $this->model('ChatModel')->demTongChuaDoc(taiKhoanHienTai()['id'], $idTaiXe),
+        ]);
+        exit;
+    }
+
+    /**
+     * Xac dinh tai xe cua cuoc hoi thoai va kiem tra quyen:
+     * - Quan ly: duoc chat voi bat ky tai xe nao (phai truyen $idTaiXe).
+     * - Tai xe: luon la chinh minh, bo qua gia tri truyen len.
+     * Tra ve id tai xe hop le, hoac 0 neu khong duoc phep.
+     */
+    private function layIdTaiXeHopLe($idTaiXe)
+    {
+        if (!taiKhoanHienTai()) {
+            return 0;
         }
-        if (laQuanLy()) {
-            return $chuyen;
+        if (laTaiXe()) {
+            return (int)(taiKhoanHienTai()['id_tai_xe'] ?? 0);
         }
-        if (laTaiXe() && (int)$chuyen['driver_id'] === (int)(taiKhoanHienTai()['id_tai_xe'] ?? 0)) {
-            return $chuyen;
+        if (!laQuanLy() || !$idTaiXe) {
+            return 0;
         }
-        return null;
+        // Quan ly: chi cho chat voi tai xe co that
+        return $this->model('TaiXeModel')->layTheoId((int)$idTaiXe) ? (int)$idTaiXe : 0;
     }
 }

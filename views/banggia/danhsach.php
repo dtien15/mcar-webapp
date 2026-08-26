@@ -102,3 +102,34 @@
     </table>
   </div>
 </div>
+
+<script>
+// Realtime: co nguoi khac vua them/sua/xoa trong danh muc nay -> tu tai lai
+// trang de thay ngay. TUYET DOI khong tai lai khi dang go do (form co du
+// lieu) hoac dang mo hop thoai - se lam mat cong nguoi dung dang nhap.
+(function () {
+  if (!window.mcarRealtime) return;
+  var henGio = null;
+
+  function dangNhapDoDang() {
+    if (document.querySelector('.modal.show')) return true;
+    var els = document.querySelectorAll('form input:not([type=hidden]):not([type=submit]), form textarea');
+    for (var i = 0; i < els.length; i++) {
+      var e = els[i];
+      if (e.type === 'checkbox' || e.type === 'radio') continue;
+      // Co gia tri khac gia tri ban dau, hoac dang la o dang go
+      if (document.activeElement === e) return true;
+      if (e.value && e.value !== e.defaultValue) return true;
+    }
+    return false;
+  }
+
+  window.mcarRealtime.dangKy('nudge', function () {
+    if (dangNhapDoDang()) return;
+    clearTimeout(henGio);
+    henGio = setTimeout(function () {
+      if (!dangNhapDoDang()) location.reload();
+    }, 1500);
+  });
+})();
+</script>

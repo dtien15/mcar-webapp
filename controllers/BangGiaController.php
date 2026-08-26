@@ -51,6 +51,7 @@ class BangGiaController extends Controller
             $bangGiaModel->them($duLieu);
             datThongBao('Đã thêm tuyến mới vào bảng giá.');
         }
+        baoThucRealtimeQuanLy();
         chuyenTrang('banggia');
     }
 
@@ -61,6 +62,7 @@ class BangGiaController extends Controller
 
         $this->model('BangGiaModel')->xoa((int)($_POST['id'] ?? 0));
         datThongBao('Đã xóa tuyến khỏi bảng giá.');
+        baoThucRealtimeQuanLy();
         chuyenTrang('banggia');
     }
 }

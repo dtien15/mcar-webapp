@@ -50,6 +50,7 @@ class XeController extends Controller
             $xeModel->them($duLieu);
             datThongBao('Đã thêm xe mới.');
         }
+        baoThucRealtimeQuanLy();
         chuyenTrang('xe');
     }
 
@@ -68,6 +69,7 @@ class XeController extends Controller
 
         $xeModel->xoa($id);
         datThongBao('Đã xóa xe.');
+        baoThucRealtimeQuanLy();
         chuyenTrang('xe');
     }
 }

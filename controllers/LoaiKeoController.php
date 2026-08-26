@@ -46,6 +46,7 @@ class LoaiKeoController extends Controller
             $loaiKeoModel->them($duLieu);
             datThongBao('Đã thêm loại kèo mới.');
         }
+        baoThucRealtimeQuanLy();
         chuyenTrang('loaikeo');
     }
 
@@ -64,6 +65,7 @@ class LoaiKeoController extends Controller
 
         $loaiKeoModel->xoa($id);
         datThongBao('Đã xóa loại kèo.');
+        baoThucRealtimeQuanLy();
         chuyenTrang('loaikeo');
     }
 }

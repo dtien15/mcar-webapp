@@ -234,8 +234,6 @@ $dsTab = [
   <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_nhotaikhac.php'; endforeach; ?>
 </div>
 
-<!-- Modal chat dung chung cho tat ca cac chuyen (mcarMoChat(id) mo cho dung chuyen) -->
-<?php include DUONG_DAN_GOC . '/views/chuyenxe/_modal_chat.php'; ?>
 
 <script>
 // ---------------------------------------------------------------
@@ -327,14 +325,5 @@ $dsTab = [
     window.mcarRealtime.dangKy('nudge', taiLaiTheoRealtime);
   }
 
-  // Tu mo chat neu den tu link thong bao chat (?mo_chat=ID). Phai cho toi
-  // window 'load' vi thu vien Bootstrap (can de mo modal) duoc nap o script
-  // O CUOI trang (sau noi dung nay) - goi som hon se loi "bootstrap is not defined".
-  var idMoChat = new URLSearchParams(window.location.search).get('mo_chat');
-  if (idMoChat) {
-    window.addEventListener('load', function () {
-      if (window.mcarMoChat) window.mcarMoChat(parseInt(idMoChat, 10));
-    });
-  }
 })();
 </script>

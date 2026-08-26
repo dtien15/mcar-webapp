@@ -28,20 +28,9 @@ class ChuyenXeController extends Controller
             'dsTaiXe'            => $this->model('TaiXeModel')->layTatCa(),
             'dsTaiXeDangChay'    => $this->model('TaiXeModel')->layTaiXeDangChay(),
             'dsLoaiKeo'          => $this->model('LoaiKeoModel')->layTatCa(),
-            'dsTripChuaXemChat'  => $this->layTripChuaXemChat(),
         ];
 
         $this->view('chuyenxe/danhsach', $duLieu, 'Chuyến xe');
-    }
-
-    /** [idChuyen => so tin chua xem], theo dung vai tro tai khoan hien tai */
-    private function layTripChuaXemChat()
-    {
-        if (!taiKhoanHienTai()) {
-            return [];
-        }
-        $idTaiXe = laTaiXe() ? (int)(taiKhoanHienTai()['id_tai_xe'] ?? 0) : null;
-        return $this->model('ChatModel')->laySoTinChuaXemTheoChuyen(taiKhoanHienTai()['id'], $idTaiXe);
     }
 
     /**
@@ -66,7 +55,6 @@ class ChuyenXeController extends Controller
         $danhSach        = $chuyenXeModel->locDanhSach($loc, $soDong, $boQua);
         $tongSo          = $chuyenXeModel->demTheoLoc($loc);
         $dsTaiXeDangChay   = $this->model('TaiXeModel')->layTaiXeDangChay();
-        $dsTripChuaXemChat = $this->layTripChuaXemChat();
 
         $theHtml          = '';
         $dongHtml         = '';
@@ -75,7 +63,7 @@ class ChuyenXeController extends Controller
         $modalSuaPhuPhiHtml = '';
         $modalNhoTaiKhacHtml = '';
         foreach ($danhSach as $chuyen) {
-            $duLieuThe = ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai, 'dsTaiXeDangChay' => $dsTaiXeDangChay, 'dsTripChuaXemChat' => $dsTripChuaXemChat];
+            $duLieuThe = ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai, 'dsTaiXeDangChay' => $dsTaiXeDangChay];
             $theHtml             .= $this->dungView('chuyenxe/_the_chuyen', $duLieuThe);
             $dongHtml            .= $this->dungView('chuyenxe/_dong_bang', $duLieuThe);
             $modalXacNhanHtml    .= $this->dungView('chuyenxe/_modal_xacnhan', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);

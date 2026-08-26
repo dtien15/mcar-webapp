@@ -74,11 +74,8 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
       <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-sm btn-outline-secondary w-100">
         <?= bieuTuong('file-invoice') ?> Xem chi tiết phiếu
       </a>
-      <button type="button" class="btn btn-sm btn-outline-info w-100 nut-chat-nhanh" onclick="mcarMoChat(<?= $chuyen['id'] ?>)">
+      <button type="button" class="btn btn-sm btn-outline-info w-100 nut-chat-nhanh" onclick="mcarMoChat(<?= $chuyen['id'] ?>, <?= (int)$chuyen['driver_id'] ?>, <?= h(json_encode('Cuốc ' . dinhDangNgay($chuyen['trip_date']) . ($chuyen['route'] ? ' · ' . $chuyen['route'] : ''))) ?>)">
         <?= bieuTuong('message-circle') ?> Nhắn tin
-        <?php if (!empty($dsTripChuaXemChat[$chuyen['id']])): ?>
-          <span class="cham-chua-doc-chat"><?= (int)$dsTripChuaXemChat[$chuyen['id']] ?></span>
-        <?php endif; ?>
       </button>
     <?php elseif ($cuaToi): ?>
       <?php if ($chuyen['status'] !== 'hoan_thanh'): ?>
@@ -101,11 +98,8 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
       <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-outline-secondary w-100">
         <?= bieuTuong('file-invoice') ?> Xem chi tiết phiếu
       </a>
-      <button type="button" class="btn btn-outline-info w-100 nut-chat-nhanh" onclick="mcarMoChat(<?= $chuyen['id'] ?>)">
+      <button type="button" class="btn btn-outline-info w-100 nut-chat-nhanh" onclick="mcarMoChat(<?= $chuyen['id'] ?>, <?= (int)$chuyen['driver_id'] ?>, <?= h(json_encode('Cuốc ' . dinhDangNgay($chuyen['trip_date']) . ($chuyen['route'] ? ' · ' . $chuyen['route'] : ''))) ?>)">
         <?= bieuTuong('message-circle') ?> Nhắn tin
-        <?php if (!empty($dsTripChuaXemChat[$chuyen['id']])): ?>
-          <span class="cham-chua-doc-chat"><?= (int)$dsTripChuaXemChat[$chuyen['id']] ?></span>
-        <?php endif; ?>
       </button>
     <?php endif; ?>
   </div>

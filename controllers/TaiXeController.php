@@ -65,6 +65,7 @@ class TaiXeController extends Controller
             $taiXeModel->them($duLieu);
             datThongBao('Đã thêm tài xế mới.');
         }
+        baoThucRealtimeQuanLy();
         chuyenTrang('taixe');
     }
 
@@ -83,6 +84,7 @@ class TaiXeController extends Controller
 
         $taiXeModel->xoa($id);
         datThongBao('Đã xóa tài xế.');
+        baoThucRealtimeQuanLy();
         chuyenTrang('taixe');
     }
 }

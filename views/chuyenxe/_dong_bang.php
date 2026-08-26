@@ -69,11 +69,8 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
         <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-sm btn-outline-secondary">
           <?= bieuTuong('file-invoice') ?> Chi tiết
         </a>
-        <button type="button" class="btn btn-sm btn-outline-info nut-chat-nhanh" onclick="mcarMoChat(<?= $chuyen['id'] ?>)" title="Nhắn tin về chuyến này">
+        <button type="button" class="btn btn-sm btn-outline-info nut-chat-nhanh" onclick="mcarMoChat(<?= $chuyen['id'] ?>, <?= (int)$chuyen['driver_id'] ?>, <?= h(json_encode('Cuốc ' . dinhDangNgay($chuyen['trip_date']) . ($chuyen['route'] ? ' · ' . $chuyen['route'] : ''))) ?>)" title="Nhắn tin về chuyến này">
           <?= bieuTuong('message-circle') ?>
-          <?php if (!empty($dsTripChuaXemChat[$chuyen['id']])): ?>
-            <span class="cham-chua-doc-chat"><?= (int)$dsTripChuaXemChat[$chuyen['id']] ?></span>
-          <?php endif; ?>
         </button>
 
         <form method="post" action="<?= duongDan('chuyenxe/xoa') ?>" onsubmit="return confirm('Xóa chuyến xe này? Không khôi phục được.');">
@@ -103,11 +100,8 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
         <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-sm btn-outline-secondary">
           <?= bieuTuong('file-invoice') ?> Chi tiết
         </a>
-        <button type="button" class="btn btn-sm btn-outline-info nut-chat-nhanh" onclick="mcarMoChat(<?= $chuyen['id'] ?>)" title="Nhắn tin về chuyến này">
+        <button type="button" class="btn btn-sm btn-outline-info nut-chat-nhanh" onclick="mcarMoChat(<?= $chuyen['id'] ?>, <?= (int)$chuyen['driver_id'] ?>, <?= h(json_encode('Cuốc ' . dinhDangNgay($chuyen['trip_date']) . ($chuyen['route'] ? ' · ' . $chuyen['route'] : ''))) ?>)" title="Nhắn tin về chuyến này">
           <?= bieuTuong('message-circle') ?>
-          <?php if (!empty($dsTripChuaXemChat[$chuyen['id']])): ?>
-            <span class="cham-chua-doc-chat"><?= (int)$dsTripChuaXemChat[$chuyen['id']] ?></span>
-          <?php endif; ?>
         </button>
       <?php endif; ?>
     </div>
