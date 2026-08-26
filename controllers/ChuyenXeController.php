@@ -265,8 +265,11 @@ class ChuyenXeController extends Controller
             $taiXeMoi = (int)$duLieu['driver_id'];
             if ($taiXeMoi && $taiXeMoi !== $taiXeCu) {
                 $this->baoChuyenXeMoi($id, $duLieu);
-            } elseif ($taiXeMoi && $chuyenXeCu && $chuyenXeCu['status'] === 'moi') {
-                $this->baoChuyenXeThayDoi($id, $duLieu);
+            } elseif ($taiXeMoi && $chuyenXeCu) {
+                // Bao cho tai xe biet DU chuyen dang o trang thai nao (truoc day chi
+                // bao khi con "Moi giao" - nghia la sua sau khi tai xe da xac nhan
+                // thi ho khong he hay biet). Chi bao khi thuc su co gi doi.
+                $this->baoChuyenXeThayDoi($id, $duLieu, $chuyenXeCu);
             }
 
             // Sua truc tiep 1 chuyen DA CHOT (khong qua "Mo lai" truoc) - van co
@@ -455,6 +458,43 @@ class ChuyenXeController extends Controller
             'chuyen'          => $chuyen,
             'lichSuChuyenGiao' => $chuyenXeModel->layLichSuChuyenGiao($id),
         ], 'Chi tiết chuyến xe');
+    }
+
+    /**
+     * API nho tra ve HTML phan noi dung cua trang Chi tiet chuyen xe - dung khi
+     * realtime nhan "nudge" de trang tu cap nhat, khong can F5. Quan trong vi
+     * PHAN LON cac truong (diem don/tra, SDT khach, VETC, bao duong, phat, tam
+     * ung, hoan tien...) chi hien o trang nay, khong co tren danh sach.
+     */
+    public function chiTietMoi($id = 0)
+    {
+        $this->yeuCauDangNhap();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $chuyenXeModel = $this->model('ChuyenXeModel');
+        $chuyen        = $chuyenXeModel->layChiTiet((int)$id);
+
+        if (!$chuyen) {
+            echo json_encode(['ok' => false, 'da_xoa' => true]);
+            exit;
+        }
+
+        $laChuTaiXe = laTaiXe() && (int)$chuyen['driver_id'] === (int)taiKhoanHienTai()['id_tai_xe'];
+        if (!laQuanLy() && !$laChuTaiXe) {
+            http_response_code(403);
+            echo json_encode(['ok' => false]);
+            exit;
+        }
+
+        echo json_encode([
+            'ok'         => true,
+            'trang_thai' => nhanTrangThaiChuyen($chuyen['status']),
+            'html'       => $this->dungView('chuyenxe/_noidung_chitiet', [
+                'chuyen'           => $chuyen,
+                'lichSuChuyenGiao' => $chuyenXeModel->layLichSuChuyenGiao((int)$id),
+            ]),
+        ]);
+        exit;
     }
 
     /** Tai xe nhap chi phi thuc te va xac nhan chuyen xe */
@@ -769,14 +809,27 @@ class ChuyenXeController extends Controller
         );
     }
 
-    /** Bao cho tai xe biet chuyen xe vua duoc sua thong tin */
-    private function baoChuyenXeThayDoi($idChuyenXe, array $duLieu)
+    /**
+     * Bao cho tai xe biet chuyen xe vua duoc sua - NOI RO nhung gi vua doi
+     * (vd "Gio don: 08:00 -> 09:45 · Tien cuoc: 300.000d -> 355.000d") thay
+     * vi chi bao chung chung "vua duoc cap nhat", de tai xe nam duoc ngay
+     * thay doi ma khong phai mo app ra do lai tung truong.
+     */
+    private function baoChuyenXeThayDoi($idChuyenXe, array $duLieu, array $chuyenXeCu = null)
     {
+        $thayDoi = $chuyenXeCu ? $this->soSanhThayDoi($chuyenXeCu, $duLieu) : '';
+
+        // Bam Cap nhat nhung khong doi gi (vd chi mo form roi luu lai) thi khong
+        // lam phien tai xe bang 1 thong bao rong nghia.
+        if ($chuyenXeCu && $thayDoi === '') {
+            return;
+        }
+
         $this->model('ThongBaoModel')->guiChoTaiXe(
             $duLieu['driver_id'],
             'Chuyến xe ngày ' . dinhDangNgay($duLieu['trip_date']) . ' vừa được cập nhật',
-            $this->motTaChuyenXe($duLieu),
-            'chuyenxe?trang_thai=moi',
+            $thayDoi !== '' ? $thayDoi : $this->motTaChuyenXe($duLieu),
+            'chuyenxe/chitiet/' . $idChuyenXe,
             'chuyen_xe_moi',
             $idChuyenXe,
             false
@@ -817,6 +870,86 @@ class ChuyenXeController extends Controller
             $phan[] = 'Tiền cuốc ' . dinhDangTien($duLieu['trip_fee']) . 'đ';
         }
         return implode(' · ', $phan);
+    }
+
+    /**
+     * So sanh du lieu chuyen xe CU va MOI, tra ve cau mo ta ro rang nhung
+     * gi vua doi (vd "Gio don: 08:00 -> 09:45 · Tien cuoc: 300.000d -> 355.000d").
+     * Chuoi rong nghia la khong co gi thay doi dang ke.
+     */
+    private function soSanhThayDoi(array $cu, array $moi)
+    {
+        // [ten cot => [nhan hien thi, kieu dinh dang]] - chi cac truong tai xe can biet
+        $dsTruong = [
+            'trip_date'        => ['Ngày chạy',      'ngay'],
+            'pickup_time'      => ['Giờ đón',        'chu'],
+            'route'            => ['Hành trình',     'chu'],
+            'pickup_location'  => ['Điểm đón',       'chu'],
+            'dropoff_location' => ['Điểm trả',       'chu'],
+            'pickup_sign'      => ['Bảng đón khách', 'chu'],
+            'passenger_count'  => ['Số lượng khách', 'chu'],
+            'customer_name'    => ['Họ tên khách',   'chu'],
+            'customer_phone'   => ['SĐT khách',      'chu'],
+            'customer_note'    => ['Ghi chú khách',  'chu'],
+            'company_note'     => ['Lưu ý công ty',  'chu'],
+            'car_id'           => ['Xe',             'xe'],
+            'revenue_vnd'      => ['Khách trả',      'tien'],
+            'trip_fee'         => ['Tiền cuốc',      'tien'],
+            'overnight_fee'    => ['Phụ phí',        'tien'],
+            'airport_fee'      => ['Phí sân bay',    'tien'],
+            'other_fee'        => ['Phát sinh khác', 'tien'],
+            'extra_surcharge'  => ['Phụ phí khác',   'tien'],
+            'fuel_cost'        => ['Xăng dầu',       'tien'],
+            'vetc'             => ['VETC',           'tien'],
+            'maintenance'      => ['Bảo dưỡng',      'tien'],
+            'fine'             => ['Phạt',           'tien'],
+            'cash_advance'     => ['Tạm ứng',        'tien'],
+            'refund_vnd'       => ['Hoàn tiền',      'tien'],
+            'driver_advance'   => ['Tài ứng trước',  'tien'],
+            'note'             => ['Ghi chú',        'chu'],
+        ];
+
+        $phan = [];
+        foreach ($dsTruong as $cot => [$nhan, $kieu]) {
+            if (!array_key_exists($cot, $moi) || !array_key_exists($cot, $cu)) {
+                continue;
+            }
+            $gtCu  = $this->hienGiaTriThayDoi($cu[$cot], $kieu);
+            $gtMoi = $this->hienGiaTriThayDoi($moi[$cot], $kieu);
+
+            if ($gtCu === $gtMoi) {
+                continue;
+            }
+            $phan[] = $nhan . ': ' . ($gtCu === '' ? '(trống)' : $gtCu)
+                    . ' → ' . ($gtMoi === '' ? '(trống)' : $gtMoi);
+        }
+
+        // Qua nhieu thay doi thi cat bot cho de doc tren man hinh dien thoai
+        if (count($phan) > 5) {
+            $conLai = count($phan) - 5;
+            $phan   = array_slice($phan, 0, 5);
+            $phan[] = 'và ' . $conLai . ' thay đổi khác';
+        }
+        return implode(' · ', $phan);
+    }
+
+    /** Dinh dang 1 gia tri de so sanh/hien trong thong bao thay doi */
+    private function hienGiaTriThayDoi($giaTri, $kieu)
+    {
+        if ($giaTri === null || $giaTri === '') {
+            return '';
+        }
+        if ($kieu === 'tien') {
+            return (float)$giaTri > 0 ? dinhDangTien($giaTri) . 'đ' : '';
+        }
+        if ($kieu === 'ngay') {
+            return dinhDangNgay($giaTri);
+        }
+        if ($kieu === 'xe') {
+            $xe = $this->model('XeModel')->layTheoId($giaTri);
+            return $xe ? trim($xe['name'] . ' ' . $xe['plate_number']) : '';
+        }
+        return trim((string)$giaTri);
     }
 
     /** Doc "ai tra phu phi khac" tu form, chi nhan 2 gia tri hop le */

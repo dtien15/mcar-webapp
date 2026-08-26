@@ -197,17 +197,32 @@ class ThongBaoController extends Controller
         $canHien       = $thongBaoModel->layChoThongBaoDay($thietBi['user_id']);
 
         if (!$canHien) {
-            // Khong co gi moi: van phai hien 1 thong bao vi trinh duyet yeu cau,
-            // nen bao so thong bao chua doc con lai.
+            // Khong co thong bao MOI nao chua tung hien. Trinh duyet van bat buoc
+            // phai hien 1 cai gi do khi da nhan tin day - lay thong bao gan nhat
+            // de hien dung NOI DUNG THAT, thay vi cau chung chung "co cap nhat moi"
+            // (nguoi dung khong biet la viec gi, phai mo app ra xem).
+            $ganNhat   = $thongBaoModel->layChuaDocGanDay($thietBi['user_id'], 1);
             $soChuaDoc = $thongBaoModel->demChuaDoc($thietBi['user_id']);
+
+            if ($ganNhat) {
+                $tb = $ganNhat[0];
+                echo json_encode([
+                    'ok'       => true,
+                    'imLang'   => true,
+                    'chuaDoc'  => $soChuaDoc,
+                    'tieuDe'   => $tb['title'],
+                    'noiDung'  => $tb['content'] ?: '',
+                    'duongDan' => duongDan($tb['link'] ?: 'thongbao'),
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+
             echo json_encode([
-                'ok'      => true,
-                'imLang'  => true,
-                'chuaDoc' => $soChuaDoc,
-                'tieuDe'  => 'MCAR',
-                'noiDung' => $soChuaDoc > 0
-                    ? 'Bạn còn ' . $soChuaDoc . ' thông báo chưa đọc'
-                    : 'Bạn có cập nhật mới',
+                'ok'       => true,
+                'imLang'   => true,
+                'chuaDoc'  => $soChuaDoc,
+                'tieuDe'   => 'MCAR',
+                'noiDung'  => 'Không có thông báo mới',
                 'duongDan' => duongDan('thongbao'),
             ], JSON_UNESCAPED_UNICODE);
             exit;
