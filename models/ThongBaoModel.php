@@ -66,7 +66,7 @@ class ThongBaoModel extends Model
      * Nho vay ho nhan duoc tin ngay ca khi da tat ung dung.
      * Loi o day khong duoc lam hong viec luu du lieu chinh.
      */
-    private function danhThucThietBi($idTaiKhoan)
+    protected function danhThucThietBi($idTaiKhoan)
     {
         if (!$idTaiKhoan) {
             return;
@@ -218,5 +218,79 @@ class ThongBaoModel extends Model
             "DELETE FROM notifications WHERE id = ? AND user_id = ?",
             [(int)$id, (int)$idTaiKhoan]
         );
+    }
+
+    /** Trong bao nhieu phut thi gop tin chat vao 1 thong bao thay vi tao them */
+    const PHUT_GOP_CHAT = 3;
+
+    /**
+     * Gui thong bao CHAT co GOP: neu nguoi nhan dang co 1 thong bao chat chua
+     * doc vua tao gan day thi CAP NHAT thong bao do (noi dung moi + so tin)
+     * thay vi tao them 1 cai moi. Nho vay go 10 tin lien tiep chi ra 1 thong
+     * bao duy nhat, khong bat dien thoai nguoi ta keu 10 lan.
+     *
+     * $dsIdTaiKhoan: danh sach tai khoan nhan.
+     * Tra ve so tai khoan THUC SU duoc bao (can danh thuc thiet bi).
+     */
+    public function guiHoacGopChat(array $dsIdTaiKhoan, $tieuDe, $noiDung, $duongDan, $idThamChieu = null)
+    {
+        $soBaoMoi = 0;
+
+        foreach ($dsIdTaiKhoan as $idTaiKhoan) {
+            if (!$idTaiKhoan) {
+                continue;
+            }
+
+            $cu = $this->motDong(
+                "SELECT id, content FROM notifications
+                 WHERE user_id = ? AND type = 'chat_moi' AND is_read = 0
+                   AND created_at >= DATE_SUB(NOW(), INTERVAL " . self::PHUT_GOP_CHAT . " MINUTE)
+                 ORDER BY id DESC LIMIT 1",
+                [(int)$idTaiKhoan]
+            );
+
+            if ($cu) {
+                // Da co thong bao chat chua doc vua roi -> chi cap nhat noi dung,
+                // KHONG tao them va KHONG danh thuc thiet bi lan nua (het spam).
+                $this->thucThi(
+                    "UPDATE notifications
+                     SET title = ?, content = ?, link = ?, ref_id = ?, created_at = NOW()
+                     WHERE id = ?",
+                    [$tieuDe, $noiDung, $duongDan, $idThamChieu, (int)$cu['id']]
+                );
+                // Van bao realtime de khung chat dang mo cap nhat ngay
+                baoThucRealtime($idTaiKhoan);
+                continue;
+            }
+
+            $this->thucThi(
+                "INSERT INTO notifications (user_id, title, content, link, type, ref_id, need_action, remind_at)
+                 VALUES (?,?,?,?,'chat_moi',?,0,NULL)",
+                [(int)$idTaiKhoan, $tieuDe, $noiDung, $duongDan, $idThamChieu]
+            );
+            $this->danhThucThietBi($idTaiKhoan);
+            baoThucRealtime($idTaiKhoan);
+            $soBaoMoi++;
+        }
+        return $soBaoMoi;
+    }
+
+    /** Danh sach id tai khoan dang hoat dong gan voi 1 tai xe */
+    public function layTaiKhoanCuaTaiXe($idTaiXe)
+    {
+        $ds = $this->truyVan(
+            "SELECT id FROM users WHERE driver_id = ? AND status = 'active'",
+            [(int)$idTaiXe]
+        );
+        return array_map(function ($d) { return (int)$d['id']; }, $ds);
+    }
+
+    /** Danh sach id tai khoan quan ly (admin/ke toan) dang hoat dong */
+    public function layTaiKhoanQuanLy()
+    {
+        $ds = $this->truyVan(
+            "SELECT id FROM users WHERE role IN ('admin','ketoan') AND status = 'active'"
+        );
+        return array_map(function ($d) { return (int)$d['id']; }, $ds);
     }
 }

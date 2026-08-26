@@ -119,23 +119,27 @@ class ChatController extends Controller
         // thoai ngay ca khi ho da tat app), khong chi "nhac" WebSocket suong.
         $noiDungRutGon = mb_strlen($noiDung) > 80 ? mb_substr($noiDung, 0, 80) . '…' : $noiDung;
 
+        // Dung guiHoacGopChat(): neu ben kia dang co thong bao chat CHUA DOC vua
+        // tao gan day thi chi CAP NHAT thong bao do, khong tao them va khong lam
+        // dien thoai keu lai. Go 10 tin lien tiep -> ho chi nhan 1 thong bao.
+        $thongBaoModel = $this->model('ThongBaoModel');
         if (laQuanLy()) {
-            $this->model('ThongBaoModel')->guiChoTaiXe(
-                $idTaiXe,
+            $thongBaoModel->guiHoacGopChat(
+                $thongBaoModel->layTaiKhoanCuaTaiXe($idTaiXe),
                 $taiKhoan['ho_ten'] . ' nhắn tin cho bạn',
                 $noiDungRutGon,
                 'chuyenxe?mo_chat=1',
-                'chat_moi',
                 $idChuyen
             );
         } else {
-            $this->model('ThongBaoModel')->guiChoQuanLy(
+            $thongBaoModel->guiHoacGopChat(
+                $thongBaoModel->layTaiKhoanQuanLy(),
                 $taiKhoan['ho_ten'] . ' nhắn tin cho công ty',
                 $noiDungRutGon,
                 'chuyenxe?mo_chat=' . $idTaiXe,
-                'chat_moi',
                 $idChuyen
             );
+            baoThucRealtimeQuanLy();
         }
 
         echo json_encode(['ok' => true]);
