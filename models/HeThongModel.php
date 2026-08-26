@@ -68,10 +68,12 @@ class HeThongModel extends Model
     {
         return [
             'chuyen_moi' => (int)$this->motGiaTri(
-                "SELECT COUNT(*) FROM trips WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)", [(int)$soNgay]
+                "SELECT COUNT(*) FROM trips
+                 WHERE deleted_at IS NULL AND created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)", [(int)$soNgay]
             ),
             'chuyen_chot' => (int)$this->motGiaTri(
-                "SELECT COUNT(*) FROM trips WHERE completed_at >= DATE_SUB(NOW(), INTERVAL ? DAY)", [(int)$soNgay]
+                "SELECT COUNT(*) FROM trips
+                 WHERE deleted_at IS NULL AND completed_at >= DATE_SUB(NOW(), INTERVAL ? DAY)", [(int)$soNgay]
             ),
             'tin_nhan' => (int)$this->motGiaTri(
                 "SELECT COUNT(*) FROM chat_messages WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)", [(int)$soNgay]
@@ -106,7 +108,7 @@ class HeThongModel extends Model
 
         // 3) Chuyen cho chot qua lau
         $soChoChotLau = (int)$this->motGiaTri(
-            "SELECT COUNT(*) FROM trips WHERE status = 'tai_xe_xac_nhan'
+            "SELECT COUNT(*) FROM trips WHERE status = 'tai_xe_xac_nhan' AND deleted_at IS NULL
                AND driver_confirmed_at < DATE_SUB(NOW(), INTERVAL 7 DAY)"
         );
         if ($soChoChotLau > 0) {
@@ -127,7 +129,7 @@ class HeThongModel extends Model
 
         // 5) Chua cau hinh ty gia ma da co thu ngoai te
         $coNgoaiTe = (int)$this->motGiaTri(
-            "SELECT COUNT(*) FROM trips WHERE revenue_usd > 0 OR revenue_eur > 0"
+            "SELECT COUNT(*) FROM trips WHERE deleted_at IS NULL AND (revenue_usd > 0 OR revenue_eur > 0)"
         );
         if ($coNgoaiTe > 0) {
             require_once DUONG_DAN_GOC . '/models/CaiDatModel.php';

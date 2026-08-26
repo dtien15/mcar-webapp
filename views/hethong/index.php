@@ -2,6 +2,12 @@
   <?php require __DIR__ . '/_noidung.php'; ?>
 </div>
 
+<?php
+// Khu vuc quan ly du lieu nam NGOAI #heThongNoiDung: no khong duoc tu lam
+// moi 20 giay, neu khong o tim kiem dang go va tab dang mo se bi xoa mat.
+require __DIR__ . '/_quan_ly_du_lieu.php';
+?>
+
 <script>
 // Trang nay tu cap nhat 2 duong: (1) khi co bat ky thay doi nao trong he
 // thong (realtime), (2) dinh ky 20 giay - vi cac so lieu nhu bo nho, thoi

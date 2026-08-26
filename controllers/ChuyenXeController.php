@@ -306,21 +306,10 @@ class ChuyenXeController extends Controller
         chuyenTrang('chuyenxe');
     }
 
-    /** Xoa chuyen xe */
-    public function xoa()
-    {
-        $this->yeuCauQuyen(['admin', 'ketoan']);
-        $this->yeuCauPost();
-
-        $id = (int)($_POST['id'] ?? 0);
-        // Lay tai xe TRUOC khi xoa, de con bao cho ho biet chuyen da bi go
-        $chuyen = $this->model('ChuyenXeModel')->layTheoId($id);
-
-        $this->model('ChuyenXeModel')->xoa($id);
-        datThongBao('Đã xóa chuyến xe.');
-        baoThucRealtimeChuyenXe($chuyen['driver_id'] ?? null);
-        chuyenTrang('chuyenxe');
-    }
+    // Da BO chuc nang xoa chuyen xe khoi day. Truoc kia moi dong trong danh
+    // sach co mot nut "Xoa" nam ngay canh nut "Chi tiet" - rat de bam nham va
+    // mat luon so lieu cua ca ky luong. Gio viec xoa chi lam duoc trong trang
+    // "Theo doi he thong" (HeThongController), va cung chi la bo vao thung rac.
 
     /**
      * Phan tich anh lich trinh hoac doan tin nhan dat xe bang AI (OpenAI), tra
@@ -618,6 +607,12 @@ class ChuyenXeController extends Controller
         $id     = (int)($_POST['id'] ?? 0);
         $chuyen = $this->model('ChuyenXeModel')->layChiTiet($id);
 
+        // Chuyen co the vua bi bo vao thung rac o trang Theo doi he thong
+        if (!$chuyen) {
+            datThongBao('Không tìm thấy chuyến xe này.', 'danger');
+            chuyenTrang('chuyenxe');
+        }
+
         $this->model('ChuyenXeModel')->chotHoanThanh($id);
 
         // Bao cho tai xe biet chuyen xe da duoc chot
@@ -648,6 +643,11 @@ class ChuyenXeController extends Controller
 
         $id     = (int)($_POST['id'] ?? 0);
         $chuyen = $this->model('ChuyenXeModel')->layChiTiet($id);
+
+        if (!$chuyen) {
+            datThongBao('Không tìm thấy chuyến xe này.', 'danger');
+            chuyenTrang('chuyenxe');
+        }
 
         $this->model('ChuyenXeModel')->moLai($id);
 
@@ -718,6 +718,12 @@ class ChuyenXeController extends Controller
 
         $id            = (int)($_POST['id'] ?? 0);
         $chuyenXeModel = $this->model('ChuyenXeModel');
+
+        if (!$chuyenXeModel->layTheoId($id)) {
+            datThongBao('Không tìm thấy chuyến xe này.', 'danger');
+            chuyenTrang('chuyenxe');
+        }
+
         $chuyenXeModel->huyXacNhanNopLai($id);
 
         $chuyen = $chuyenXeModel->layTheoId($id);

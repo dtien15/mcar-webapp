@@ -95,7 +95,9 @@ class ChuyenXeModel extends Model
     /** Dung menh de WHERE tu bo loc */
     private function dungDieuKien(array $loc)
     {
-        $dieuKien = ['1=1'];
+        // Chuyen trong thung rac coi nhu khong ton tai voi toan bo ung dung:
+        // khong hien o danh sach, khong tinh vao tong hop, khong vao luong.
+        $dieuKien = ['t.deleted_at IS NULL'];
         $thamSo   = [];
 
         if (!empty($loc['tu_ngay'])) {
@@ -142,7 +144,7 @@ class ChuyenXeModel extends Model
              LEFT JOIN drivers d ON d.id = t.driver_id
              LEFT JOIN contract_types ct ON ct.id = t.contract_type_id
              LEFT JOIN users u ON u.id = t.cash_remitted_by
-             WHERE t.id = ?",
+             WHERE t.id = ? AND t.deleted_at IS NULL",
             [(int)$id]
         );
     }
@@ -151,7 +153,7 @@ class ChuyenXeModel extends Model
     public function taiXeXacNhan($id, $idTaiXe, array $duLieu)
     {
         $chuyen = $this->motDong(
-            "SELECT * FROM trips WHERE id = ? AND driver_id = ?",
+            "SELECT * FROM trips WHERE id = ? AND driver_id = ? AND deleted_at IS NULL",
             [(int)$id, (int)$idTaiXe]
         );
         if (!$chuyen || $chuyen['status'] !== 'moi') {
@@ -190,7 +192,8 @@ class ChuyenXeModel extends Model
     public function taiXeSuaPhuPhi($id, $idTaiXe, array $duLieu)
     {
         $chuyen = $this->motDong(
-            "SELECT id FROM trips WHERE id = ? AND driver_id = ? AND status = 'tai_xe_xac_nhan'",
+            "SELECT id FROM trips WHERE id = ? AND driver_id = ? AND status = 'tai_xe_xac_nhan'
+               AND deleted_at IS NULL",
             [(int)$id, (int)$idTaiXe]
         );
         if (!$chuyen) {
@@ -223,7 +226,8 @@ class ChuyenXeModel extends Model
         }
 
         $chuyen = $this->motDong(
-            "SELECT id FROM trips WHERE id = ? AND driver_id = ? AND status = 'moi'",
+            "SELECT id FROM trips WHERE id = ? AND driver_id = ? AND status = 'moi'
+               AND deleted_at IS NULL",
             [(int)$id, (int)$idTaiXeHienTai]
         );
         if (!$chuyen) {
@@ -265,7 +269,7 @@ class ChuyenXeModel extends Model
     {
         return $this->thucThi(
             "UPDATE trips SET status='hoan_thanh', completed_at=NOW()
-             WHERE id = ? AND status <> 'hoan_thanh'",
+             WHERE id = ? AND status <> 'hoan_thanh' AND deleted_at IS NULL",
             [(int)$id]
         );
     }
@@ -274,7 +278,8 @@ class ChuyenXeModel extends Model
     public function moLai($id)
     {
         return $this->thucThi(
-            "UPDATE trips SET status='tai_xe_xac_nhan', completed_at=NULL WHERE id = ?",
+            "UPDATE trips SET status='tai_xe_xac_nhan', completed_at=NULL
+             WHERE id = ? AND deleted_at IS NULL",
             [(int)$id]
         );
     }
@@ -287,7 +292,7 @@ class ChuyenXeModel extends Model
      */
     public function xacNhanNopLai($id, $idNguoiXacNhan, $hinhThuc)
     {
-        $chuyen = $this->motDong("SELECT * FROM trips WHERE id = ?", [(int)$id]);
+        $chuyen = $this->motDong("SELECT * FROM trips WHERE id = ? AND deleted_at IS NULL", [(int)$id]);
         if (!$chuyen || (int)$chuyen['customer_paid'] === 1 || (int)$chuyen['cash_remitted'] === 1
             || !in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)) {
             return false;
@@ -307,7 +312,7 @@ class ChuyenXeModel extends Model
         return $this->thucThi(
             "UPDATE trips SET cash_remitted=0, cash_remitted_method=NULL,
                     cash_remitted_at=NULL, cash_remitted_by=NULL
-             WHERE id = ?",
+             WHERE id = ? AND deleted_at IS NULL",
             [(int)$id]
         );
     }
@@ -317,17 +322,19 @@ class ChuyenXeModel extends Model
     {
         if ($idTaiXe) {
             return (int)$this->motGiaTri(
-                "SELECT COUNT(*) FROM trips WHERE status='moi' AND driver_id = ?",
+                "SELECT COUNT(*) FROM trips WHERE status='moi' AND driver_id = ? AND deleted_at IS NULL",
                 [(int)$idTaiXe]
             );
         }
-        return (int)$this->motGiaTri("SELECT COUNT(*) FROM trips WHERE status='moi'");
+        return (int)$this->motGiaTri("SELECT COUNT(*) FROM trips WHERE status='moi' AND deleted_at IS NULL");
     }
 
     /** Dem so chuyen xe tai xe da xac nhan, cho quan ly chot */
     public function demChoChot()
     {
-        return (int)$this->motGiaTri("SELECT COUNT(*) FROM trips WHERE status='tai_xe_xac_nhan'");
+        return (int)$this->motGiaTri(
+            "SELECT COUNT(*) FROM trips WHERE status='tai_xe_xac_nhan' AND deleted_at IS NULL"
+        );
     }
 
     // -----------------------------------------------------------------
@@ -345,7 +352,8 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(revenue_eur),0) AS doanh_thu_eur,
                     COALESCE(SUM(fuel_cost),0)   AS xang_dau,
                     COALESCE(SUM(trip_fee),0)    AS tien_tai
-             FROM trips WHERE YEAR(trip_date) = ? AND status = 'hoan_thanh'
+             FROM trips
+             WHERE YEAR(trip_date) = ? AND status = 'hoan_thanh' AND deleted_at IS NULL
              GROUP BY MONTH(trip_date) ORDER BY thang",
             [(int)$nam]
         );
@@ -382,7 +390,8 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(t.maintenance),0) AS bao_duong,
                     COALESCE(SUM(t.trip_fee),0)    AS tien_tai
              FROM cars c
-             LEFT JOIN trips t ON t.car_id = c.id AND t.trip_date BETWEEN ? AND ? AND t.status = 'hoan_thanh'
+             LEFT JOIN trips t ON t.car_id = c.id AND t.trip_date BETWEEN ? AND ?
+                            AND t.status = 'hoan_thanh' AND t.deleted_at IS NULL
              GROUP BY c.id ORDER BY doanh_thu DESC",
             [$tuNgay, $denNgay]
         );
@@ -401,7 +410,8 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(t.overnight_fee),0) AS luu_dem,
                     COALESCE(SUM(t.fine),0)          AS phat
              FROM drivers d
-             LEFT JOIN trips t ON t.driver_id = d.id AND t.trip_date BETWEEN ? AND ? AND t.status = 'hoan_thanh'
+             LEFT JOIN trips t ON t.driver_id = d.id AND t.trip_date BETWEEN ? AND ?
+                            AND t.status = 'hoan_thanh' AND t.deleted_at IS NULL
              GROUP BY d.id ORDER BY doanh_thu DESC",
             [$tuNgay, $denNgay]
         );
@@ -417,7 +427,8 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(t.revenue_usd),0) AS doanh_thu_usd,
                     COALESCE(SUM(t.revenue_eur),0) AS doanh_thu_eur
              FROM contract_types ct
-             LEFT JOIN trips t ON t.contract_type_id = ct.id AND t.trip_date BETWEEN ? AND ? AND t.status = 'hoan_thanh'
+             LEFT JOIN trips t ON t.contract_type_id = ct.id AND t.trip_date BETWEEN ? AND ?
+                            AND t.status = 'hoan_thanh' AND t.deleted_at IS NULL
              GROUP BY ct.id ORDER BY doanh_thu DESC",
             [$tuNgay, $denNgay]
         );
@@ -452,7 +463,9 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(refund_usd),0)    AS hoan_tien_usd,
                     COALESCE(SUM(cash_advance),0)  AS tam_ung,
                     COALESCE(SUM(fuel_cost),0)     AS xang_dau
-             FROM trips WHERE driver_id = ? AND trip_date BETWEEN ? AND ? AND status = 'hoan_thanh'",
+             FROM trips
+             WHERE driver_id = ? AND trip_date BETWEEN ? AND ?
+               AND status = 'hoan_thanh' AND deleted_at IS NULL",
             [(int)$idTaiXe, $tuNgay, $denNgay]
         );
     }
@@ -469,7 +482,8 @@ class ChuyenXeModel extends Model
              FROM trips t
              LEFT JOIN cars c ON c.id = t.car_id
              LEFT JOIN contract_types ct ON ct.id = t.contract_type_id
-             WHERE t.driver_id = ? AND t.trip_date BETWEEN ? AND ? AND t.status = 'hoan_thanh'
+             WHERE t.driver_id = ? AND t.trip_date BETWEEN ? AND ?
+               AND t.status = 'hoan_thanh' AND t.deleted_at IS NULL
              ORDER BY t.trip_date, t.id",
             [(int)$idTaiXe, $tuNgay, $denNgay]
         );
@@ -485,7 +499,7 @@ class ChuyenXeModel extends Model
             "SELECT t.id, t.trip_date, t.route, t.created_at, d.full_name AS ten_tai_xe
              FROM trips t
              LEFT JOIN drivers d ON d.id = t.driver_id
-             WHERE t.public_submitted = 1
+             WHERE t.public_submitted = 1 AND t.deleted_at IS NULL
              ORDER BY t.id DESC
              LIMIT " . (int)$gioiHan
         );
@@ -496,8 +510,132 @@ class ChuyenXeModel extends Model
     {
         return (int)$this->motGiaTri(
             "SELECT COUNT(*) FROM trips
-             WHERE public_submitted = 1 AND MONTH(created_at) = ? AND YEAR(created_at) = ?",
+             WHERE public_submitted = 1 AND deleted_at IS NULL
+               AND MONTH(created_at) = ? AND YEAR(created_at) = ?",
             [(int)$thang, (int)$nam]
         );
+    }
+
+    // -----------------------------------------------------------------
+    // Thung rac - xoa mem
+    //
+    // Chuyen xe la du lieu tien bac, xoa nham la mat luon so lieu cua ca
+    // ky luong. Nen o day "xoa" chi la danh dau deleted_at: chuyen bien
+    // mat khoi moi danh sach / bao cao / bang luong nhung van con trong
+    // CSDL, khoi phuc lai duoc. Qua SO_NGAY_GIU_RAC ngay cron moi xoa han.
+    // -----------------------------------------------------------------
+
+    /** So ngay giu trong thung rac truoc khi xoa vinh vien */
+    const SO_NGAY_GIU_RAC = 30;
+
+    /** Bo 1 chuyen vao thung rac. Tra ve false neu chuyen khong ton tai / da o trong rac */
+    public function xoaMem($id, $idNguoiXoa = null)
+    {
+        return $this->soDongBiAnhHuong(
+            "UPDATE trips SET deleted_at = NOW(), deleted_by = ? WHERE id = ? AND deleted_at IS NULL",
+            [$idNguoiXoa ? (int)$idNguoiXoa : null, (int)$id]
+        ) > 0;
+    }
+
+    /**
+     * Ghi de ham xoa cua lop cha: trong ung dung nay khong co cho nao duoc
+     * xoa han chuyen xe bang mot lenh DELETE truc tiep nua.
+     */
+    public function xoa($id)
+    {
+        return $this->xoaMem($id);
+    }
+
+    /**
+     * Ghi de: lay chuyen theo id nhung bo qua chuyen dang nam trong thung rac,
+     * de moi cho dang dung ham nay (sua, chi tiet, chot...) deu khong dung
+     * phai chuyen da xoa.
+     */
+    public function layTheoId($id)
+    {
+        return $this->motDong(
+            "SELECT * FROM trips WHERE id = ? AND deleted_at IS NULL",
+            [(int)$id]
+        );
+    }
+
+    /** Lay 1 chuyen dang o trong thung rac (dung truoc khi khoi phuc / xoa han) */
+    public function layTrongRac($id)
+    {
+        return $this->motDong(
+            "SELECT * FROM trips WHERE id = ? AND deleted_at IS NOT NULL",
+            [(int)$id]
+        );
+    }
+
+    /** Dua 1 chuyen tu thung rac tro lai danh sach */
+    public function khoiPhuc($id)
+    {
+        return $this->soDongBiAnhHuong(
+            "UPDATE trips SET deleted_at = NULL, deleted_by = NULL WHERE id = ? AND deleted_at IS NOT NULL",
+            [(int)$id]
+        ) > 0;
+    }
+
+    /** Xoa vinh vien - chi ap dung cho chuyen DANG o trong thung rac */
+    public function xoaVinhVien($id)
+    {
+        return $this->soDongBiAnhHuong(
+            "DELETE FROM trips WHERE id = ? AND deleted_at IS NOT NULL",
+            [(int)$id]
+        ) > 0;
+    }
+
+    /** Chay 1 cau lenh va tra ve so dong that su bi thay doi */
+    private function soDongBiAnhHuong($sql, array $thamSo = [])
+    {
+        $cauLenh = $this->db->prepare($sql);
+        $cauLenh->execute($thamSo);
+        return $cauLenh->rowCount();
+    }
+
+    /** Danh sach chuyen trong thung rac, moi xoa truoc, kem so ngay con lai */
+    public function layThungRac($gioiHan = 100)
+    {
+        return $this->truyVan(
+            "SELECT t.*,
+                    c.name AS ten_xe, c.plate_number AS bien_so,
+                    d.full_name AS ten_tai_xe,
+                    u.full_name AS ten_nguoi_xoa,
+                    DATEDIFF(DATE_ADD(t.deleted_at, INTERVAL " . self::SO_NGAY_GIU_RAC . " DAY), NOW()) AS con_lai_ngay
+             FROM trips t
+             LEFT JOIN cars c ON c.id = t.car_id
+             LEFT JOIN drivers d ON d.id = t.driver_id
+             LEFT JOIN users u ON u.id = t.deleted_by
+             WHERE t.deleted_at IS NOT NULL
+             ORDER BY t.deleted_at DESC
+             LIMIT " . (int)$gioiHan
+        );
+    }
+
+    /** Dem so chuyen dang nam trong thung rac */
+    public function demThungRac()
+    {
+        return (int)$this->motGiaTri("SELECT COUNT(*) FROM trips WHERE deleted_at IS NOT NULL");
+    }
+
+    /**
+     * Xoa vinh vien nhung chuyen da nam trong thung rac qua han (cron goi).
+     * Tra ve so chuyen da bi xoa han.
+     */
+    public function donRacQuaHan($soNgay = self::SO_NGAY_GIU_RAC)
+    {
+        $soNgay = max(1, (int)$soNgay);
+        $can    = (int)$this->motGiaTri(
+            "SELECT COUNT(*) FROM trips
+             WHERE deleted_at IS NOT NULL AND deleted_at < DATE_SUB(NOW(), INTERVAL {$soNgay} DAY)"
+        );
+        if ($can > 0) {
+            $this->thucThi(
+                "DELETE FROM trips
+                 WHERE deleted_at IS NOT NULL AND deleted_at < DATE_SUB(NOW(), INTERVAL {$soNgay} DAY)"
+            );
+        }
+        return $can;
     }
 }

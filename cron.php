@@ -65,6 +65,16 @@ require_once DUONG_DAN_GOC . '/models/GhiNhoModel.php';
 $ghiLog[] = 'Đã dọn mã ghi nhớ đăng nhập hết hạn';
 
 // ---------------------------------------------------------------------
+// Don thung rac chuyen xe: chuyen bi xoa trong trang "Theo doi he thong"
+// nam trong thung rac 30 ngay de con khoi phuc duoc, qua han moi xoa han.
+// ---------------------------------------------------------------------
+require_once DUONG_DAN_GOC . '/models/ChuyenXeModel.php';
+$soRacDaDon = (new ChuyenXeModel())->donRacQuaHan();
+$ghiLog[] = $soRacDaDon > 0
+    ? 'Đã xóa vĩnh viễn ' . $soRacDaDon . ' chuyến quá ' . ChuyenXeModel::SO_NGAY_GIU_RAC . ' ngày trong thùng rác'
+    : 'Thùng rác không có chuyến nào quá hạn';
+
+// ---------------------------------------------------------------------
 // Ket qua
 // ---------------------------------------------------------------------
 $thoiGian = round((microtime(true) - $batDau) * 1000);

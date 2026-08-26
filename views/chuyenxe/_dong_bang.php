@@ -73,11 +73,8 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
           <?= bieuTuong('message-circle') ?>
         </button>
 
-        <form method="post" action="<?= duongDan('chuyenxe/xoa') ?>" onsubmit="return confirm('Xóa chuyến xe này? Không khôi phục được.');">
-          <?php truongToken(); ?>
-          <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
-          <button class="btn btn-sm btn-outline-danger">Xóa</button>
-        </form>
+        <?php // Khong con nut Xoa o day de tranh bam nham. Viec xoa chuyen xe
+              // nam trong trang "Theo doi he thong" (chi quan tri vien). ?>
 
       <?php elseif ($cuaToi): ?>
         <?php if ($chuyen['status'] !== 'hoan_thanh'): ?>
