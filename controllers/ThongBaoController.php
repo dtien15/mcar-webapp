@@ -18,6 +18,23 @@ class ThongBaoController extends Controller
     }
 
     /**
+     * API nho tra ve HTML danh sach thong bao day du - dung khi realtime nhan
+     * "nudge" de trang Thong bao tu cap nhat, khong can F5.
+     */
+    public function danhSachMoi()
+    {
+        $this->yeuCauDangNhap();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $danhSach = $this->model('ThongBaoModel')->layDanhSach(taiKhoanHienTai()['id']);
+        echo json_encode([
+            'ok'   => true,
+            'html' => $this->dungView('thongbao/_danhsach', ['danhSach' => $danhSach]),
+        ]);
+        exit;
+    }
+
+    /**
      * Cap token de trinh duyet mo ket noi WebSocket realtime (ws-server/).
      * Goi lai moi lan (re)connect thay vi nhung 1 token co dinh vao trang,
      * de khong bao gio bi het han giua chung khi tab mo lau.
@@ -69,9 +86,6 @@ class ThongBaoController extends Controller
                 'tieuDe'   => $tb['title'],
                 'noiDung'  => $tb['content'],
                 'duongDan' => $tb['link'] ? duongDan($tb['link']) : duongDan('thongbao'),
-                // Da tung hien truoc day (shown_at co gia tri) nghia la lan nay la nhac lai.
-                // Khong dung remind_count vi ban ghi nay duoc doc truoc khi cap nhat.
-                'laNhacLai' => !empty($tb['shown_at']),
             ];
         }
 
@@ -205,7 +219,7 @@ class ThongBaoController extends Controller
         foreach ($canHien as $tb) {
             $dsHien[] = [
                 'id'        => (int)$tb['id'],
-                'tieuDe'    => (!empty($tb['shown_at']) ? '⏰ Nhắc lại: ' : '') . $tb['title'],
+                'tieuDe'    => $tb['title'],
                 'noiDung'   => $tb['content'],
                 'duongDan'  => duongDan('thongbao/doc/' . $tb['id']),
                 'canXuLy'   => (int)$tb['need_action'] === 1,

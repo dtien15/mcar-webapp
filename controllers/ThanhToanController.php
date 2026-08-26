@@ -72,6 +72,7 @@ class ThanhToanController extends Controller
             $thanhToanModel->them($duLieu);
             datThongBao('Đã thêm khoản chi mới.');
         }
+        baoThucRealtimeQuanLy();
         chuyenTrang('thanhtoan');
     }
 
@@ -82,6 +83,28 @@ class ThanhToanController extends Controller
 
         $this->model('ThanhToanModel')->xoa((int)($_POST['id'] ?? 0));
         datThongBao('Đã xóa khoản chi.');
+        baoThucRealtimeQuanLy();
         chuyenTrang('thanhtoan');
+    }
+
+    /**
+     * API nho tra ve HTML da render san cua tab "Khoan chi cong ty" - dung
+     * khi realtime nhan duoc "nudge" de tu cap nhat, khong can F5.
+     */
+    public function khoanChiMoi()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        header('Content-Type: application/json; charset=utf-8');
+
+        $thanhToanModel = $this->model('ThanhToanModel');
+        $tuNgay  = layGet('tu_ngay');
+        $denNgay = layGet('den_ngay');
+        $loai    = layGet('loai');
+
+        echo json_encode(['ok' => true, 'html' => $this->dungView('thanhtoan/_khoanchi', [
+            'danhSach' => $thanhToanModel->locDanhSach($tuNgay, $denNgay, $loai),
+            'tongTien' => $thanhToanModel->tongTien($tuNgay, $denNgay, $loai),
+        ])]);
+        exit;
     }
 }

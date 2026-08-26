@@ -64,6 +64,8 @@ class GuiChuyenController extends Controller
 
         $idMoi = $this->model('ChuyenXeModel')->them($duLieu);
         $this->baoChuyenXeMoi($idMoi, $duLieu);
+        // Quan ly dang mo trang Chuyen xe cung phai thay chuyen moi nay ngay
+        baoThucRealtimeQuanLy();
 
         datThongBao('Đã gửi chuyến ngày ' . dinhDangNgay($duLieu['trip_date']) . ' cho tài xế ' . $taiXe['full_name'] . '.');
         chuyenTrang('chuyen-xe');

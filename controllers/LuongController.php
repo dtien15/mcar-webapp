@@ -65,6 +65,7 @@ class LuongController extends Controller
         $soLuong = $this->model('LuongModel')->tinhLaiTatCa($thang, $nam);
 
         datThongBao("Đã tính lại lương cho {$soLuong} tài xế trong kỳ {$thang}/{$nam}.");
+        baoThucRealtimeQuanLy();
         chuyenTrang("luong?thang={$thang}&nam={$nam}");
     }
 
@@ -85,6 +86,7 @@ class LuongController extends Controller
         );
 
         datThongBao('Đã cập nhật thanh toán lương.');
+        baoThucRealtimeQuanLy();
 
         // Goi tu tab Cong no ben trang Thanh toan thi quay lai dung trang do,
         // khong nhay sang Bang luong khien nguoi dung mat dau dang lam.

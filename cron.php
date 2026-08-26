@@ -48,31 +48,14 @@ $batDau = microtime(true);
 $ghiLog = [];
 
 // ---------------------------------------------------------------------
-// 1. Nhac lai cac chuyen xe tai xe chua xac nhan
+// Da BO HAN phan "nhac lai thong bao chua xu ly" o day. Truoc kia cron
+// gui lai thong bao moi 30 phut (toi da 12 lan) cho tai xe chua bam vao -
+// gay spam kho chiu tren dien thoai. Gio moi thong bao chi bao dung 1 lan,
+// con lai nam trong app cho nguoi dung tu xem.
 // ---------------------------------------------------------------------
-$denHan = $thongBaoModel->layDenHanNhacLai();
-
-$theoTaiKhoan = [];
-foreach ($denHan as $dong) {
-    $theoTaiKhoan[$dong['user_id']][] = $dong['id'];
-}
-
-$soNguoi = 0;
-$soThietBi = 0;
-foreach ($theoTaiKhoan as $idTaiKhoan => $dsIdThongBao) {
-    $soGui = $pushModel->danhThucTaiKhoan($idTaiKhoan);
-    $soThietBi += $soGui;
-    $soNguoi++;
-
-    // Hoan lich nhac de lan chay sau khong gui trung
-    $thongBaoModel->hoanLichNhac($dsIdThongBao);
-}
-
-$ghiLog[] = 'Nhắc lại: ' . count($denHan) . ' thông báo · '
-          . $soNguoi . ' người · gửi tới ' . $soThietBi . ' thiết bị';
 
 // ---------------------------------------------------------------------
-// 2. Don dep thong bao cu (da doc: giu 30 ngay, chua doc: giu toi da 60 ngay)
+// Don dep thong bao cu (da doc: giu 30 ngay, chua doc: giu toi da 60 ngay)
 // ---------------------------------------------------------------------
 $thongBaoModel->xoaThongBaoCu(30, 60);
 $ghiLog[] = 'Đã dọn thông báo cũ (đã đọc >30 ngày, chưa đọc >60 ngày)';

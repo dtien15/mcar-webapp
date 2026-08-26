@@ -254,6 +254,8 @@ class ChuyenXeController extends Controller
             $duLieu['car_id']    = (int)$xeMacDinh['id'];
         }
 
+        $taiXeCu = 0; // tai xe TRUOC khi sua (neu la sua) - dung de bao realtime cho ca 2 ben
+
         if ($id > 0) {
             $chuyenXeCu = $chuyenXeModel->layTheoId($id);
             $chuyenXeModel->capNhat($id, $duLieu);
@@ -303,9 +305,12 @@ class ChuyenXeController extends Controller
             datThongBao('Đã thêm chuyến xe mới và giao cho tài xế.');
         }
 
-        // Bao cho cac quan ly khac dang mo trang Chuyen xe biet co thay doi,
-        // de danh sach cua ho tu cap nhat ngay khong can F5.
-        baoThucRealtimeQuanLy();
+        // Bao cho quan ly khac VA tai xe lien quan (ca tai xe cu neu vua bi
+        // doi nguoi) de danh sach cua ho tu cap nhat ngay, khong can F5.
+        baoThucRealtimeChuyenXe($duLieu['driver_id'] ?? null);
+        if (!empty($taiXeCu) && $taiXeCu !== (int)($duLieu['driver_id'] ?? 0)) {
+            baoThucRealtimeTaiXe($taiXeCu);
+        }
 
         chuyenTrang('chuyenxe');
     }
@@ -316,9 +321,13 @@ class ChuyenXeController extends Controller
         $this->yeuCauQuyen(['admin', 'ketoan']);
         $this->yeuCauPost();
 
-        $this->model('ChuyenXeModel')->xoa((int)($_POST['id'] ?? 0));
+        $id = (int)($_POST['id'] ?? 0);
+        // Lay tai xe TRUOC khi xoa, de con bao cho ho biet chuyen da bi go
+        $chuyen = $this->model('ChuyenXeModel')->layTheoId($id);
+
+        $this->model('ChuyenXeModel')->xoa($id);
         datThongBao('Đã xóa chuyến xe.');
-        baoThucRealtimeQuanLy();
+        baoThucRealtimeChuyenXe($chuyen['driver_id'] ?? null);
         chuyenTrang('chuyenxe');
     }
 
@@ -498,6 +507,7 @@ class ChuyenXeController extends Controller
             $this->baoChoQuanLyChoChot($id);
 
             datThongBao('Đã xác nhận chuyến xe. Chờ công ty chốt.');
+            baoThucRealtimeChuyenXe($idTaiXe);
         } else {
             datThongBao('Chuyến xe không hợp lệ hoặc đã được xác nhận trước đó.', 'danger');
         }
@@ -526,7 +536,7 @@ class ChuyenXeController extends Controller
 
         if ($ketQua) {
             datThongBao('Đã cập nhật phụ phí. Công ty sẽ thấy số liệu mới khi chốt.');
-            baoThucRealtimeQuanLy();
+            baoThucRealtimeChuyenXe($idTaiXe);
         } else {
             datThongBao('Không sửa được — chuyến xe chưa xác nhận, đã bị chốt, hoặc không phải của bạn.', 'danger');
         }
@@ -563,6 +573,8 @@ class ChuyenXeController extends Controller
                 false // chi bao 1 lan, khong nhac lai lien tuc gay cam giac spam
             );
             datThongBao('Đã chuyển chuyến xe này cho tài xế khác chạy giùm.');
+            // Bao cho quan ly + ca tai xe cu (chuyen vua roi khoi danh sach cua ho)
+            baoThucRealtimeChuyenXe($idTaiXe);
         } else {
             datThongBao('Không nhờ được — chuyến đã xác nhận/chốt rồi, không phải chuyến của bạn, hoặc tài xế được chọn không hợp lệ.', 'danger');
         }
@@ -596,6 +608,7 @@ class ChuyenXeController extends Controller
         }
 
         datThongBao('Đã chốt hoàn thành chuyến xe.');
+        baoThucRealtimeChuyenXe($chuyen['driver_id'] ?? null);
         chuyenTrang('chuyenxe');
     }
 
@@ -617,6 +630,7 @@ class ChuyenXeController extends Controller
         }
 
         datThongBao('Đã mở lại chuyến xe.');
+        baoThucRealtimeChuyenXe($chuyen['driver_id'] ?? null);
         chuyenTrang('chuyenxe');
     }
 
@@ -633,7 +647,7 @@ class ChuyenXeController extends Controller
         $nam   = (int)date('Y', strtotime($chuyen['trip_date']));
 
         $this->model('LuongModel')->tinhLai($chuyen['driver_id'], $thang, $nam);
-        baoThucRealtimeQuanLy();
+        baoThucRealtimeChuyenXe($chuyen['driver_id']);
     }
 
     /**
@@ -661,6 +675,7 @@ class ChuyenXeController extends Controller
                 $this->tinhLaiLuongTheoChuyen($chuyen);
             }
             datThongBao('Đã xác nhận tài xế nộp lại tiền cho công ty.');
+            baoThucRealtimeChuyenXe($chuyen['driver_id'] ?? null);
         } else {
             datThongBao('Không xác nhận được — chuyến này khách đã thanh toán thẳng công ty, chưa có số liệu, hoặc đã xác nhận nộp lại trước đó rồi.', 'danger');
         }
@@ -683,6 +698,7 @@ class ChuyenXeController extends Controller
         }
 
         datThongBao('Đã hủy xác nhận nộp lại tiền.');
+        baoThucRealtimeChuyenXe($chuyen['driver_id'] ?? null);
         chuyenTrang('chuyenxe');
     }
 

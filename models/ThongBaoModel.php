@@ -8,14 +8,12 @@ class ThongBaoModel extends Model
     protected $bang = 'notifications';
     protected $sapXepMacDinh = 'created_at DESC, id DESC';
 
-    /** Sau bao lau thi nhac lai (phut) */
-    const PHUT_NHAC_LAI = 30;
-    /** Nhac lai toi da bao nhieu lan */
-    const SO_LAN_NHAC_TOI_DA = 12;
-
     /**
      * Tao thong bao cho tat ca tai khoan gan voi 1 tai xe.
-     * $canXuLy = true: se nhac lai nhieu lan cho den khi tai xe xu ly xong.
+     * Moi thong bao chi duoc BAO DUNG 1 LAN - da bo han co che nhac lai
+     * (truoc day nhac moi 30 phut toi da 12 lan, gay spam kho chiu).
+     * Tham so $canXuLy giu lai chi de danh dau "viec can lam" (hien manh
+     * hon 1 chut tren dien thoai), KHONG con lam thong bao lap lai nua.
      */
     public function guiChoTaiXe($idTaiXe, $tieuDe, $noiDung, $duongDan = '', $loai = 'chung', $idThamChieu = null, $canXuLy = false)
     {
@@ -29,18 +27,14 @@ class ThongBaoModel extends Model
             $dsTaiKhoan = [['id' => null]];
         }
 
-        $nhacLuc = $canXuLy
-            ? date('Y-m-d H:i:s', strtotime('+' . self::PHUT_NHAC_LAI . ' minutes'))
-            : null;
-
         foreach ($dsTaiKhoan as $taiKhoan) {
             $this->thucThi(
                 "INSERT INTO notifications
                     (user_id, driver_id, title, content, link, type, ref_id, need_action, remind_at)
-                 VALUES (?,?,?,?,?,?,?,?,?)",
+                 VALUES (?,?,?,?,?,?,?,?,NULL)",
                 [
                     $taiKhoan['id'], (int)$idTaiXe, $tieuDe, $noiDung,
-                    $duongDan, $loai, $idThamChieu, $canXuLy ? 1 : 0, $nhacLuc,
+                    $duongDan, $loai, $idThamChieu, $canXuLy ? 1 : 0,
                 ]
             );
             $this->danhThucThietBi($taiKhoan['id']);
@@ -116,18 +110,15 @@ class ThongBaoModel extends Model
     }
 
     /**
-     * Lay cac thong bao can bat popup tren trinh duyet:
-     * - Chua doc
-     * - Chua tung hien, HOAC da den luc nhac lai
+     * Lay cac thong bao can bat popup tren trinh duyet: chua doc VA CHUA
+     * TUNG HIEN. Da bo han phan "den luc nhac lai" - moi thong bao chi bao
+     * dung 1 lan, khong lap lai gay phien.
      */
     public function layCanHienPopup($idTaiKhoan)
     {
         return $this->truyVan(
             "SELECT * FROM notifications
-             WHERE user_id = ? AND is_read = 0
-               AND (shown_at IS NULL
-                    OR (need_action = 1 AND remind_at IS NOT NULL AND remind_at <= NOW()
-                        AND remind_count < " . self::SO_LAN_NHAC_TOI_DA . "))
+             WHERE user_id = ? AND is_read = 0 AND shown_at IS NULL
              ORDER BY created_at ASC
              LIMIT 5",
             [(int)$idTaiKhoan]
@@ -136,56 +127,26 @@ class ThongBaoModel extends Model
 
     /**
      * Danh sach thong bao de Service Worker hien khi nhan tin day.
-     * Khac layCanHienPopup o cho khong xet remind_at, vi luc nay may chu
-     * da quyet dinh la "den luc bao" roi.
+     *
+     * QUAN TRONG: chi lay thong bao CHUA TUNG HIEN (shown_at IS NULL).
+     * Truoc day ham nay lay moi thong bao CHUA DOC - nghia la moi lan co 1
+     * tin moi, dien thoai se hien lai ca nhung thong bao cu chua kip bam vao,
+     * gay spam ("Nhac lai: ..." lien tuc). Da doc hay chua khong lien quan:
+     * mot thong bao chi duoc BAO 1 LAN duy nhat, con lai nam trong app cho
+     * nguoi dung tu xem.
      */
     public function layChoThongBaoDay($idTaiKhoan)
     {
         return $this->truyVan(
             "SELECT * FROM notifications
-             WHERE user_id = ? AND is_read = 0
-             ORDER BY need_action DESC, created_at DESC
+             WHERE user_id = ? AND is_read = 0 AND shown_at IS NULL
+             ORDER BY created_at DESC
              LIMIT 3",
             [(int)$idTaiKhoan]
         );
     }
 
-    /**
-     * Cac thong bao den han nhac lai (dung cho tac vu dinh ky tren may chu).
-     * Tra ve danh sach gom user_id de biet can danh thuc ai.
-     */
-    public function layDenHanNhacLai()
-    {
-        return $this->truyVan(
-            "SELECT id, user_id FROM notifications
-             WHERE is_read = 0 AND need_action = 1
-               AND user_id IS NOT NULL
-               AND remind_at IS NOT NULL AND remind_at <= NOW()
-               AND remind_count < " . self::SO_LAN_NHAC_TOI_DA
-        );
-    }
-
-    /**
-     * Hoan lich nhac cua cac thong bao vua duoc gui tin day,
-     * de lan chay ke tiep cua tac vu dinh ky khong gui trung.
-     */
-    public function hoanLichNhac(array $dsId)
-    {
-        if (!$dsId) {
-            return;
-        }
-        $dsId    = array_map('intval', $dsId);
-        $danhDau = implode(',', array_fill(0, count($dsId), '?'));
-
-        $this->thucThi(
-            "UPDATE notifications
-             SET remind_at = DATE_ADD(NOW(), INTERVAL " . self::PHUT_NHAC_LAI . " MINUTE)
-             WHERE id IN ($danhDau)",
-            $dsId
-        );
-    }
-
-    /** Ghi nhan da hien popup, hen gio nhac lai neu can xu ly */
+    /** Ghi nhan da hien thong bao (de khong bao gio hien lai lan nua) */
     public function ghiNhanDaHien(array $dsId)
     {
         if (!$dsId) {
@@ -194,16 +155,9 @@ class ThongBaoModel extends Model
         $dsId    = array_map('intval', $dsId);
         $danhDau = implode(',', array_fill(0, count($dsId), '?'));
 
-        // Luu y: MySQL gan gia tri cac cot theo thu tu trai sang phai, cac cot sau
-        // doc duoc gia tri MOI cua cot truoc. Vi vay phai tinh remind_count TRUOC
-        // khi cap nhat shown_at, neu khong lan hien dau tien cung bi tinh la nhac lai.
         $this->thucThi(
             "UPDATE notifications
-             SET remind_count = remind_count + IF(shown_at IS NULL, 0, 1),
-                 remind_at = IF(need_action = 1,
-                                DATE_ADD(NOW(), INTERVAL " . self::PHUT_NHAC_LAI . " MINUTE),
-                                NULL),
-                 shown_at = IFNULL(shown_at, NOW())
+             SET remind_at = NULL, shown_at = IFNULL(shown_at, NOW())
              WHERE id IN ($danhDau)",
             $dsId
         );

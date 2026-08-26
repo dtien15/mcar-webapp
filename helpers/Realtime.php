@@ -71,6 +71,38 @@ function baoThucRealtimeQuanLy()
 }
 
 /**
+ * Bao (nudge) tai xe theo id trong bang drivers - tim tai khoan dang hoat
+ * dong gan voi tai xe do roi nhac. Dung khi co thay doi tren chuyen xe cua
+ * ho ma KHONG tao thong bao moi (vd quan ly sua lai gio don/dia diem, chot
+ * so, xac nhan nop lai tien...) - nhung viec do van phai hien ngay tren man
+ * hinh tai xe, khong bat ho phai tai lai trang moi thay.
+ */
+function baoThucRealtimeTaiXe($idTaiXe)
+{
+    if (!coRealtime() || !$idTaiXe) {
+        return;
+    }
+    try {
+        require_once DUONG_DAN_GOC . '/models/NguoiDungModel.php';
+        $taiKhoan = (new NguoiDungModel())->layTheoDriverId((int)$idTaiXe);
+        if ($taiKhoan) {
+            guiBroadcastNoiBo(['user_id' => (int)$taiKhoan['id']]);
+        }
+    } catch (Exception $e) {
+        // Loi tra cuu/mang khong duoc lam hong thao tac chinh
+    }
+}
+
+/** Bao ca quan ly lan tai xe cua 1 chuyen xe - dung sau moi thay doi tren chuyen do */
+function baoThucRealtimeChuyenXe($idTaiXe = null)
+{
+    baoThucRealtimeQuanLy();
+    if ($idTaiXe) {
+        baoThucRealtimeTaiXe($idTaiXe);
+    }
+}
+
+/**
  * Danh sach id tai xe (bang drivers) dang mo web (co ket noi WebSocket con
  * song). Tra ve mang rong neu chua cau hinh realtime hoac ws-server dang
  * tat - luc do trang Tai xe chi don gian khong hien den online, khong loi.

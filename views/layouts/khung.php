@@ -289,14 +289,12 @@ window.mcarRealtime = {
   function hienPopup(tb) {
     if (!hoTroThongBao || Notification.permission !== 'granted') return;
     try {
-      var tieuDe = (tb.laNhacLai ? '⏰ Nhắc lại: ' : '') + tb.tieuDe;
-      var popup = new Notification(tieuDe, {
+      var popup = new Notification(tb.tieuDe, {
         body: tb.noiDung || '',
         icon: '<?= duongDan('assets/img/favicon/web-app-manifest-192x192.png') ?>',
         badge: '<?= duongDan('assets/img/favicon/web-app-manifest-192x192.png') ?>',
         tag: 'mcar-' + tb.id,          // cung tag thi khong hien trung lap
-        renotify: true,
-        requireInteraction: tb.laNhacLai // nhac lai thi giu tren man hinh den khi bam
+        renotify: false
       });
       popup.onclick = function () {
         window.focus();

@@ -332,3 +332,19 @@ foreach ($theoThang as $t => $d) { $tenThang[] = 'Th ' . $t; }
   });
 })();
 </script>
+
+<script>
+// Realtime: co chuyen vua chot/mo lai/sua... -> so lieu bao cao da doi.
+// Trang nay co 4 bieu do Chart.js (thay the HTML se pha huy chart), nen tai
+// lai ca trang - nhung gop nhieu tin bao lien tiep thanh 1 lan (cho 2 giay)
+// de khong tai lai lien tuc khi co nhieu thay doi cung luc.
+(function () {
+  var henGio = null;
+  if (!window.mcarRealtime) return;
+
+  window.mcarRealtime.dangKy('nudge', function () {
+    clearTimeout(henGio);
+    henGio = setTimeout(function () { location.reload(); }, 2000);
+  });
+})();
+</script>
