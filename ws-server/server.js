@@ -36,6 +36,8 @@ const ketNoiTheoNguoiDung = new Map();
 const ketNoiQuanLy = new Set();
 /** ketNoiTheoTaiXe: Map<idTaiXe, Set<ws>> - dung xac dinh tai xe nao dang online */
 const ketNoiTheoTaiXe = new Map();
+/** Dem tong so tin "nhac" da gui + luc khoi dong, dung cho trang Theo doi he thong */
+const thongKe = { soNhacDaGui: 0, batDauLuc: Date.now() };
 /** khoaSuaChuyen: Map<idChuyen, {idTaiKhoan, ten, luc}> - ai dang mo form sua chuyen nao */
 const khoaSuaChuyen = new Map();
 
@@ -117,7 +119,7 @@ function guiAn(ws, obj) {
   try { ws.send(JSON.stringify(obj)); } catch (e) { /* ket noi co the vua dong, bo qua */ }
 }
 
-function guiNhac(ws) { guiAn(ws, { type: 'nudge' }); }
+function guiNhac(ws) { thongKe.soNhacDaGui++; guiAn(ws, { type: 'nudge' }); }
 
 // -----------------------------------------------------------------
 // HTTP server: health check + API noi bo (/broadcast, /online-status)
@@ -137,12 +139,40 @@ const mayChu = http.createServer((req, res) => {
   }
 
   if (req.headers['x-ws-secret'] !== BI_MAT
-      && (duongDan.endsWith('/broadcast') || duongDan.endsWith('/online-status'))) {
+      && (duongDan.endsWith('/broadcast') || duongDan.endsWith('/online-status')
+          || duongDan.endsWith('/thong-ke'))) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: false, loi: 'Sai khoa bi mat' }));
     return;
   }
 
+  if (req.method === 'GET' && duongDan.endsWith('/thong-ke')) {
+    const bn = process.memoryUsage();
+    const soKetNoi = wss.clients.size;
+    let soDaXacThuc = 0;
+    wss.clients.forEach((ws) => { if (ws.daXacThuc) soDaXacThuc++; });
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      ok: true,
+      // Thoi gian may chu realtime da chay lien tuc (giay)
+      chay_duoc: Math.floor((Date.now() - thongKe.batDauLuc) / 1000),
+      phien_ban_node: process.version,
+      // Bo nho dang dung (MB) - quan trong voi hosting dung chung co gioi han
+      ram_dang_dung: Math.round(bn.rss / 1048576 * 10) / 10,
+      ram_heap: Math.round(bn.heapUsed / 1048576 * 10) / 10,
+      // Ket noi
+      so_ket_noi: soKetNoi,
+      so_da_xac_thuc: soDaXacThuc,
+      so_tai_khoan: ketNoiTheoNguoiDung.size,
+      so_quan_ly: ketNoiQuanLy.size,
+      tai_xe_online: Array.from(ketNoiTheoTaiXe.keys()),
+      // Hoat dong
+      so_nhac_da_gui: thongKe.soNhacDaGui,
+      so_khoa_dang_giu: khoaSuaChuyen.size,
+    }));
+    return;
+  }
   if (req.method === 'GET' && duongDan.endsWith('/online-status')) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true, tai_xe_online: Array.from(ketNoiTheoTaiXe.keys()) }));

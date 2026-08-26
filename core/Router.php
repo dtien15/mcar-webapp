@@ -23,6 +23,7 @@ class Router
         'chuyen-xe' => 'GuiChuyenController',
         'caidat'    => 'CaiDatController',
         'chat'      => 'ChatController',
+        'hethong'   => 'HeThongController',
     ];
 
     public function chay()

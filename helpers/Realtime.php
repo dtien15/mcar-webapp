@@ -156,3 +156,32 @@ function guiBroadcastNoiBo(array $duLieu)
         // ws-server dang tat/loi mang: bo qua, khong lam hong luong chinh
     }
 }
+
+/**
+ * Lay thong ke may chu realtime (RAM, so ket noi, thoi gian chay...).
+ * Tra ve null neu chua cau hinh realtime hoac may chu do dang tat -
+ * trang Theo doi he thong se hien "khong ket noi duoc" thay vi bao loi.
+ */
+function layThongKeRealtime()
+{
+    if (!coRealtime()) {
+        return null;
+    }
+    try {
+        $ch = curl_init(layGocUrlRealtime() . '/thong-ke');
+        curl_setopt_array($ch, [
+            CURLOPT_HTTPGET        => true,
+            CURLOPT_HTTPHEADER     => ['X-WS-Secret: ' . WS_SHARED_SECRET],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT_MS => 800,
+            CURLOPT_TIMEOUT_MS     => 2000,
+        ]);
+        $ketQua = curl_exec($ch);
+        curl_close($ch);
+
+        $duLieu = json_decode((string)$ketQua, true);
+        return !empty($duLieu['ok']) ? $duLieu : null;
+    } catch (Exception $e) {
+        return null;
+    }
+}

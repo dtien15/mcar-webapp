@@ -32,6 +32,7 @@ $menu = [
     ['nhom'  => 'HỆ THỐNG',  'quyen' => ['admin']],
     ['route' => 'nguoidung', 'nhan' => 'Người dùng',          'icon' => 'users',            'quyen' => ['admin']],
     ['route' => 'caidat',    'nhan' => 'Cài đặt',             'icon' => 'settings',         'quyen' => ['admin']],
+    ['route' => 'hethong',   'nhan' => 'Theo dõi hệ thống',   'icon' => 'heartbeat',        'quyen' => ['admin']],
 ];
 
 ?>
