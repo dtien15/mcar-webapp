@@ -18,7 +18,10 @@
           <div class="text-center text-muted py-3" style="font-size:13px">Đang tải…</div>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer d-block">
+        <div id="chatModalDaKhoa" class="dang-khoa-chat d-none">
+          <?= bieuTuong('lock') ?> Chuyến đã chốt xong, không thể nhắn tin thêm.
+        </div>
         <form id="chatModalForm" class="d-flex gap-2 w-100">
           <input type="hidden" name="id_chuyen" id="chatModalIdChuyen" value="">
           <input type="text" name="noi_dung" id="chatModalONhap" class="form-control" placeholder="Nhắn gì đó..." maxlength="2000" autocomplete="off">
@@ -36,8 +39,14 @@
 .tin-nhan-chat .thoi-gian-tin { font-size: 10.5px; color: #94a3b8; margin-top: 3px; }
 .nut-chat-nhanh { position: relative; }
 .cham-chua-doc-chat {
-  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
-  background: #dc2626; margin-left: 4px; vertical-align: top;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px;
+  background: #dc2626; color: #fff; font-size: 10.5px; font-weight: 700;
+  margin-left: 4px; vertical-align: top; line-height: 1;
+}
+.dang-khoa-chat {
+  text-align: center; color: var(--mau-chu-nhat, #6b7280); font-size: 13px;
+  padding: 10px; background: #f8fafc; border-radius: 8px;
 }
 </style>
 
@@ -51,7 +60,9 @@
   var oNhap    = document.getElementById('chatModalONhap');
   var oIdChuyen = document.getElementById('chatModalIdChuyen');
   var oTieuDe  = document.getElementById('chatTieuDeChuyen');
+  var oDaKhoa  = document.getElementById('chatModalDaKhoa');
   var TOKEN_CSRF = '<?= h(taoToken()) ?>';
+  var henGioHoi = null; // polling ngan khi dang mo modal, dam bao 2 chieu realtime khong bi mat goi tin
 
   function veTinNhan(tn) {
     var dong = document.createElement('div');
@@ -85,6 +96,11 @@
         }
         dsTinNhanEl.scrollTop = dsTinNhanEl.scrollHeight;
 
+        // Chuyen da chot -> khoa form nhap, chi con xem lai lich su
+        var koaGuiDuoc = kq.co_the_gui === false;
+        oDaKhoa.classList.toggle('d-none', !koaGuiDuoc);
+        form.classList.toggle('d-none', koaGuiDuoc);
+
         // Da xem roi -> cham do tren nut ngoai danh sach an di ngay, khong doi realtime
         document.querySelectorAll('.nut-chat-nhanh[onclick="mcarMoChat(' + idChuyen + ')"] .cham-chua-doc-chat')
           .forEach(function (c) { c.remove(); });
@@ -97,14 +113,27 @@
     oIdChuyen.value = idChuyen;
     oTieuDe.textContent = '#' + idChuyen;
     dsTinNhanEl.innerHTML = '<div class="text-center text-muted py-3" style="font-size:13px">Đang tải…</div>';
+    oDaKhoa.classList.add('d-none');
+    form.classList.remove('d-none');
 
     if (!modalBs) modalBs = new bootstrap.Modal(modalEl);
     modalBs.show();
     taiTinNhan(idChuyen);
     setTimeout(function () { oNhap.focus(); }, 300);
+
+    // Dang mo chat thi tu hoi lai server moi 4 giay - lam luoi an toan cho ca
+    // 2 chieu tra loi qua lai, phong khi nudge WebSocket bi mat/tre (mang
+    // chap chon, ket noi vua rot dang cho ket noi lai...).
+    clearInterval(henGioHoi);
+    henGioHoi = setInterval(function () {
+      if (idChuyenDangMo) taiTinNhan(idChuyenDangMo);
+    }, 4000);
   };
 
-  modalEl.addEventListener('hidden.bs.modal', function () { idChuyenDangMo = null; });
+  modalEl.addEventListener('hidden.bs.modal', function () {
+    idChuyenDangMo = null;
+    clearInterval(henGioHoi);
+  });
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();

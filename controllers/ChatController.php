@@ -30,7 +30,13 @@ class ChatController extends Controller
             ];
         }, $chatModel->layTinNhanTheoChuyen($idChuyen));
 
-        echo json_encode(['ok' => true, 'tin_nhan' => $dsTinNhan]);
+        echo json_encode([
+            'ok'         => true,
+            'tin_nhan'   => $dsTinNhan,
+            // Chuyen da chot xong thi khong con nhan tin them duoc nua (van
+            // xem lai duoc lich su cu) - khong con gi can trao doi sau khi chot.
+            'co_the_gui' => $chuyen['status'] !== 'hoan_thanh',
+        ]);
         exit;
     }
 
@@ -55,6 +61,10 @@ class ChatController extends Controller
             echo json_encode(['ok' => false, 'loi' => 'Không có quyền nhắn tin trong chuyến xe này.']);
             exit;
         }
+        if ($chuyen['status'] === 'hoan_thanh') {
+            echo json_encode(['ok' => false, 'loi' => 'Chuyến xe này đã chốt xong, không thể nhắn tin thêm.']);
+            exit;
+        }
         if ($noiDung === '') {
             echo json_encode(['ok' => false, 'loi' => 'Vui lòng nhập nội dung tin nhắn.']);
             exit;
@@ -72,7 +82,9 @@ class ChatController extends Controller
         // kia thay ngay o chuong thong bao, va nhat la nhan duoc PUSH NOTIFICATION
         // ngay ca khi ho khong mo web/tat trinh duyet. baoThucRealtime*() ben
         // trong ThongBaoModel se tu lo phan "nhac tuc thi" cho ben dang mo web.
-        $duongDanChuyen = 'chuyenxe/chitiet/' . $idChuyen;
+        // Tro ve trang danh sach kem tham so mo_chat de JS tu mo dung modal chat
+        // cua chuyen nay (khong con panel chat rieng o trang chi tiet nua).
+        $duongDanChuyen = 'chuyenxe?mo_chat=' . $idChuyen;
         $noiDungRutGon  = mb_strlen($noiDung) > 80 ? mb_substr($noiDung, 0, 80) . '…' : $noiDung;
 
         if (laQuanLy()) {

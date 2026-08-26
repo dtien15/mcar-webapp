@@ -3,6 +3,9 @@
 <div class="khong-in mb-3 d-flex gap-2 flex-wrap align-items-center">
   <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light btn-sm"><?= bieuTuong('arrow-left') ?> Quay lại danh sách</a>
   <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><?= bieuTuong('printer') ?> In</button>
+  <a href="<?= duongDan('chuyenxe?mo_chat=' . $chuyen['id']) ?>" class="btn btn-outline-info btn-sm">
+    <?= bieuTuong('message-circle') ?> Nhắn tin
+  </a>
   <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?> ms-auto"><?= h($tt['nhan']) ?></span>
 </div>
 
@@ -288,111 +291,3 @@
 
   </div>
 </div>
-
-<!-- Chat trao doi ve chuyen xe nay (giua quan ly va tai xe) -->
-<div class="the khong-in" id="hopChat">
-  <div class="the-dau"><?= bieuTuong('message-circle') ?> Trao đổi về chuyến xe này</div>
-  <div class="the-than">
-    <div id="dsTinNhan" style="max-height:320px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:4px;">
-      <div class="text-center text-muted py-3" style="font-size:13px">Đang tải…</div>
-    </div>
-    <form id="formGuiChat" class="d-flex gap-2 mt-2">
-      <?php truongToken(); ?>
-      <input type="hidden" name="id_chuyen" value="<?= (int)$chuyen['id'] ?>">
-      <input type="text" name="noi_dung" id="oNhapChat" class="form-control" placeholder="Nhắn gì đó..." maxlength="2000" autocomplete="off">
-      <button type="submit" class="btn btn-primary"><?= bieuTuong('send') ?></button>
-    </form>
-  </div>
-</div>
-
-<style>
-.tin-nhan-chat { max-width: 78%; padding: 8px 12px; border-radius: 12px; font-size: 13.5px; background: #f1f5f9; }
-.tin-nhan-chat.cua-toi { align-self: flex-end; background: #dbeafe; }
-.tin-nhan-chat .ten-nguoi-gui { font-weight: 600; font-size: 11.5px; color: var(--mau-chinh); margin-bottom: 2px; }
-.tin-nhan-chat .thoi-gian-tin { font-size: 10.5px; color: #94a3b8; margin-top: 3px; }
-</style>
-
-<script>
-(function () {
-  var idChuyen  = <?= (int)$chuyen['id'] ?>;
-  var dsTinNhan = document.getElementById('dsTinNhan');
-  var form      = document.getElementById('formGuiChat');
-  var oNhap     = document.getElementById('oNhapChat');
-  var urlLay    = '<?= duongDan('chat/lay') ?>/' + idChuyen;
-  var urlGui    = '<?= duongDan('chat/gui') ?>';
-
-  function veTinNhan(tn) {
-    var dong = document.createElement('div');
-    dong.className = 'tin-nhan-chat' + (tn.cua_toi ? ' cua-toi' : '');
-    var ten = document.createElement('div');
-    ten.className = 'ten-nguoi-gui';
-    ten.textContent = tn.cua_toi ? 'Bạn' : tn.ten_nguoi_gui;
-    var noiDung = document.createElement('div');
-    noiDung.textContent = tn.noi_dung;
-    var tg = document.createElement('div');
-    tg.className = 'thoi-gian-tin';
-    tg.textContent = tn.thoi_gian;
-    dong.appendChild(ten);
-    dong.appendChild(noiDung);
-    dong.appendChild(tg);
-    return dong;
-  }
-
-  function taiTinNhan() {
-    fetch(urlLay, { credentials: 'same-origin' })
-      .then(function (r) { return r.json(); })
-      .then(function (kq) {
-        if (!kq.ok) {
-          dsTinNhan.innerHTML = '<div class="text-center text-muted py-3" style="font-size:13px">Không tải được tin nhắn.</div>';
-          return;
-        }
-        var dangCuoiTrang = dsTinNhan.scrollTop + dsTinNhan.clientHeight >= dsTinNhan.scrollHeight - 30;
-        dsTinNhan.innerHTML = '';
-        if (!kq.tin_nhan.length) {
-          dsTinNhan.innerHTML = '<div class="text-center text-muted py-3" style="font-size:13px">Chưa có tin nhắn nào. Nhắn gì đó cho '
-            + (<?= laQuanLy() ? 'true' : 'false' ?> ? 'tài xế' : 'công ty') + ' đi!</div>';
-        } else {
-          kq.tin_nhan.forEach(function (tn) { dsTinNhan.appendChild(veTinNhan(tn)); });
-        }
-        if (dangCuoiTrang || dsTinNhan.dataset.laLanDau !== '0') {
-          dsTinNhan.scrollTop = dsTinNhan.scrollHeight;
-        }
-        dsTinNhan.dataset.laLanDau = '0';
-      })
-      .catch(function () {});
-  }
-
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var noiDung = oNhap.value.trim();
-    if (!noiDung) return;
-
-    var duLieu = new FormData(form);
-    oNhap.value = '';
-    oNhap.disabled = true;
-
-    fetch(urlGui, { method: 'POST', credentials: 'same-origin', body: duLieu })
-      .then(function (r) { return r.json(); })
-      .then(function (kq) {
-        oNhap.disabled = false;
-        oNhap.focus();
-        if (kq.ok) {
-          taiTinNhan();
-        } else {
-          alert(kq.loi || 'Không gửi được tin nhắn.');
-          oNhap.value = noiDung;
-        }
-      })
-      .catch(function () {
-        oNhap.disabled = false;
-        oNhap.value = noiDung;
-      });
-  });
-
-  taiTinNhan();
-
-  if (window.mcarRealtime) {
-    window.mcarRealtime.dangKy('nudge', taiTinNhan);
-  }
-})();
-</script>

@@ -52,25 +52,32 @@ class ChatModel extends Model
     }
 
     /**
-     * Danh sach id chuyen xe co tin nhan CHUA XEM doi voi 1 tai khoan - dung
-     * cham do tren nut "Nhan tin" o danh sach chuyen xe. Quan ly thay chua
-     * xem tren moi chuyen; tai xe chi thay chua xem tren chuyen cua chinh minh.
+     * So tin nhan CHUA XEM cua tung chuyen xe, doi voi 1 tai khoan - dung hien
+     * SO LUONG tren nut "Nhan tin" o danh sach chuyen xe. Quan ly thay chua
+     * xem tren moi chuyen; tai xe chi thay tren chuyen cua chinh minh.
      */
-    public function layTripCoTinChuaXem($idNguoiXem, $idTaiXeNeuLaTaiXe = null)
+    public function laySoTinChuaXemTheoChuyen($idNguoiXem, $idTaiXeNeuLaTaiXe = null)
     {
         if ($idTaiXeNeuLaTaiXe) {
             $ds = $this->truyVan(
-                "SELECT DISTINCT c.trip_id FROM chat_messages c
+                "SELECT c.trip_id, COUNT(*) AS so_luong FROM chat_messages c
                  JOIN trips t ON t.id = c.trip_id
-                 WHERE t.driver_id = ? AND c.sender_id <> ? AND c.read_at IS NULL",
+                 WHERE t.driver_id = ? AND c.sender_id <> ? AND c.read_at IS NULL
+                 GROUP BY c.trip_id",
                 [(int)$idTaiXeNeuLaTaiXe, (int)$idNguoiXem]
             );
         } else {
             $ds = $this->truyVan(
-                "SELECT DISTINCT trip_id FROM chat_messages WHERE sender_id <> ? AND read_at IS NULL",
+                "SELECT trip_id, COUNT(*) AS so_luong FROM chat_messages
+                 WHERE sender_id <> ? AND read_at IS NULL
+                 GROUP BY trip_id",
                 [(int)$idNguoiXem]
             );
         }
-        return array_map(function ($d) { return (int)$d['trip_id']; }, $ds);
+        $ketQua = [];
+        foreach ($ds as $d) {
+            $ketQua[(int)$d['trip_id']] = (int)$d['so_luong'];
+        }
+        return $ketQua;
     }
 }

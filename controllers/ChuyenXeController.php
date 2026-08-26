@@ -34,14 +34,14 @@ class ChuyenXeController extends Controller
         $this->view('chuyenxe/danhsach', $duLieu, 'Chuyến xe');
     }
 
-    /** Danh sach id chuyen co tin nhan chua xem, theo dung vai tro tai khoan hien tai */
+    /** [idChuyen => so tin chua xem], theo dung vai tro tai khoan hien tai */
     private function layTripChuaXemChat()
     {
         if (!taiKhoanHienTai()) {
             return [];
         }
         $idTaiXe = laTaiXe() ? (int)(taiKhoanHienTai()['id_tai_xe'] ?? 0) : null;
-        return $this->model('ChatModel')->layTripCoTinChuaXem(taiKhoanHienTai()['id'], $idTaiXe);
+        return $this->model('ChatModel')->laySoTinChuaXemTheoChuyen(taiKhoanHienTai()['id'], $idTaiXe);
     }
 
     /**

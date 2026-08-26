@@ -71,8 +71,8 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
         </a>
         <button type="button" class="btn btn-sm btn-outline-info nut-chat-nhanh" onclick="mcarMoChat(<?= $chuyen['id'] ?>)" title="Nhắn tin về chuyến này">
           <?= bieuTuong('message-circle') ?>
-          <?php if (!empty($dsTripChuaXemChat) && in_array($chuyen['id'], $dsTripChuaXemChat, true)): ?>
-            <span class="cham-chua-doc-chat"></span>
+          <?php if (!empty($dsTripChuaXemChat[$chuyen['id']])): ?>
+            <span class="cham-chua-doc-chat"><?= (int)$dsTripChuaXemChat[$chuyen['id']] ?></span>
           <?php endif; ?>
         </button>
 
@@ -105,8 +105,8 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
         </a>
         <button type="button" class="btn btn-sm btn-outline-info nut-chat-nhanh" onclick="mcarMoChat(<?= $chuyen['id'] ?>)" title="Nhắn tin về chuyến này">
           <?= bieuTuong('message-circle') ?>
-          <?php if (!empty($dsTripChuaXemChat) && in_array($chuyen['id'], $dsTripChuaXemChat, true)): ?>
-            <span class="cham-chua-doc-chat"></span>
+          <?php if (!empty($dsTripChuaXemChat[$chuyen['id']])): ?>
+            <span class="cham-chua-doc-chat"><?= (int)$dsTripChuaXemChat[$chuyen['id']] ?></span>
           <?php endif; ?>
         </button>
       <?php endif; ?>
