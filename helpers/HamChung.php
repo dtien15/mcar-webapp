@@ -389,6 +389,19 @@ function phutTuGioDon($gio)
 /** Trong bao nhieu tieng thi coi 2 chuyen la dam nhau */
 const GIO_COI_LA_TRUNG = 4;
 
+/**
+ * Duong dan toi file tinh (css/js) kem phien ban theo lan sua file gan nhat.
+ *
+ * Khong co no thi moi lan sua giao dien nguoi dung phai tu bam Ctrl+F5 moi
+ * thay - va phan lon se khong biet ma lam, cu tuong ban cap nhat bi loi.
+ */
+function duongDanTinh($duongDanTuongDoi)
+{
+    $tapTin = DUONG_DAN_GOC . '/' . ltrim($duongDanTuongDoi, '/');
+    $phien  = file_exists($tapTin) ? filemtime($tapTin) : 0;
+    return duongDan($duongDanTuongDoi) . '?v=' . $phien;
+}
+
 /** Doi so tien thanh chu (dung cho phieu luong) */
 function doiTienSangChu($so)
 {

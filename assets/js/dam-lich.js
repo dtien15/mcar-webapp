@@ -82,3 +82,22 @@
 
   kiemTra();
 })();
+
+// =====================================================================
+// Menu "..." trong bang chuyen xe
+//
+// Bang danh sach cuon ngang duoc (overflow-x), ma menu xo xuong lai nam
+// ben trong no - mo ra la bi cat mat mot nua. Trong luc menu dang mo thi
+// cho bang tran ra, dong menu la tra lai nhu cu.
+// =====================================================================
+(function () {
+  document.addEventListener('show.bs.dropdown', function (su) {
+    var bang = su.target.closest ? su.target.closest('.bang-cuon') : null;
+    if (bang) bang.classList.add('dang-mo-menu');
+  });
+
+  document.addEventListener('hidden.bs.dropdown', function (su) {
+    var bang = su.target.closest ? su.target.closest('.bang-cuon') : null;
+    if (bang) bang.classList.remove('dang-mo-menu');
+  });
+})();

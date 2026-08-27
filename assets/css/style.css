@@ -663,8 +663,10 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
 .the-chuyen-xe .nhan { font-size: 11px; color: #94a3b8; }
 .the-chuyen-xe .gt { font-size: 13px; font-weight: 600; }
 .the-chuyen-xe .gt.nhan-manh { color: var(--mau-chinh); font-size: 15px; }
-.the-chuyen-xe .chan-the { display: flex; gap: 8px; flex-wrap: wrap; }
-.the-chuyen-xe .chan-the .btn { flex: 1; min-width: 120px; }
+/* Chan the gio chi con chua .cum-thao-tac, de cum do tu lo bo cuc.
+   Rule "min-width: 120px" cu o day ghim moi nut lai 120px - lam nut "..."
+   khong the thu nho ve 44px va tran ra ngoai the. */
+.the-chuyen-xe .chan-the { display: block; }
 
 /* ---------- Man hinh nho ---------- */
 @media (max-width: 992px) {
@@ -801,3 +803,83 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
   font-weight: 600;
   font-size: 14px;
 }
+
+/* =====================================================================
+   Cum thao tac cua 1 chuyen xe
+   Truoc day cot nay do toi 6 nut cung luc voi 5 mau khac nhau, nhin ca
+   bang rat roi va cac dong khong thang hang nhau. Gio chi MOT nut co mau
+   (viec chinh cua chuyen do luc nay), con lai deu mo nhat hoac nam trong
+   menu "..." - mat nhin phat la biet phai lam gi.
+   ===================================================================== */
+.cum-thao-tac {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.cum-thao-tac.ngang { justify-content: flex-end; }
+.cum-thao-tac form { margin: 0; }
+
+/* Nut chinh: thu duy nhat duoc phep noi bat */
+.cum-thao-tac .nut-chinh {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Nut phu: cung mot mau xam nhat, khong tranh chu y voi nut chinh */
+.cum-thao-tac .nut-phu {
+  color: var(--mau-chu-nhat);
+  border-color: var(--mau-vien);
+  white-space: nowrap;
+}
+.cum-thao-tac .nut-phu:hover {
+  background: var(--mau-nen);
+  color: var(--mau-chu);
+  border-color: var(--mau-vien);
+}
+
+/* Muc nguy hiem trong menu (Huy chuyen, Bao khach huy) */
+.dropdown-item.muc-nguy-hiem { color: #b3342b; }
+.dropdown-item.muc-nguy-hiem:hover,
+.dropdown-item.muc-nguy-hiem:focus { background: #fbeae8; color: #8f2921; }
+.dropdown-menu form { margin: 0; }
+.dropdown-menu .dropdown-item { display: flex; align-items: center; gap: 8px; width: 100%; }
+
+/* Tren may tinh: nut Chi tiet / Nhan tin / Khac chi hien bieu tuong cho gon */
+@media (min-width: 992px) {
+  .cum-thao-tac.ngang .chi-dien-thoai { display: none; }
+}
+
+/* Tren dien thoai: nut chinh chiem tron hang, hai nut phu chia doi hang duoi */
+.cum-thao-tac.doc {
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px;
+}
+.cum-thao-tac.doc > form,
+.cum-thao-tac.doc > .nut-chinh { flex: 1 0 100%; }
+.cum-thao-tac.doc > a.nut-phu,
+.cum-thao-tac.doc > .nut-chat-nhanh { flex: 1 1 0; }
+.cum-thao-tac.doc .btn {
+  width: 100%;
+  min-height: 42px;      /* du to de bam bang ngon tay */
+}
+
+/* Nut "Khac" chi de bieu tuong va ghim dung 44px, de ca 3 nut phu vua tron
+   mot hang thay vi day nhau xuong 3 hang.
+   Phai dat SAU rule width:100% o tren, va can ca min/max-width vi flex item
+   mac dinh khong co nho hon be rong noi dung cua no. */
+.cum-thao-tac.doc > .dropdown {
+  flex: 0 0 44px;
+  min-width: 44px;
+  max-width: 44px;
+}
+.cum-thao-tac.doc > .dropdown .chu-nut { display: none; }
+.cum-thao-tac.doc > .dropdown .btn {
+  width: 44px;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Menu "..." nam trong bang cuon ngang se bi cat mat - mo ra thi cho bang
+   tran tam thoi (JS them lop nay khi menu mo) */
+.bang-cuon.dang-mo-menu { overflow: visible; }

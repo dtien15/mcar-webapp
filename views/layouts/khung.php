@@ -68,7 +68,7 @@ foreach ($menu as $m) {
 <title><?= h($tieuDe ?? 'MCAR') ?> · <?= h($tenHeThong) ?></title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css" rel="stylesheet">
-<link rel="stylesheet" href="<?= duongDan('assets/css/style.css') ?>">
+<link rel="stylesheet" href="<?= duongDanTinh('assets/css/style.css') ?>">
 
 <!-- Biểu tượng trang (favicon) -->
 <link rel="icon" type="image/png" sizes="96x96" href="<?= duongDan('assets/img/favicon/favicon-96x96.png') ?>">
@@ -210,10 +210,10 @@ window.mcarRealtime = {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="<?= duongDan('assets/js/tien.js') ?>"></script>
-<script src="<?= duongDan('assets/js/dan-nhanh.js') ?>"></script>
-<script src="<?= duongDan('assets/js/dam-lich.js') ?>"></script>
-<script src="<?= duongDan('assets/js/phan-tich-ai.js') ?>"></script>
+<script src="<?= duongDanTinh('assets/js/tien.js') ?>"></script>
+<script src="<?= duongDanTinh('assets/js/dan-nhanh.js') ?>"></script>
+<script src="<?= duongDanTinh('assets/js/dam-lich.js') ?>"></script>
+<script src="<?= duongDanTinh('assets/js/phan-tich-ai.js') ?>"></script>
 <script>
 // ---------------------------------------------------------------
 // Mo/dong thanh ben tren dien thoai
