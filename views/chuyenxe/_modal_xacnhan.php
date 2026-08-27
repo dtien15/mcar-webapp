@@ -56,34 +56,42 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
               <input type="text" class="form-control form-control-sm o-nhap-tien o-chi-phi-ngoai" placeholder="0"
                      name="chi_phi_keo_ngoai" value="<?= h(giaTriTienForm($chuyen, 'outsource_cost')) ?>">
             </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Ai thu tiền khách</label>
-              <input class="form-control form-control-sm" name="ai_thu"
-                     value="<?= h($chuyen['collector_name'] ?? '') ?>">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Ghi chú thu tiền</label>
-              <input class="form-control form-control-sm" name="ghi_chu_thu"
-                     value="<?= h($chuyen['collector_note'] ?? '') ?>">
-            </div>
           </div>
           <div class="text-muted mt-2" style="font-size:12px">
             Sửa lại nếu số liệu thực tế khác với công ty đã giao.
           </div>
         </fieldset>
 
-        <!-- Neu khach chuyen khoan: anh ck lam bang chung -->
-        <fieldset class="nhom-truong">
-          <legend>Nếu khách chuyển khoản</legend>
+        <!-- Ai dang giu tien cua khach - quyet dinh co tru vao luong hay khong -->
+        <?php $aiThuModal = $chuyen['collector_type'] ?? ''; ?>
+        <fieldset class="nhom-truong nhom-tien-noi">
+          <legend>Ai đang giữ tiền khách</legend>
           <div class="row g-2">
-            <div class="col-6 col-md-6">
-              <label class="form-label">Ảnh chụp chuyển khoản</label>
-              <input type="file" name="anh_ck" class="form-control form-control-sm" accept="image/png,image/jpeg,image/webp">
+            <div class="col-12 col-md-6">
+              <label class="form-label">Ai thu tiền khách</label>
+              <?= oChonAiThu($aiThuModal, 'ai_thu', 'form-select-sm') ?>
             </div>
-            <div class="col-6 col-md-6">
-              <label class="form-label">Chuyển khoản qua ai / tài khoản nào</label>
-              <input class="form-control form-control-sm" name="ck_qua_ai"
-                     value="<?= h($chuyen['transfer_note'] ?? '') ?>">
+            <div class="col-12 col-md-6">
+              <label class="form-label">Ghi chú thu tiền</label>
+              <input class="form-control form-control-sm" name="ghi_chu_thu"
+                     value="<?= h($chuyen['collector_note'] ?? '') ?>">
+            </div>
+            <div class="col-12">
+              <div class="hau-qua-tien" data-hau-qua-ai-thu hidden></div>
+            </div>
+
+            <div class="col-12 khoi-chuyen-khoan" <?= laChuyenKhoan($aiThuModal) ? '' : 'hidden' ?>>
+              <div class="row g-2">
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Ảnh chụp chuyển khoản</label>
+                  <input type="file" name="anh_ck" class="form-control form-control-sm" accept="image/png,image/jpeg,image/webp">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Chuyển khoản qua ai / tài khoản nào</label>
+                  <input class="form-control form-control-sm" name="ck_qua_ai"
+                         value="<?= h($chuyen['transfer_note'] ?? '') ?>">
+                </div>
+              </div>
             </div>
           </div>
         </fieldset>

@@ -710,3 +710,85 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
   .the-chuyen-xe .thong-tin-the { grid-template-columns: 1fr 1fr; }
   .khung-ds-thong-bao { width: calc(100vw - 20px); }
 }
+
+/* =====================================================================
+   Nhom truong tien trong form chuyen xe
+   Truoc day toan bo khoi "Doanh thu & thu tien" la mot day o 3-cot deu
+   nhau, nhin vao khong biet o nao lien quan o nao. Gio moi nhom co vien
+   va tieu de rieng, va cac o thuoc ve nhau duoc long them 1 lop nen.
+   ===================================================================== */
+.nhom-tien {
+  border: 1px solid var(--mau-vien);
+  border-radius: 10px;
+  padding: 12px 14px 14px;
+  margin-bottom: 12px;
+  background: #fff;
+}
+.nhom-tien > legend {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--mau-chinh);
+  padding: 0 7px;
+  width: auto;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Nhom noi tiep nhom truoc no (tien vua nhap o tren dang duoc noi den) */
+.nhom-tien-noi {
+  border-left: 3px solid var(--mau-chinh);
+}
+
+/* Cac o thuoc ve nhau, long trong 1 nhom lon hon */
+.nhom-lien-quan {
+  background: var(--mau-nen);
+  border-radius: 8px;
+  padding: 10px 12px 12px;
+}
+
+/* Dau "-" giua "Chi phi keo ngoai" va "Minh nhan" */
+.dau-phep {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--mau-chu-nhat);
+  line-height: 1;
+  user-select: none;
+}
+
+/* O ket qua tu tinh - khac han o nhap de khong ai go nham vao */
+.o-ket-qua {
+  background: var(--mau-nen) !important;
+  font-weight: 700;
+}
+
+/* Cau noi ro hau qua cua lua chon "ai thu tien khach" */
+.hau-qua-tien {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  border-radius: 8px;
+  padding: 8px 11px;
+  margin-top: 2px;
+}
+.hau-qua-tien.tai-xe-giu {
+  background: #fef6e7;
+  color: #92610a;
+}
+.hau-qua-tien.cty-giu {
+  background: #e8f5ee;
+  color: #14724e;
+}
+
+/* Dien thoai: nhom van ro rang, khong bi bop chat */
+@media (max-width: 575.98px) {
+  .nhom-tien { padding: 10px 11px 12px; }
+  .nhom-tien > legend { font-size: 11px; }
+  .dau-phep { display: none; }
+  .nhom-lien-quan { padding: 9px 10px 11px; }
+}

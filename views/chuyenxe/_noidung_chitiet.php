@@ -95,10 +95,15 @@
           <label class="form-label">Khách trả VNĐ</label>
           <input class="form-control form-control-sm" value="<?= dinhDangTien($chuyen['revenue_vnd']) ?>" readonly>
         </div>
-        <?php if (!empty($chuyen['collector_name'])): ?>
+        <?php if (!empty($chuyen['collector_type'])): ?>
         <div class="col-6 col-md-3">
           <label class="form-label">Ai thu tiền khách</label>
-          <input class="form-control form-control-sm" value="<?= h($chuyen['collector_name']) ?>" readonly>
+          <input class="form-control form-control-sm" value="<?= h(nhanAiThu($chuyen['collector_type'])) ?>" readonly>
+          <div class="text-muted mt-1" style="font-size:11.5px">
+            <?= h(taiXeDangGiuTien($chuyen['collector_type'])
+                    ? ($chuyen['cash_remitted'] ? 'Tài xế đã nộp lại cho công ty.' : 'Tài xế đang giữ tiền, chưa nộp lại.')
+                    : 'Tài xế không cầm tiền của chuyến này.') ?>
+          </div>
         </div>
         <?php endif; ?>
         <?php if (!empty($chuyen['collector_note'])): ?>

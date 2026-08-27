@@ -239,6 +239,77 @@ function nhanTrangThaiChuyen($trangThai)
     return $danhSach[$trangThai] ?? ['nhan' => $trangThai, 'mau' => 'light'];
 }
 
+/**
+ * "Ai thu tien khach" - dung chung cho form them/sua chuyen, modal tai xe
+ * xac nhan, va trang chi tiet, de 3 noi luon khop nhau.
+ *
+ * 'giu' = tai xe co dang cam tien cua cong ty khong. Day la thu quyet dinh
+ * co TRU tien khach vao luong tai xe hay khong, nen no phai di lien voi lua
+ * chon chu khong nam o mot o rieng de quen tick.
+ */
+function danhSachAiThu()
+{
+    return [
+        'tai_xe_tien_mat' => [
+            'nhan' => 'Tài xế thu tiền mặt',
+            'giu'  => true,
+            'y'    => 'Tài xế đang giữ tiền, trừ vào lương đến khi nộp lại công ty.',
+        ],
+        'tai_xe_ck' => [
+            'nhan' => 'Khách chuyển khoản cho tài xế',
+            'giu'  => true,
+            'y'    => 'Tài xế đang giữ tiền, trừ vào lương đến khi nộp lại công ty.',
+        ],
+        'cong_ty' => [
+            'nhan' => 'Công ty thu (khách trả thẳng cho công ty)',
+            'giu'  => false,
+            'y'    => 'Tài xế không cầm đồng nào, không trừ gì vào lương.',
+        ],
+        'chua_thu' => [
+            'nhan' => 'Chưa thu được tiền',
+            'giu'  => false,
+            'y'    => 'Chưa ai cầm tiền, không trừ vào lương tài xế.',
+        ],
+    ];
+}
+
+/** Tai xe co dang giu tien khach khong, theo lua chon "ai thu" */
+function taiXeDangGiuTien($maAiThu)
+{
+    $ds = danhSachAiThu();
+    return isset($ds[$maAiThu]) ? $ds[$maAiThu]['giu'] : false;
+}
+
+/** Ten de doc cua lua chon "ai thu" (rong neu chua chon) */
+function nhanAiThu($maAiThu)
+{
+    $ds = danhSachAiThu();
+    return $ds[$maAiThu]['nhan'] ?? '';
+}
+
+/** Lua chon "ai thu" co phai dang chuyen khoan khong (de hien o anh CK) */
+function laChuyenKhoan($maAiThu)
+{
+    return $maAiThu === 'tai_xe_ck' || $maAiThu === 'cong_ty';
+}
+
+/**
+ * In ra the <select> "Ai thu tien khach". Dung chung nen 3 noi khong bao gio
+ * lech danh sach lua chon.
+ */
+function oChonAiThu($giaTriHienTai, $ten = 'ai_thu', $themLop = '', $tatSua = '')
+{
+    $html = '<select name="' . h($ten) . '" class="form-select o-ai-thu ' . h($themLop) . '" ' . $tatSua . '>';
+    $html .= '<option value="">-- Chọn --</option>';
+    foreach (danhSachAiThu() as $ma => $muc) {
+        $html .= '<option value="' . h($ma) . '" data-giu="' . ($muc['giu'] ? '1' : '0') . '"'
+               . ' data-y="' . h($muc['y']) . '"'
+               . ($giaTriHienTai === $ma ? ' selected' : '') . '>'
+               . h($muc['nhan']) . '</option>';
+    }
+    return $html . '</select>';
+}
+
 /** Doi so tien thanh chu (dung cho phieu luong) */
 function doiTienSangChu($so)
 {

@@ -44,7 +44,7 @@
               <?php endif; ?>
             </td>
             <td class="text-end"><?= dinhDangTien($chuyen['revenue_vnd']) ?></td>
-            <td><?= h($chuyen['collector_name']) ?></td>
+            <td><?= h(nhanAiThu($chuyen['collector_type'] ?? '')) ?></td>
             <td>
               <?php if ($chuyen['customer_paid']): ?>
                 Khách TT thẳng cty

@@ -114,6 +114,53 @@
     });
   });
 
+  // ---- 6b: O "Ai thu tien khach" ----
+  //
+  // Lua chon nay quyet dinh co TRU tien khach vao luong tai xe hay khong,
+  // nen phai noi thang hau qua ra ngay duoi o chon - khong de nguoi dung
+  // doan. Chon xong con tu an/hien khoi chuyen khoan cho do roi mat.
+  document.querySelectorAll('.o-ai-thu').forEach(function (oChon) {
+    var vung    = oChon.closest('fieldset') || oChon.closest('form') || document;
+    var oHauQua = vung.querySelector('[data-hau-qua-ai-thu]');
+    var khoiCk  = vung.querySelector('.khoi-chuyen-khoan');
+    var oTien   = (oChon.closest('form') || document).querySelector('.o-khach-tra');
+
+    function capNhat() {
+      var muc = oChon.options[oChon.selectedIndex];
+      var ma  = oChon.value;
+
+      // Khoi chuyen khoan chi can khi tien di qua tai khoan
+      if (khoiCk) {
+        if (ma === 'tai_xe_ck' || ma === 'cong_ty') khoiCk.removeAttribute('hidden');
+        else khoiCk.setAttribute('hidden', '');
+      }
+
+      if (!oHauQua) return;
+      if (!ma) { oHauQua.setAttribute('hidden', ''); return; }
+
+      var taiXeGiu = muc.getAttribute('data-giu') === '1';
+      var cau = muc.getAttribute('data-y') || '';
+
+      // Co so tien cu the thi noi luon con so, de doc hon la noi chung chung
+      var soTien = oTien ? parseInt(chiLaySo(oTien.value) || '0', 10) : 0;
+      if (taiXeGiu && soTien > 0) {
+        cau = 'Tài xế đang giữ ' + dinhDangHienThi(soTien) + 'đ của công ty — '
+            + 'số này bị trừ vào lương đến khi nộp lại.';
+      } else if (!taiXeGiu && soTien > 0 && ma !== 'chua_thu') {
+        cau = 'Công ty đã nhận ' + dinhDangHienThi(soTien) + 'đ — tài xế không cầm đồng nào, '
+            + 'không trừ gì vào lương.';
+      }
+
+      oHauQua.textContent = cau;
+      oHauQua.className = 'hau-qua-tien ' + (taiXeGiu ? 'tai-xe-giu' : 'cty-giu');
+      oHauQua.removeAttribute('hidden');
+    }
+
+    oChon.addEventListener('change', capNhat);
+    if (oTien) oTien.addEventListener('input', capNhat);
+    capNhat();
+  });
+
   // ---- 6: Nhom nut chon nhanh Phu phi dien thang so tien ----
   document.querySelectorAll('.o-phu-phi-nhanh').forEach(function (nhom) {
     var form = nhom.closest('form') || document;

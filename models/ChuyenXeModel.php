@@ -25,7 +25,7 @@ class ChuyenXeModel extends Model
     public static function cotTaiXe()
     {
         return ['revenue_vnd', 'trip_fee', 'overnight_fee', 'deposit_amount', 'customer_paid',
-                'collector_name', 'collector_note', 'transfer_note',
+                'collector_type', 'collector_note', 'transfer_note',
                 'extra_surcharge', 'extra_surcharge_payer', 'extra_surcharge_note',
                 'fuel_cost', 'fuel_vat', 'fuel_payer', 'vetc', 'maintenance', 'fine',
                 'refund_vnd', 'refund_usd', 'cash_advance', 'direct_payment', 'note'];
@@ -162,7 +162,7 @@ class ChuyenXeModel extends Model
 
         return $this->thucThi(
             "UPDATE trips SET revenue_vnd=?, trip_fee=?, overnight_fee=?, outsource_cost=?, deposit_amount=?, customer_paid=?,
-                    collector_name=?, collector_note=?,
+                    collector_type=?, collector_note=?,
                     transfer_proof_image=COALESCE(?, transfer_proof_image), transfer_note=?,
                     extra_surcharge=?, extra_surcharge_payer=?, extra_surcharge_note=?,
                     fuel_cost=?, fuel_vat=?, fuel_payer=?, vetc=?, maintenance=?, fine=?,
@@ -172,7 +172,7 @@ class ChuyenXeModel extends Model
             [
                 $duLieu['revenue_vnd'], $duLieu['trip_fee'], $duLieu['overnight_fee'], $duLieu['outsource_cost'],
                 $duLieu['deposit_amount'], $duLieu['customer_paid'],
-                $duLieu['collector_name'], $duLieu['collector_note'],
+                $duLieu['collector_type'], $duLieu['collector_note'],
                 $duLieu['transfer_proof_image'], $duLieu['transfer_note'],
                 $duLieu['extra_surcharge'], $duLieu['extra_surcharge_payer'], $duLieu['extra_surcharge_note'],
                 $duLieu['fuel_cost'], $duLieu['fuel_vat'], $duLieu['fuel_payer'], $duLieu['vetc'],

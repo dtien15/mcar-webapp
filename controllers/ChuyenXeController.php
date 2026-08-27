@@ -200,7 +200,11 @@ class ChuyenXeController extends Controller
             'trip_fee'         => $this->soTuForm('tien_cuoc_xe'),
             'overnight_fee'    => $this->soTuForm('luu_dem'),
             'deposit_amount'   => $this->soTuForm('dat_coc'),
-            'customer_paid'    => !empty($_POST['khach_da_thanh_toan']) ? 1 : 0,
+            'collector_type'   => $this->layAiThu(),
+            // Suy tu "ai thu tien khach" chu khong de o rieng: truoc day o
+            // rieng do khong he ton tai trong form nen customer_paid luon = 0,
+            // moi chuyen deu bi tru tien khach vao luong tai xe.
+            'customer_paid'    => taiXeDangGiuTien($this->layAiThu()) ? 0 : 1,
             'airport_fee'      => $this->soTuForm('phi_san_bay'),
             'other_fee'        => $this->soTuForm('phat_sinh_khac'),
             'driver_advance'   => $this->soTuForm('tien_tai_ung'),
@@ -210,7 +214,6 @@ class ChuyenXeController extends Controller
 
         // Quan ly duoc phep sua ca phan chi phi cua tai xe
         $duLieuTaiXe = [
-            'collector_name'        => $this->chuTuForm('ai_thu'),
             'collector_note'        => $this->chuTuForm('ghi_chu_thu'),
             'transfer_note'         => $this->chuTuForm('ck_qua_ai'),
             'extra_surcharge'       => $this->soTuForm('phu_phi_khac'),
@@ -304,6 +307,16 @@ class ChuyenXeController extends Controller
         }
 
         chuyenTrang('chuyenxe');
+    }
+
+    /**
+     * Lua chon "Ai thu tien khach" tu form. Chi nhan cac ma co trong danh
+     * sach dung chung - go bay gia tri la thi coi nhu chua chon.
+     */
+    private function layAiThu()
+    {
+        $ma = $this->chuTuForm('ai_thu');
+        return isset(danhSachAiThu()[$ma]) ? $ma : null;
     }
 
     // Da BO chuc nang xoa chuyen xe khoi day. Truoc kia moi dong trong danh
@@ -494,8 +507,8 @@ class ChuyenXeController extends Controller
             'overnight_fee'          => $this->soTuForm('luu_dem'),
             'outsource_cost'         => $this->soTuForm('chi_phi_keo_ngoai'),
             'deposit_amount'         => $this->soTuForm('dat_coc'),
-            'customer_paid'          => !empty($_POST['khach_da_thanh_toan']) ? 1 : 0,
-            'collector_name'         => $this->chuTuForm('ai_thu'),
+            'collector_type'         => $this->layAiThu(),
+            'customer_paid'          => taiXeDangGiuTien($this->layAiThu()) ? 0 : 1,
             'collector_note'         => $this->chuTuForm('ghi_chu_thu'),
             'transfer_proof_image'   => $this->xuLyAnhCK('anh_ck'),
             'transfer_note'          => $this->chuTuForm('ck_qua_ai'),
