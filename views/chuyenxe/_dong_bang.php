@@ -52,6 +52,19 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
           </form>
         <?php endif; ?>
 
+        <?php if ($chuyen['status'] === 'da_huy'): ?>
+          <form method="post" action="<?= duongDan('chuyenxe/bohuy') ?>" onsubmit="return confirm('Bỏ hủy, đưa chuyến trở lại trạng thái trước đó?');">
+            <?php truongToken(); ?>
+            <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
+            <button class="btn btn-sm btn-outline-warning"><?= bieuTuong('arrow-back-up') ?> Bỏ hủy</button>
+          </form>
+        <?php else: ?>
+          <button type="button" class="btn btn-sm btn-outline-danger"
+                  data-bs-toggle="modal" data-bs-target="#huyChuyen<?= $chuyen['id'] ?>">
+            <?= bieuTuong('ban') ?> Hủy
+          </button>
+        <?php endif; ?>
+
         <?php if ((int)$chuyen['customer_paid'] === 0 && (int)$chuyen['cash_remitted'] === 0
                    && in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
           <button type="button" class="btn btn-sm btn-outline-success"

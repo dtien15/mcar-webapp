@@ -12,6 +12,7 @@ $dsTab = [
     'moi'             => 'Mới giao',
     'tai_xe_xac_nhan' => 'Tài xế đã xác nhận',
     'hoan_thanh'      => 'Hoàn thành',
+    'da_huy'          => 'Đã hủy',
 ];
 ?>
 
@@ -232,6 +233,18 @@ $dsTab = [
 <!-- Hop thoai tai xe nho tai xe khac chay gium chuyen cua minh -->
 <div id="khoiModalNhoTaiKhac">
   <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_nhotaikhac.php'; endforeach; ?>
+</div>
+
+<!-- Hop thoai huy chuyen (quan ly) va bao khach huy (tai xe) -->
+<div id="khoiModalHuy">
+  <?php foreach ($danhSach as $chuyen): ?>
+    <?php if (laQuanLy() && $chuyen['status'] !== 'da_huy'): ?>
+      <?php include DUONG_DAN_GOC . '/views/chuyenxe/_modal_huy.php'; ?>
+    <?php elseif (laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai
+                  && !in_array($chuyen['status'], ['da_huy', 'hoan_thanh'], true)): ?>
+      <?php include DUONG_DAN_GOC . '/views/chuyenxe/_modal_baohuy.php'; ?>
+    <?php endif; ?>
+  <?php endforeach; ?>
 </div>
 
 

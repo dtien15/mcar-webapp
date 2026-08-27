@@ -161,6 +161,32 @@
     capNhat();
   });
 
+  // ---- 6c: Modal Huy chuyen - giai doan quyet dinh co o tien hay khong ----
+  //
+  // Huy truoc gio don thi thuong khong ai mat gi, hien 2 o tien ra chi tho
+  // nguoi dung. Chi khi tai xe da chay roi moi can nhap khach den bu / bu
+  // cho tai xe.
+  document.querySelectorAll('.o-giai-doan-huy').forEach(function (oChon) {
+    var form   = oChon.closest('form') || document;
+    var khoi   = form.querySelector('.khoi-tien-huy');
+    var oY     = form.querySelector('[data-y-giai-doan]');
+
+    function capNhat() {
+      var muc = oChon.options[oChon.selectedIndex];
+      if (!muc) return;
+
+      if (oY) oY.textContent = muc.getAttribute('data-y') || '';
+
+      if (khoi) {
+        if (muc.getAttribute('data-cotien') === '1') khoi.removeAttribute('hidden');
+        else khoi.setAttribute('hidden', '');
+      }
+    }
+
+    oChon.addEventListener('change', capNhat);
+    capNhat();
+  });
+
   // ---- 6: Nhom nut chon nhanh Phu phi dien thang so tien ----
   document.querySelectorAll('.o-phu-phi-nhanh').forEach(function (nhom) {
     var form = nhom.closest('form') || document;

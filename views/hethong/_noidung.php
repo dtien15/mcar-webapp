@@ -160,6 +160,7 @@ $ramCao = $realtime && $realtime['ram_dang_dung'] > 150;
           <tbody>
             <tr><td>Chuyến xe được tạo</td><td class="canh-phai"><strong><?= dinhDangTien($hoatDong['chuyen_moi']) ?></strong></td></tr>
             <tr><td>Chuyến được chốt</td><td class="canh-phai"><strong><?= dinhDangTien($hoatDong['chuyen_chot']) ?></strong></td></tr>
+            <tr><td>Chuyến bị hủy</td><td class="canh-phai"><strong><?= dinhDangTien($hoatDong['chuyen_huy']) ?></strong></td></tr>
             <tr><td>Tin nhắn trao đổi</td><td class="canh-phai"><strong><?= dinhDangTien($hoatDong['tin_nhan']) ?></strong></td></tr>
             <tr><td>Thông báo đã gửi</td><td class="canh-phai"><strong><?= dinhDangTien($hoatDong['thong_bao']) ?></strong></td></tr>
           </tbody>

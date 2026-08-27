@@ -167,7 +167,12 @@ class HeThongModel extends Model
             ),
             'chuyen_chot' => (int)$this->motGiaTri(
                 "SELECT COUNT(*) FROM trips
-                 WHERE deleted_at IS NULL AND completed_at >= DATE_SUB(NOW(), INTERVAL ? DAY)", [(int)$soNgay]
+                 WHERE deleted_at IS NULL AND status = 'hoan_thanh'
+                   AND completed_at >= DATE_SUB(NOW(), INTERVAL ? DAY)", [(int)$soNgay]
+            ),
+            'chuyen_huy' => (int)$this->motGiaTri(
+                "SELECT COUNT(*) FROM trips
+                 WHERE deleted_at IS NULL AND cancelled_at >= DATE_SUB(NOW(), INTERVAL ? DAY)", [(int)$soNgay]
             ),
             'tin_nhan' => (int)$this->motGiaTri(
                 "SELECT COUNT(*) FROM chat_messages WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)", [(int)$soNgay]

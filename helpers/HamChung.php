@@ -235,6 +235,7 @@ function nhanTrangThaiChuyen($trangThai)
         'moi'              => ['nhan' => 'Mới giao',            'mau' => 'secondary'],
         'tai_xe_xac_nhan'  => ['nhan' => 'Tài xế đã xác nhận',  'mau' => 'warning'],
         'hoan_thanh'       => ['nhan' => 'Hoàn thành',          'mau' => 'success'],
+        'da_huy'           => ['nhan' => 'Đã hủy',              'mau' => 'danger'],
     ];
     return $danhSach[$trangThai] ?? ['nhan' => $trangThai, 'mau' => 'light'];
 }
@@ -308,6 +309,54 @@ function oChonAiThu($giaTriHienTai, $ten = 'ai_thu', $themLop = '', $tatSua = ''
                . h($muc['nhan']) . '</option>';
     }
     return $html . '</select>';
+}
+
+/**
+ * Cac giai doan huy chuyen. Giai doan quyet dinh chuyen do co phat sinh tien
+ * hay khong: chua di thi thuong khong ai mat gi, da toi diem don hoac dang
+ * tren duong thi tai xe da ton cong va xang, khach thuong phai den mot phan.
+ */
+function danhSachGiaiDoanHuy()
+{
+    return [
+        'chua_di' => [
+            'nhan' => 'Chưa đi — hủy trước giờ đón',
+            'y'    => 'Thường không ai mất gì. Để trống hai ô tiền bên dưới.',
+        ],
+        'da_toi_diem_don' => [
+            'nhan' => 'Tài xế đã tới điểm đón',
+            'y'    => 'Tài xế đã tốn công và xăng — thường có bù cho tài xế, khách có thể phải đền.',
+        ],
+        'dang_di' => [
+            'nhan' => 'Đang trên đường thì hủy',
+            'y'    => 'Đã chạy được một đoạn — cần nhập cả tiền khách đền và tiền bù cho tài xế.',
+        ],
+    ];
+}
+
+/** Ten de doc cua giai doan huy (rong neu khong co) */
+function nhanGiaiDoanHuy($ma)
+{
+    $ds = danhSachGiaiDoanHuy();
+    return $ds[$ma]['nhan'] ?? '';
+}
+
+/**
+ * Trang thai chuyen se quay ve khi BO HUY.
+ *
+ * Suy tu cac moc thoi gian da ghi, nen khong can luu them cot "trang thai
+ * truoc khi huy": da tung chot thi ve Hoan thanh, tai xe da tung xac nhan
+ * thi ve cho chot, con lai la Moi giao.
+ */
+function trangThaiTruocKhiHuy(array $chuyen)
+{
+    if (!empty($chuyen['completed_at'])) {
+        return 'hoan_thanh';
+    }
+    if (!empty($chuyen['driver_confirmed_at'])) {
+        return 'tai_xe_xac_nhan';
+    }
+    return 'moi';
 }
 
 /** Doi so tien thanh chu (dung cho phieu luong) */

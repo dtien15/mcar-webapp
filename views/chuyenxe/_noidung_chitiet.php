@@ -273,7 +273,37 @@
           <?= h(dinhDangNgay($chuyen['surcharge_updated_at'], 'd/m/Y H:i')) ?>
         </div>
         <?php endif; ?>
+        <?php if (!empty($chuyen['cancelled_at'])): ?>
+        <div class="col-6 col-md-4">
+          <span class="text-muted d-block" style="font-size:11px">Hủy lúc</span>
+          <?= h(dinhDangNgay($chuyen['cancelled_at'], 'd/m/Y H:i')) ?>
+        </div>
+        <?php endif; ?>
       </div>
+
+      <?php if ($chuyen['status'] === 'da_huy'): ?>
+        <div class="alert alert-danger mt-2 mb-0" style="font-size:13px">
+          <strong><?= bieuTuong('ban') ?> Chuyến này đã bị hủy</strong>
+          <?php if (!empty($chuyen['cancel_stage'])): ?>
+            · <?= h(nhanGiaiDoanHuy($chuyen['cancel_stage'])) ?>
+          <?php endif; ?>
+          <?php if (!empty($chuyen['cancel_reason'])): ?>
+            <div class="mt-1">Lý do: <?= h($chuyen['cancel_reason']) ?></div>
+          <?php endif; ?>
+          <?php if ((float)$chuyen['trip_fee'] > 0 || (float)$chuyen['revenue_vnd'] > 0): ?>
+            <div class="mt-1">
+              <?php if ((float)$chuyen['revenue_vnd'] > 0): ?>
+                Khách đền bù <?= dinhDangTien($chuyen['revenue_vnd']) ?>đ.
+              <?php endif; ?>
+              <?php if ((float)$chuyen['trip_fee'] > 0): ?>
+                Công ty bù cho tài xế <?= dinhDangTien($chuyen['trip_fee']) ?>đ, đã tính vào lương.
+              <?php endif; ?>
+            </div>
+          <?php else: ?>
+            <div class="mt-1">Không phát sinh tiền — chuyến không tính vào lương hay báo cáo.</div>
+          <?php endif; ?>
+        </div>
+      <?php endif; ?>
     </fieldset>
 
     <?php if (!empty($lichSuChuyenGiao)): ?>

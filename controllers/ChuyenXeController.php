@@ -310,6 +310,146 @@ class ChuyenXeController extends Controller
     }
 
     /**
+     * Huy chuyen xe. Khac han xoa: xoa la go nham, huy la chuyen kinh doanh
+     * co that - van giu lai de con biet thang nay rot bao nhieu cuoc.
+     *
+     * Huy o giai doan da chay roi thi thuong con tien: khach den bu, va cong
+     * ty bu cong cho tai xe. Hai khoan do van chay vao luong va bao cao nhu
+     * chuyen binh thuong, chi khac la khong dem vao "so chuyen chay duoc".
+     */
+    public function huy()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->yeuCauPost();
+
+        $id            = (int)($_POST['id'] ?? 0);
+        $chuyenXeModel = $this->model('ChuyenXeModel');
+        $chuyen        = $chuyenXeModel->layChiTiet($id);
+
+        if (!$chuyen) {
+            datThongBao('Không tìm thấy chuyến xe này.', 'danger');
+            chuyenTrang('chuyenxe');
+        }
+        if ($chuyen['status'] === 'da_huy') {
+            datThongBao('Chuyến này đã bị hủy trước đó rồi.', 'warning');
+            chuyenTrang('chuyenxe');
+        }
+
+        $lyDo     = $this->chuTuForm('ly_do_huy');
+        $giaiDoan = $this->chuTuForm('giai_doan_huy');
+        if (!isset(danhSachGiaiDoanHuy()[$giaiDoan])) {
+            $giaiDoan = 'chua_di';
+        }
+
+        $tien = [
+            'khach_den'  => $this->soTuForm('khach_den_bu'),
+            'bu_tai_xe'  => $this->soTuForm('bu_cho_tai_xe'),
+        ];
+
+        if (!$chuyenXeModel->huy($id, taiKhoanHienTai()['id'] ?? null, $lyDo, $giaiDoan, $tien)) {
+            datThongBao('Không hủy được chuyến xe này.', 'danger');
+            chuyenTrang('chuyenxe');
+        }
+
+        // Tai xe phai biet NGAY, nhat la khi ho dang tren duong
+        if ($chuyen['driver_id']) {
+            $this->model('ThongBaoModel')->guiChoTaiXe(
+                $chuyen['driver_id'],
+                'Chuyến ngày ' . dinhDangNgay($chuyen['trip_date']) . ' đã bị hủy',
+                trim('Chuyến ' . $chuyen['route'] . ' đã được hủy.'
+                    . ($lyDo !== '' ? ' Lý do: ' . $lyDo . '.' : '')
+                    . ($tien['bu_tai_xe'] > 0
+                        ? ' Công ty bù cho bạn ' . dinhDangTien($tien['bu_tai_xe']) . 'đ, đã tính vào lương.'
+                        : '')),
+                'chuyenxe',
+                'chuyen_bi_huy',
+                $id
+            );
+        }
+
+        // Chuyen da chot ma bi huy thi so lieu ky do doi -> tinh lai ngay
+        $this->tinhLaiLuongTheoChuyen($chuyen);
+
+        datThongBao('Đã hủy chuyến xe' . ($tien['bu_tai_xe'] > 0
+            ? ', bù cho tài xế ' . dinhDangTien($tien['bu_tai_xe']) . 'đ.' : '.'));
+        baoThucRealtimeChuyenXe($chuyen['driver_id'] ?? null);
+        chuyenTrang('chuyenxe');
+    }
+
+    /** Bo huy - dua chuyen tro lai dung trang thai truoc khi bi huy */
+    public function boHuy()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->yeuCauPost();
+
+        $id            = (int)($_POST['id'] ?? 0);
+        $chuyenXeModel = $this->model('ChuyenXeModel');
+        $chuyen        = $chuyenXeModel->layChiTiet($id);
+
+        if (!$chuyen || $chuyen['status'] !== 'da_huy') {
+            datThongBao('Chuyến này không ở trạng thái đã hủy.', 'danger');
+            chuyenTrang('chuyenxe');
+        }
+
+        if (!$chuyenXeModel->boHuy($id)) {
+            datThongBao('Không bỏ hủy được chuyến xe này.', 'danger');
+            chuyenTrang('chuyenxe');
+        }
+
+        if ($chuyen['driver_id']) {
+            $this->model('ThongBaoModel')->guiChoTaiXe(
+                $chuyen['driver_id'],
+                'Chuyến ngày ' . dinhDangNgay($chuyen['trip_date']) . ' được mở lại',
+                'Chuyến ' . $chuyen['route'] . ' vừa được bỏ hủy, quay lại danh sách của bạn.',
+                'chuyenxe',
+                'chuyen_bo_huy',
+                $id
+            );
+        }
+
+        $this->tinhLaiLuongTheoChuyen($chuyen);
+
+        datThongBao('Đã bỏ hủy, chuyến quay lại trạng thái trước đó.');
+        baoThucRealtimeChuyenXe($chuyen['driver_id'] ?? null);
+        chuyenTrang('chuyenxe');
+    }
+
+    /**
+     * Tai xe bao khach huy. Tai xe KHONG tu huy duoc vi huy dinh den tien -
+     * ho chi bao len, quan ly xem roi quyet dinh.
+     */
+    public function baoKhachHuy()
+    {
+        $this->yeuCauQuyen(['taixe']);
+        $this->yeuCauPost();
+
+        $id      = (int)($_POST['id'] ?? 0);
+        $idTaiXe = (int)(taiKhoanHienTai()['id_tai_xe'] ?? 0);
+        $chuyen  = $this->model('ChuyenXeModel')->layChiTiet($id);
+
+        if (!$chuyen || (int)$chuyen['driver_id'] !== $idTaiXe || $chuyen['status'] === 'da_huy') {
+            datThongBao('Không báo được cho chuyến này.', 'danger');
+            chuyenTrang('chuyenxe');
+        }
+
+        $lyDo = $this->chuTuForm('ly_do_huy');
+
+        $this->model('ThongBaoModel')->guiChoQuanLy(
+            'Tài xế báo khách hủy chuyến ngày ' . dinhDangNgay($chuyen['trip_date']),
+            trim($chuyen['ten_tai_xe'] . ' báo khách hủy chuyến ' . $chuyen['route'] . '.'
+                . ($lyDo !== '' ? ' Lý do: ' . $lyDo . '.' : '')
+                . ' Vào chuyến để xác nhận hủy.'),
+            'chuyenxe',
+            'tai_xe_bao_huy',
+            $id
+        );
+
+        datThongBao('Đã báo cho công ty. Chờ công ty xác nhận hủy.');
+        baoThucRealtimeQuanLy();
+        chuyenTrang('chuyenxe');
+    }
+
+    /**
      * Lua chon "Ai thu tien khach" tu form. Chi nhan cac ma co trong danh
      * sach dung chung - go bay gia tri la thi coi nhu chua chon.
      */
@@ -684,6 +824,11 @@ class ChuyenXeController extends Controller
      */
     private function tinhLaiLuongTheoChuyen(array $chuyen)
     {
+        // Chuyen chua gan tai xe thi khong co bang luong nao de tinh
+        if (empty($chuyen['driver_id'])) {
+            return;
+        }
+
         $thang = (int)date('n', strtotime($chuyen['trip_date']));
         $nam   = (int)date('Y', strtotime($chuyen['trip_date']));
 

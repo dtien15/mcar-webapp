@@ -792,3 +792,12 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
   .dau-phep { display: none; }
   .nhom-lien-quan { padding: 9px 10px 11px; }
 }
+
+/* Tom tat chuyen xe trong cac modal (huy, bao huy) */
+.tom-tat-chuyen {
+  background: var(--mau-nen);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 14px;
+}

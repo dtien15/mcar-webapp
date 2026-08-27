@@ -269,7 +269,7 @@ class ChuyenXeModel extends Model
     {
         return $this->thucThi(
             "UPDATE trips SET status='hoan_thanh', completed_at=NOW()
-             WHERE id = ? AND status <> 'hoan_thanh' AND deleted_at IS NULL",
+             WHERE id = ? AND status NOT IN ('hoan_thanh', 'da_huy') AND deleted_at IS NULL",
             [(int)$id]
         );
     }
@@ -279,7 +279,7 @@ class ChuyenXeModel extends Model
     {
         return $this->thucThi(
             "UPDATE trips SET status='tai_xe_xac_nhan', completed_at=NULL
-             WHERE id = ? AND deleted_at IS NULL",
+             WHERE id = ? AND status = 'hoan_thanh' AND deleted_at IS NULL",
             [(int)$id]
         );
     }
@@ -294,7 +294,7 @@ class ChuyenXeModel extends Model
     {
         $chuyen = $this->motDong("SELECT * FROM trips WHERE id = ? AND deleted_at IS NULL", [(int)$id]);
         if (!$chuyen || (int)$chuyen['customer_paid'] === 1 || (int)$chuyen['cash_remitted'] === 1
-            || !in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)) {
+            || !in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh', 'da_huy'], true)) {
             return false;
         }
 
@@ -346,27 +346,30 @@ class ChuyenXeModel extends Model
     {
         $duLieu = $this->truyVan(
             "SELECT MONTH(trip_date) AS thang,
-                    COUNT(*) AS so_chuyen,
+                    COUNT(CASE WHEN status = 'hoan_thanh' THEN 1 END) AS so_chuyen,
+                    COUNT(CASE WHEN status = 'da_huy' THEN 1 END)     AS so_chuyen_huy,
                     COALESCE(SUM(revenue_vnd),0) AS doanh_thu,
                     COALESCE(SUM(revenue_usd),0) AS doanh_thu_usd,
                     COALESCE(SUM(revenue_eur),0) AS doanh_thu_eur,
                     COALESCE(SUM(fuel_cost),0)   AS xang_dau,
                     COALESCE(SUM(trip_fee),0)    AS tien_tai
              FROM trips
-             WHERE YEAR(trip_date) = ? AND status = 'hoan_thanh' AND deleted_at IS NULL
+             WHERE YEAR(trip_date) = ? AND status IN ('hoan_thanh','da_huy') AND deleted_at IS NULL
              GROUP BY MONTH(trip_date) ORDER BY thang",
             [(int)$nam]
         );
 
         $ketQua = [];
         for ($thang = 1; $thang <= 12; $thang++) {
-            $ketQua[$thang] = ['thang' => $thang, 'so_chuyen' => 0, 'doanh_thu' => 0,
-                'doanh_thu_usd' => 0, 'doanh_thu_eur' => 0, 'xang_dau' => 0, 'tien_tai' => 0];
+            $ketQua[$thang] = ['thang' => $thang, 'so_chuyen' => 0, 'so_chuyen_huy' => 0,
+                'doanh_thu' => 0, 'doanh_thu_usd' => 0, 'doanh_thu_eur' => 0,
+                'xang_dau' => 0, 'tien_tai' => 0];
         }
         foreach ($duLieu as $dong) {
             $ketQua[(int)$dong['thang']] = [
                 'thang'         => (int)$dong['thang'],
                 'so_chuyen'     => (int)$dong['so_chuyen'],
+                'so_chuyen_huy' => (int)$dong['so_chuyen_huy'],
                 'doanh_thu'     => (float)$dong['doanh_thu'],
                 'doanh_thu_usd' => (float)$dong['doanh_thu_usd'],
                 'doanh_thu_eur' => (float)$dong['doanh_thu_eur'],
@@ -382,7 +385,8 @@ class ChuyenXeModel extends Model
     {
         return $this->truyVan(
             "SELECT c.id, c.name, c.plate_number, c.seats,
-                    COUNT(t.id) AS so_chuyen,
+                    COUNT(CASE WHEN t.status = 'hoan_thanh' THEN 1 END) AS so_chuyen,
+                    COUNT(CASE WHEN t.status = 'da_huy' THEN 1 END)     AS so_chuyen_huy,
                     COALESCE(SUM(t.revenue_vnd),0) AS doanh_thu,
                     COALESCE(SUM(t.revenue_usd),0) AS doanh_thu_usd,
                     COALESCE(SUM(t.revenue_eur),0) AS doanh_thu_eur,
@@ -391,7 +395,7 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(t.trip_fee),0)    AS tien_tai
              FROM cars c
              LEFT JOIN trips t ON t.car_id = c.id AND t.trip_date BETWEEN ? AND ?
-                            AND t.status = 'hoan_thanh' AND t.deleted_at IS NULL
+                            AND t.status IN ('hoan_thanh','da_huy') AND t.deleted_at IS NULL
              GROUP BY c.id ORDER BY doanh_thu DESC",
             [$tuNgay, $denNgay]
         );
@@ -402,7 +406,8 @@ class ChuyenXeModel extends Model
     {
         return $this->truyVan(
             "SELECT d.id, d.full_name, d.short_name,
-                    COUNT(t.id) AS so_chuyen,
+                    COUNT(CASE WHEN t.status = 'hoan_thanh' THEN 1 END) AS so_chuyen,
+                    COUNT(CASE WHEN t.status = 'da_huy' THEN 1 END)     AS so_chuyen_huy,
                     COALESCE(SUM(t.revenue_vnd),0)   AS doanh_thu,
                     COALESCE(SUM(t.revenue_usd),0)   AS doanh_thu_usd,
                     COALESCE(SUM(t.revenue_eur),0)   AS doanh_thu_eur,
@@ -411,7 +416,7 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(t.fine),0)          AS phat
              FROM drivers d
              LEFT JOIN trips t ON t.driver_id = d.id AND t.trip_date BETWEEN ? AND ?
-                            AND t.status = 'hoan_thanh' AND t.deleted_at IS NULL
+                            AND t.status IN ('hoan_thanh','da_huy') AND t.deleted_at IS NULL
              GROUP BY d.id ORDER BY doanh_thu DESC",
             [$tuNgay, $denNgay]
         );
@@ -422,13 +427,14 @@ class ChuyenXeModel extends Model
     {
         return $this->truyVan(
             "SELECT ct.id, ct.name,
-                    COUNT(t.id) AS so_chuyen,
+                    COUNT(CASE WHEN t.status = 'hoan_thanh' THEN 1 END) AS so_chuyen,
+                    COUNT(CASE WHEN t.status = 'da_huy' THEN 1 END)     AS so_chuyen_huy,
                     COALESCE(SUM(t.revenue_vnd),0) AS doanh_thu,
                     COALESCE(SUM(t.revenue_usd),0) AS doanh_thu_usd,
                     COALESCE(SUM(t.revenue_eur),0) AS doanh_thu_eur
              FROM contract_types ct
              LEFT JOIN trips t ON t.contract_type_id = ct.id AND t.trip_date BETWEEN ? AND ?
-                            AND t.status = 'hoan_thanh' AND t.deleted_at IS NULL
+                            AND t.status IN ('hoan_thanh','da_huy') AND t.deleted_at IS NULL
              GROUP BY ct.id ORDER BY doanh_thu DESC",
             [$tuNgay, $denNgay]
         );
@@ -443,7 +449,8 @@ class ChuyenXeModel extends Model
     public function tongHopTaiXeTheoKy($idTaiXe, $tuNgay, $denNgay)
     {
         return $this->motDong(
-            "SELECT COUNT(*) AS so_chuyen,
+            "SELECT COUNT(CASE WHEN status = 'hoan_thanh' THEN 1 END) AS so_chuyen,
+                    COUNT(CASE WHEN status = 'da_huy' THEN 1 END)     AS so_chuyen_huy,
                     COALESCE(SUM(overnight_fee),0) AS luu_dem,
                     COALESCE(SUM(airport_fee),0)   AS phi_san_bay,
                     COALESCE(SUM(other_fee),0)     AS phat_sinh,
@@ -465,7 +472,7 @@ class ChuyenXeModel extends Model
                     COALESCE(SUM(fuel_cost),0)     AS xang_dau
              FROM trips
              WHERE driver_id = ? AND trip_date BETWEEN ? AND ?
-               AND status = 'hoan_thanh' AND deleted_at IS NULL",
+               AND status IN ('hoan_thanh', 'da_huy') AND deleted_at IS NULL",
             [(int)$idTaiXe, $tuNgay, $denNgay]
         );
     }
@@ -483,7 +490,9 @@ class ChuyenXeModel extends Model
              LEFT JOIN cars c ON c.id = t.car_id
              LEFT JOIN contract_types ct ON ct.id = t.contract_type_id
              WHERE t.driver_id = ? AND t.trip_date BETWEEN ? AND ?
-               AND t.status = 'hoan_thanh' AND t.deleted_at IS NULL
+               AND t.deleted_at IS NULL
+               AND (t.status = 'hoan_thanh'
+                 OR (t.status = 'da_huy' AND (t.trip_fee > 0 OR t.revenue_vnd > 0)))
              ORDER BY t.trip_date, t.id",
             [(int)$idTaiXe, $tuNgay, $denNgay]
         );
@@ -513,6 +522,74 @@ class ChuyenXeModel extends Model
              WHERE public_submitted = 1 AND deleted_at IS NULL
                AND MONTH(created_at) = ? AND YEAR(created_at) = ?",
             [(int)$thang, (int)$nam]
+        );
+    }
+
+    // -----------------------------------------------------------------
+    // Huy chuyen
+    //
+    // Huy KHAC xoa: xoa la go nham, huy la chuyen kinh doanh co that - van
+    // giu lai de con biet thang nay rot bao nhieu cuoc, khach nao hay huy.
+    // Chuyen da huy co the van con tien (tai xe da chay toi diem don, khach
+    // den bu) nen no VAN duoc tinh vao luong; chi khac la khong dem vao "so
+    // chuyen chay duoc".
+    // -----------------------------------------------------------------
+
+    /**
+     * Huy 1 chuyen. $tien = ['khach_den' => ..., 'bu_tai_xe' => ...] - de 0
+     * ca hai la huy sach, chuyen bien mat khoi moi con so tien.
+     */
+    public function huy($id, $idNguoiHuy, $lyDo, $giaiDoan, array $tien)
+    {
+        // Giu lai doanh thu va tien cuoc GOC truoc khi ghi de bang tien den bu -
+        // khong thi bo huy xong la mat trang so lieu cu cua chuyen.
+        return $this->soDongBiAnhHuong(
+            "UPDATE trips
+                SET status = 'da_huy', cancelled_at = NOW(), cancelled_by = ?,
+                    cancel_reason = ?, cancel_stage = ?,
+                    pre_cancel_revenue  = revenue_vnd,
+                    pre_cancel_trip_fee = trip_fee,
+                    revenue_vnd = ?, trip_fee = ?
+              WHERE id = ? AND status <> 'da_huy' AND deleted_at IS NULL",
+            [
+                $idNguoiHuy ? (int)$idNguoiHuy : null, $lyDo, $giaiDoan,
+                (float)$tien['khach_den'], (float)$tien['bu_tai_xe'], (int)$id,
+            ]
+        ) > 0;
+    }
+
+    /** Bo huy - dua chuyen tro lai dung trang thai truoc khi bi huy */
+    public function boHuy($id)
+    {
+        $chuyen = $this->motDong(
+            "SELECT * FROM trips WHERE id = ? AND status = 'da_huy' AND deleted_at IS NULL",
+            [(int)$id]
+        );
+        if (!$chuyen) {
+            return false;
+        }
+
+        // Tra lai dung doanh thu / tien cuoc truoc khi bi huy
+        return $this->soDongBiAnhHuong(
+            "UPDATE trips
+                SET status = ?, cancelled_at = NULL, cancelled_by = NULL,
+                    cancel_reason = NULL, cancel_stage = NULL,
+                    revenue_vnd = COALESCE(pre_cancel_revenue, revenue_vnd),
+                    trip_fee    = COALESCE(pre_cancel_trip_fee, trip_fee),
+                    pre_cancel_revenue = NULL, pre_cancel_trip_fee = NULL
+              WHERE id = ? AND status = 'da_huy'",
+            [trangThaiTruocKhiHuy($chuyen), (int)$id]
+        ) > 0;
+    }
+
+    /** Dem so chuyen bi huy trong 1 khoang - dung cho bao cao */
+    public function demDaHuy($tuNgay, $denNgay)
+    {
+        return (int)$this->motGiaTri(
+            "SELECT COUNT(*) FROM trips
+              WHERE status = 'da_huy' AND deleted_at IS NULL
+                AND trip_date BETWEEN ? AND ?",
+            [$tuNgay, $denNgay]
         );
     }
 

@@ -71,6 +71,18 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
           <button class="btn btn-sm btn-outline-secondary"><?= bieuTuong('arrow-back-up') ?> Hủy xác nhận nộp lại</button>
         </form>
       <?php endif; ?>
+      <?php if ($chuyen['status'] === 'da_huy'): ?>
+        <form method="post" class="w-100" action="<?= duongDan('chuyenxe/bohuy') ?>" onsubmit="return confirm('Bỏ hủy, đưa chuyến trở lại trạng thái trước đó?');">
+          <?php truongToken(); ?>
+          <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
+          <button class="btn btn-sm btn-outline-warning w-100"><?= bieuTuong('arrow-back-up') ?> Bỏ hủy</button>
+        </form>
+      <?php else: ?>
+        <button type="button" class="btn btn-sm btn-outline-danger w-100"
+                data-bs-toggle="modal" data-bs-target="#huyChuyen<?= $chuyen['id'] ?>">
+          <?= bieuTuong('ban') ?> Hủy chuyến
+        </button>
+      <?php endif; ?>
       <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-sm btn-outline-secondary w-100">
         <?= bieuTuong('file-invoice') ?> Xem chi tiết phiếu
       </a>
@@ -94,6 +106,10 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
             <?= bieuTuong('receipt') ?> Kiểm tra / Sửa phụ phí
           </button>
         <?php endif; ?>
+        <button type="button" class="btn btn-outline-warning w-100"
+                data-bs-toggle="modal" data-bs-target="#baoHuy<?= $chuyen['id'] ?>">
+          <?= bieuTuong('bell-exclamation') ?> Báo khách hủy
+        </button>
       <?php endif; ?>
       <a href="<?= duongDan('chuyenxe/chitiet/' . $chuyen['id']) ?>" class="btn btn-outline-secondary w-100">
         <?= bieuTuong('file-invoice') ?> Xem chi tiết phiếu
