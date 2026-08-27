@@ -106,4 +106,66 @@ class ChatModel extends Model
             [(int)$idNguoiXem]
         );
     }
+
+    // -----------------------------------------------------------------
+    // Duyet / don tin nhan trong trang "Theo doi he thong" (quan tri)
+    // -----------------------------------------------------------------
+
+    /** Danh sach tin nhan cua TOAN he thong, co tim kiem va phan trang */
+    public function locChoQuanTri($tuKhoa = '', $gioiHan = 20, $boQua = 0)
+    {
+        [$dieuKien, $thamSo] = $this->dieuKienLoc($tuKhoa);
+
+        return $this->truyVan(
+            "SELECT c.*, u.full_name AS ten_nguoi_gui, u.role AS vai_tro_nguoi_gui,
+                    d.full_name AS ten_tai_xe, t.trip_date, t.route
+             FROM chat_messages c
+             LEFT JOIN users u ON u.id = c.sender_id
+             LEFT JOIN drivers d ON d.id = c.driver_id
+             LEFT JOIN trips t ON t.id = c.trip_id
+             WHERE {$dieuKien}
+             ORDER BY c.created_at DESC, c.id DESC
+             LIMIT " . (int)$gioiHan . " OFFSET " . (int)$boQua,
+            $thamSo
+        );
+    }
+
+    /** Tong so tin nhan khop tim kiem */
+    public function demChoQuanTri($tuKhoa = '')
+    {
+        [$dieuKien, $thamSo] = $this->dieuKienLoc($tuKhoa);
+        return (int)$this->motGiaTri("SELECT COUNT(*) FROM chat_messages c WHERE {$dieuKien}", $thamSo);
+    }
+
+    /** Xoa han cac tin nhan theo danh sach id. Tra ve so dong da xoa */
+    public function xoaTheoIds(array $dsId)
+    {
+        $dsId = array_values(array_filter(array_map('intval', $dsId)));
+        if (!$dsId) {
+            return 0;
+        }
+        $danhDau = implode(',', array_fill(0, count($dsId), '?'));
+        $cauLenh = $this->db->prepare("DELETE FROM chat_messages WHERE id IN ({$danhDau})");
+        $cauLenh->execute($dsId);
+        return $cauLenh->rowCount();
+    }
+
+    /** Xoa han TAT CA tin nhan khop tim kiem hien tai. Tra ve so dong da xoa */
+    public function xoaTheoLoc($tuKhoa = '')
+    {
+        [$dieuKien, $thamSo] = $this->dieuKienLoc($tuKhoa);
+        $cauLenh = $this->db->prepare("DELETE c FROM chat_messages c WHERE {$dieuKien}");
+        $cauLenh->execute($thamSo);
+        return $cauLenh->rowCount();
+    }
+
+    /** Menh de WHERE cho tim kiem tin nhan (dung chung cho liet ke / dem / xoa) */
+    private function dieuKienLoc($tuKhoa)
+    {
+        $tuKhoa = trim((string)$tuKhoa);
+        if ($tuKhoa === '') {
+            return ['1=1', []];
+        }
+        return ['c.content LIKE ?', ['%' . $tuKhoa . '%']];
+    }
 }

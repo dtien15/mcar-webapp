@@ -293,4 +293,66 @@ class ThongBaoModel extends Model
         );
         return array_map(function ($d) { return (int)$d['id']; }, $ds);
     }
+
+    // -----------------------------------------------------------------
+    // Duyet / don thong bao trong trang "Theo doi he thong" (quan tri)
+    // -----------------------------------------------------------------
+
+    /** Danh sach thong bao cua TOAN he thong, co tim kiem va phan trang */
+    public function locChoQuanTri($tuKhoa = '', $gioiHan = 20, $boQua = 0)
+    {
+        [$dieuKien, $thamSo] = $this->dieuKienLoc($tuKhoa);
+
+        return $this->truyVan(
+            "SELECT n.*, u.full_name AS ten_nguoi_nhan, u.role AS vai_tro_nguoi_nhan,
+                    d.full_name AS ten_tai_xe
+             FROM notifications n
+             LEFT JOIN users u ON u.id = n.user_id
+             LEFT JOIN drivers d ON d.id = n.driver_id
+             WHERE {$dieuKien}
+             ORDER BY n.created_at DESC, n.id DESC
+             LIMIT " . (int)$gioiHan . " OFFSET " . (int)$boQua,
+            $thamSo
+        );
+    }
+
+    /** Tong so thong bao khop tim kiem */
+    public function demChoQuanTri($tuKhoa = '')
+    {
+        [$dieuKien, $thamSo] = $this->dieuKienLoc($tuKhoa);
+        return (int)$this->motGiaTri("SELECT COUNT(*) FROM notifications n WHERE {$dieuKien}", $thamSo);
+    }
+
+    /** Xoa han cac thong bao theo danh sach id. Tra ve so dong da xoa */
+    public function xoaTheoIds(array $dsId)
+    {
+        $dsId = array_values(array_filter(array_map('intval', $dsId)));
+        if (!$dsId) {
+            return 0;
+        }
+        $danhDau = implode(',', array_fill(0, count($dsId), '?'));
+        $cauLenh = $this->db->prepare("DELETE FROM notifications WHERE id IN ({$danhDau})");
+        $cauLenh->execute($dsId);
+        return $cauLenh->rowCount();
+    }
+
+    /** Xoa han TAT CA thong bao khop tim kiem hien tai. Tra ve so dong da xoa */
+    public function xoaTheoLoc($tuKhoa = '')
+    {
+        [$dieuKien, $thamSo] = $this->dieuKienLoc($tuKhoa);
+        $cauLenh = $this->db->prepare("DELETE n FROM notifications n WHERE {$dieuKien}");
+        $cauLenh->execute($thamSo);
+        return $cauLenh->rowCount();
+    }
+
+    /** Menh de WHERE cho tim kiem thong bao (dung chung cho liet ke / dem / xoa) */
+    private function dieuKienLoc($tuKhoa)
+    {
+        $tuKhoa = trim((string)$tuKhoa);
+        if ($tuKhoa === '') {
+            return ['1=1', []];
+        }
+        $mau = '%' . $tuKhoa . '%';
+        return ['(n.title LIKE ? OR n.content LIKE ?)', [$mau, $mau]];
+    }
 }

@@ -595,8 +595,10 @@ class ChuyenXeModel extends Model
     }
 
     /** Danh sach chuyen trong thung rac, moi xoa truoc, kem so ngay con lai */
-    public function layThungRac($gioiHan = 100)
+    public function layThungRac($gioiHan = 100, $boQua = 0, $tuKhoa = '')
     {
+        [$loc, $thamSo] = $this->locTrongRac($tuKhoa);
+
         return $this->truyVan(
             "SELECT t.*,
                     c.name AS ten_xe, c.plate_number AS bien_so,
@@ -607,16 +609,76 @@ class ChuyenXeModel extends Model
              LEFT JOIN cars c ON c.id = t.car_id
              LEFT JOIN drivers d ON d.id = t.driver_id
              LEFT JOIN users u ON u.id = t.deleted_by
-             WHERE t.deleted_at IS NOT NULL
+             WHERE t.deleted_at IS NOT NULL AND {$loc}
              ORDER BY t.deleted_at DESC
-             LIMIT " . (int)$gioiHan
+             LIMIT " . (int)$gioiHan . " OFFSET " . (int)$boQua,
+            $thamSo
         );
     }
 
-    /** Dem so chuyen dang nam trong thung rac */
-    public function demThungRac()
+    /** Dem so chuyen dang nam trong thung rac (co the loc theo tu khoa) */
+    public function demThungRac($tuKhoa = '')
     {
-        return (int)$this->motGiaTri("SELECT COUNT(*) FROM trips WHERE deleted_at IS NOT NULL");
+        [$loc, $thamSo] = $this->locTrongRac($tuKhoa);
+        return (int)$this->motGiaTri(
+            "SELECT COUNT(*) FROM trips t WHERE t.deleted_at IS NOT NULL AND {$loc}",
+            $thamSo
+        );
+    }
+
+    /** Menh de tim kiem trong thung rac (giong bo loc cua danh sach chinh) */
+    private function locTrongRac($tuKhoa)
+    {
+        $tuKhoa = trim((string)$tuKhoa);
+        if ($tuKhoa === '') {
+            return ['1=1', []];
+        }
+        $mau = '%' . $tuKhoa . '%';
+        return [
+            '(t.pickup_location LIKE ? OR t.dropoff_location LIKE ? OR t.route LIKE ? OR t.note LIKE ?)',
+            [$mau, $mau, $mau, $mau],
+        ];
+    }
+
+    /** Bo nhieu chuyen vao thung rac cung luc. Tra ve so chuyen thuc su bi xoa */
+    public function xoaMemNhieu(array $dsId, $idNguoiXoa = null)
+    {
+        return $this->hangLoat(
+            "UPDATE trips SET deleted_at = NOW(), deleted_by = ? WHERE deleted_at IS NULL AND id IN (%s)",
+            $dsId,
+            [$idNguoiXoa ? (int)$idNguoiXoa : null]
+        );
+    }
+
+    /** Khoi phuc nhieu chuyen cung luc. Tra ve so chuyen thuc su duoc khoi phuc */
+    public function khoiPhucNhieu(array $dsId)
+    {
+        return $this->hangLoat(
+            "UPDATE trips SET deleted_at = NULL, deleted_by = NULL WHERE deleted_at IS NOT NULL AND id IN (%s)",
+            $dsId
+        );
+    }
+
+    /** Xoa vinh vien nhieu chuyen (chi nhung chuyen dang o trong thung rac) */
+    public function xoaVinhVienNhieu(array $dsId)
+    {
+        return $this->hangLoat(
+            "DELETE FROM trips WHERE deleted_at IS NOT NULL AND id IN (%s)",
+            $dsId
+        );
+    }
+
+    /** Chay 1 lenh tren nhieu id cung luc, tra ve so dong that su bi thay doi */
+    private function hangLoat($mauSql, array $dsId, array $thamSoDau = [])
+    {
+        $dsId = array_values(array_filter(array_map('intval', $dsId)));
+        if (!$dsId) {
+            return 0;
+        }
+        $danhDau = implode(',', array_fill(0, count($dsId), '?'));
+        $cauLenh = $this->db->prepare(sprintf($mauSql, $danhDau));
+        $cauLenh->execute(array_merge($thamSoDau, $dsId));
+        return $cauLenh->rowCount();
     }
 
     /**
