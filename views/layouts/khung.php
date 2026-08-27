@@ -1,6 +1,22 @@
 <?php
 // Khung giao dien chung: thanh ben + thanh tren + vung noi dung
-$duongDanDayDu   = trim(strtolower($_GET['url'] ?? 'tongquan'), '/');
+// Suy duong dan hien tai giong het Router: hosting khong bat rewrite thi
+// $_GET['url'] khong he ton tai, khi do menu se luon sang nham muc dau tien.
+$duongDanDayDu = trim(strtolower($_GET['url'] ?? ''), '/');
+if ($duongDanDayDu === '') {
+    $d   = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+    $d   = $d === null ? '' : $d;
+    $goc = thuMucGoc();
+    if ($goc !== '' && strpos($d, $goc) === 0) {
+        $d = substr($d, strlen($goc));
+    }
+    $d = ltrim($d, '/');
+    if (strpos($d, 'index.php') === 0) {
+        $d = ltrim(substr($d, strlen('index.php')), '/');
+    }
+    $duongDanDayDu = trim(strtolower($d), '/');
+}
+$duongDanDayDu = $duongDanDayDu !== '' ? $duongDanDayDu : 'tongquan';
 $duongDanHienTai = explode('/', $duongDanDayDu)[0] ?: 'tongquan';
 $taiKhoan        = taiKhoanHienTai();
 $thongBao        = layThongBao();
@@ -24,6 +40,7 @@ $menu = [
     ['route' => 'luong',     'nhan' => 'Bảng lương',          'icon' => 'report-money',     'quyen' => ['admin','ketoan']],
     ['route' => 'thanhtoan', 'nhan' => 'Thanh toán & công nợ','icon' => 'receipt',          'quyen' => ['admin','ketoan']],
     ['route' => 'baocao',    'nhan' => 'Báo cáo doanh thu',   'icon' => 'chart-bar',        'quyen' => ['admin','ketoan']],
+    ['route' => 'baocao/lailo', 'nhan' => 'Báo cáo lãi lỗ',   'icon' => 'report-analytics', 'quyen' => ['admin','ketoan']],
     ['nhom'  => 'DANH MỤC',  'quyen' => ['admin','ketoan']],
     ['route' => 'xe',        'nhan' => 'Xe',                  'icon' => 'car',              'quyen' => ['admin','ketoan']],
     ['route' => 'taixe',     'nhan' => 'Tài xế',              'icon' => 'steering-wheel',   'quyen' => ['admin','ketoan']],
@@ -34,6 +51,13 @@ $menu = [
     ['route' => 'caidat',    'nhan' => 'Cài đặt',             'icon' => 'settings',         'quyen' => ['admin']],
     ['route' => 'hethong',   'nhan' => 'Theo dõi hệ thống',   'icon' => 'heartbeat',        'quyen' => ['admin']],
 ];
+
+// Cac muc menu co duong dan nhieu doan - de muc cha biet khi nao phai nhuong
+$dsMenuCon = [];
+foreach ($menu as $m) {
+    $r = $m['route'] ?? '';
+    if ($r !== '' && strpos($r, '/') !== false) { $dsMenuCon[] = $r; }
+}
 
 ?>
 <!DOCTYPE html>
@@ -94,7 +118,16 @@ window.mcarRealtime = {
       <?php if (isset($muc['nhom'])): ?>
         <div class="nhom-menu"><?= h($muc['nhom']) ?></div>
       <?php else: ?>
-        <a class="muc-menu <?= $duongDanHienTai === ($muc['active'] ?? $muc['route']) ? 'dang-chon' : '' ?>"
+        <?php
+          // Muc co duong dan nhieu doan (vd baocao/lailo) phai khop ca duong dan.
+          // Muc cha (vd baocao) sang theo doan dau NHUNG nhuong lai khi dang o
+          // dung mot muc con - neu khong ca hai cung sang.
+          $khoaSoKhop = $muc['active'] ?? $muc['route'];
+          $dangO = strpos($khoaSoKhop, '/') !== false
+                 ? ($duongDanDayDu === $khoaSoKhop)
+                 : ($duongDanHienTai === $khoaSoKhop && !in_array($duongDanDayDu, $dsMenuCon, true));
+        ?>
+        <a class="muc-menu <?= $dangO ? 'dang-chon' : '' ?>"
            href="<?= duongDan($muc['route']) ?>">
           <span class="icon"><?= bieuTuong($muc['icon']) ?></span>
           <span class="nhan"><?= h($muc['nhan']) ?></span>

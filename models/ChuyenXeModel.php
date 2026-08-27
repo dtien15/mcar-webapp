@@ -534,7 +534,164 @@ class ChuyenXeModel extends Model
         );
     }
 
-// -----------------------------------------------------------------
+    // -----------------------------------------------------------------
+    // Lai / lo
+    //
+    // Bao cao cu chi co DOANH THU. Chuyen keo ngoai khach tra 10 trieu ma
+    // minh dua nha xe ngoai 9 trieu van duoc dem la 10 trieu doanh thu - nhin
+    // vao tuong lam an tot trong khi thuc nhan 1 trieu. Cac ham duoi day tinh
+    // ra so THUC SU con lai sau khi tru het chi phi.
+    //
+    // Quy uoc ve tung khoan (viet ra day de sau khong ai phai doan):
+    //   TRU  outsource_cost   tra cho nha xe / cty ngoai
+    //   TRU  trip_fee         tien cuoc tra tai xe
+    //   TRU  overnight_fee    luu dem / chay khuya, tra tai xe
+    //   TRU  airport_fee      phi san bay, dau xe
+    //   TRU  other_fee        phat sinh khac
+    //   TRU  extra_surcharge  phu phi khac (du tai xe hay cty ung, cuoi cung
+    //                         cty van chiu)
+    //   TRU  fuel_cost        xang dau
+    //   TRU  vetc, maintenance
+    //   TRU  refund_vnd/usd   hoan lai cho khach -> giam doanh thu
+    //   KHONG tru fine        tien phat tai xe chiu, cty khong mat
+    //   KHONG tru driver_advance  tien tai ung truoc la ung TRUOC cua tien
+    //                         cuoc, tru nua la tinh hai lan
+    //   KHONG tru fuel_vat    la phan thue duoc khau tru, khong phai chi phi
+    // -----------------------------------------------------------------
+
+    /** Menh de SQL tinh tong chi phi truc tiep cua chuyen xe */
+    private static function sqlChiPhiChuyen($tienTo = '')
+    {
+        $t = $tienTo;
+        return "COALESCE(SUM({$t}outsource_cost),0) + COALESCE(SUM({$t}trip_fee),0)
+              + COALESCE(SUM({$t}overnight_fee),0) + COALESCE(SUM({$t}airport_fee),0)
+              + COALESCE(SUM({$t}other_fee),0)     + COALESCE(SUM({$t}extra_surcharge),0)
+              + COALESCE(SUM({$t}fuel_cost),0)     + COALESCE(SUM({$t}vetc),0)
+              + COALESCE(SUM({$t}maintenance),0)";
+    }
+
+    /**
+     * Doanh thu va tung khoan chi phi trong 1 khoang - de dung tinh lai/lo.
+     * Chi tinh chuyen da chot va chuyen da huy (chuyen huy co the co tien den bu).
+     */
+    public function laiLoTheoKhoang($tuNgay, $denNgay)
+    {
+        return $this->motDong(
+            "SELECT
+                COUNT(CASE WHEN status = 'hoan_thanh' THEN 1 END) AS so_chuyen,
+                COUNT(CASE WHEN status = 'da_huy' THEN 1 END)     AS so_chuyen_huy,
+                COALESCE(SUM(revenue_vnd),0)     AS thu_vnd,
+                COALESCE(SUM(revenue_usd),0)     AS thu_usd,
+                COALESCE(SUM(revenue_eur),0)     AS thu_eur,
+                COALESCE(SUM(refund_vnd),0)      AS hoan_vnd,
+                COALESCE(SUM(refund_usd),0)      AS hoan_usd,
+                COALESCE(SUM(outsource_cost),0)  AS keo_ngoai,
+                COALESCE(SUM(trip_fee),0)        AS tien_cuoc,
+                COALESCE(SUM(overnight_fee),0)   AS luu_dem,
+                COALESCE(SUM(airport_fee),0)     AS phi_san_bay,
+                COALESCE(SUM(other_fee),0)       AS phat_sinh,
+                COALESCE(SUM(extra_surcharge),0) AS phu_phi_khac,
+                COALESCE(SUM(fuel_cost),0)       AS xang_dau,
+                COALESCE(SUM(fuel_vat),0)        AS vat_xang_dau,
+                COALESCE(SUM(vetc),0)            AS vetc,
+                COALESCE(SUM(maintenance),0)     AS bao_duong,
+                COALESCE(SUM(fine),0)            AS phat
+             FROM trips
+             WHERE trip_date BETWEEN ? AND ?
+               AND deleted_at IS NULL
+               AND status IN ('hoan_thanh','da_huy')",
+            [$tuNgay, $denNgay]
+        );
+    }
+
+    /** Lai/lo cua tung XE trong khoang - de biet xe nao that su co lai */
+    public function laiLoTheoXe($tuNgay, $denNgay)
+    {
+        return $this->truyVan(
+            "SELECT c.id, c.name, c.plate_number, c.seats,
+                    COUNT(CASE WHEN t.status = 'hoan_thanh' THEN 1 END) AS so_chuyen,
+                    COALESCE(SUM(t.revenue_vnd),0) AS thu_vnd,
+                    COALESCE(SUM(t.revenue_usd),0) AS thu_usd,
+                    COALESCE(SUM(t.revenue_eur),0) AS thu_eur,
+                    COALESCE(SUM(t.refund_vnd),0)  AS hoan_vnd,
+                    COALESCE(SUM(t.refund_usd),0)  AS hoan_usd,
+                    " . self::sqlChiPhiChuyen('t.') . " AS chi_phi
+             FROM cars c
+             LEFT JOIN trips t ON t.car_id = c.id
+                            AND t.trip_date BETWEEN ? AND ?
+                            AND t.deleted_at IS NULL
+                            AND t.status IN ('hoan_thanh','da_huy')
+             GROUP BY c.id
+             ORDER BY c.name",
+            [$tuNgay, $denNgay]
+        );
+    }
+
+    /** Lai/lo cua tung LOAI KEO - de biet loai keo nao dang an mong */
+    public function laiLoTheoLoaiKeo($tuNgay, $denNgay)
+    {
+        return $this->truyVan(
+            "SELECT ct.id, ct.name,
+                    COUNT(CASE WHEN t.status = 'hoan_thanh' THEN 1 END) AS so_chuyen,
+                    COALESCE(SUM(t.revenue_vnd),0) AS thu_vnd,
+                    COALESCE(SUM(t.revenue_usd),0) AS thu_usd,
+                    COALESCE(SUM(t.revenue_eur),0) AS thu_eur,
+                    COALESCE(SUM(t.refund_vnd),0)  AS hoan_vnd,
+                    COALESCE(SUM(t.refund_usd),0)  AS hoan_usd,
+                    " . self::sqlChiPhiChuyen('t.') . " AS chi_phi
+             FROM contract_types ct
+             LEFT JOIN trips t ON t.contract_type_id = ct.id
+                            AND t.trip_date BETWEEN ? AND ?
+                            AND t.deleted_at IS NULL
+                            AND t.status IN ('hoan_thanh','da_huy')
+             GROUP BY ct.id
+             ORDER BY ct.name",
+            [$tuNgay, $denNgay]
+        );
+    }
+
+    /** Lai/lo tung thang trong nam - de nhin duoc xu huong */
+    public function laiLoTheoThang($nam)
+    {
+        $ds = $this->truyVan(
+            "SELECT MONTH(trip_date) AS thang,
+                    COUNT(CASE WHEN status = 'hoan_thanh' THEN 1 END) AS so_chuyen,
+                    COALESCE(SUM(revenue_vnd),0) AS thu_vnd,
+                    COALESCE(SUM(revenue_usd),0) AS thu_usd,
+                    COALESCE(SUM(revenue_eur),0) AS thu_eur,
+                    COALESCE(SUM(refund_vnd),0)  AS hoan_vnd,
+                    COALESCE(SUM(refund_usd),0)  AS hoan_usd,
+                    " . self::sqlChiPhiChuyen() . " AS chi_phi
+             FROM trips
+             WHERE YEAR(trip_date) = ?
+               AND deleted_at IS NULL
+               AND status IN ('hoan_thanh','da_huy')
+             GROUP BY MONTH(trip_date)
+             ORDER BY thang",
+            [(int)$nam]
+        );
+
+        $ketQua = [];
+        for ($thang = 1; $thang <= 12; $thang++) {
+            $ketQua[$thang] = ['thang' => $thang, 'so_chuyen' => 0, 'thu_vnd' => 0,
+                'thu_usd' => 0, 'thu_eur' => 0, 'hoan_vnd' => 0, 'hoan_usd' => 0, 'chi_phi' => 0];
+        }
+        foreach ($ds as $dong) {
+            $ketQua[(int)$dong['thang']] = [
+                'thang'     => (int)$dong['thang'],
+                'so_chuyen' => (int)$dong['so_chuyen'],
+                'thu_vnd'   => (float)$dong['thu_vnd'],
+                'thu_usd'   => (float)$dong['thu_usd'],
+                'thu_eur'   => (float)$dong['thu_eur'],
+                'hoan_vnd'  => (float)$dong['hoan_vnd'],
+                'hoan_usd'  => (float)$dong['hoan_usd'],
+                'chi_phi'   => (float)$dong['chi_phi'],
+            ];
+        }
+        return $ketQua;
+    }
+
+    // -----------------------------------------------------------------
     // Canh bao trung lich
     //
     // Mot xe hoac mot tai xe khong the o hai noi cung luc. Truoc day giao 2
