@@ -59,8 +59,20 @@ class TaiXeController extends Controller
 
         $taiXeModel = $this->model('TaiXeModel');
         if ($id > 0) {
+            // Bao hiem bi tru thang vao luong hang ky, nen doi muc bao hiem la
+            // moi ky cua nguoi nay deu sai. Ghi lai muc cu de biet co thay doi.
+            $taiXeCu     = $taiXeModel->layTheoId($id);
+            $baoHiemCu   = $taiXeCu ? (float)$taiXeCu['insurance'] : 0;
+
             $taiXeModel->capNhat($id, $duLieu);
-            datThongBao('Đã cập nhật thông tin tài xế.');
+
+            if ((float)$duLieu['insurance'] != $baoHiemCu) {
+                $soKy = $this->model('LuongModel')->tinhLaiMoiKyCuaTaiXe($id);
+                datThongBao('Đã cập nhật thông tin tài xế và tính lại ' . $soKy . ' kỳ lương theo mức bảo hiểm mới.');
+                baoThucRealtimeQuanLy();
+            } else {
+                datThongBao('Đã cập nhật thông tin tài xế.');
+            }
         } else {
             $taiXeModel->them($duLieu);
             datThongBao('Đã thêm tài xế mới.');

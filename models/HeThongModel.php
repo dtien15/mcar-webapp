@@ -234,6 +234,27 @@ class HeThongModel extends Model
             }
         }
 
+        // 6) Bang luong lech so voi du lieu chuyen xe that
+        //
+        // Luong duoc tinh lai tu dong o moi cho lam thay doi so lieu, nhung day
+        // la tien nen van phai co mot vong kiem tra doc lap: neu sau nay them
+        // duong nao do lam lech ma khong ai hay, phai biet ngay tai day thay vi
+        // cho den luc tai xe keu thieu tien.
+        require_once DUONG_DAN_GOC . '/models/LuongModel.php';
+        $lech = (new LuongModel())->doLech();
+        if ($lech) {
+            $vaiDong = array_slice($lech, 0, 3);
+            $moTa = [];
+            foreach ($vaiDong as $l) {
+                $moTa[] = $l['ten_tai_xe'] . ' kỳ ' . sprintf('%02d/%d', $l['thang'], $l['nam'])
+                        . ' (đang lưu ' . number_format($l['con_lai_luu'], 0, ',', '.')
+                        . 'đ, đúng phải là ' . number_format($l['con_lai_dung'], 0, ',', '.') . 'đ)';
+            }
+            $ds[] = ['canh_bao', count($lech) . ' bảng lương đang lệch so với dữ liệu chuyến xe thật: '
+                   . implode('; ', $moTa) . (count($lech) > 3 ? '; …' : '')
+                   . '. Vào Bảng lương bấm "Tính lại toàn bộ kỳ" để chỉnh lại.'];
+        }
+
         return $ds;
     }
 }

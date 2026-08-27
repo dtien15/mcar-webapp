@@ -44,17 +44,38 @@ class LuongModel extends Model
         );
     }
 
-    /** So du con lai cua ky lien truoc */
+    /**
+     * So du mang sang tu ky truoc.
+     *
+     * Lay ky GAN NHAT TRUOC do co bang luong, khong phai chi moi thang lien ke.
+     * Truoc day chi nhin dung thang lien truoc: tai xe chay thang 8 roi nghi
+     * thang 9, den thang 10 chay lai la khoan no thang 8 boc hoi sach - vi
+     * thang 9 khong co bang luong nao de mang sang.
+     */
     public function laySoDuKyTruoc($idTaiXe, $thang, $nam)
     {
-        $thangTruoc = $thang == 1 ? 12 : $thang - 1;
-        $namTruoc   = $thang == 1 ? $nam - 1 : $nam;
-
         $soDu = $this->motGiaTri(
-            "SELECT remaining FROM payroll WHERE driver_id = ? AND month = ? AND year = ?",
-            [(int)$idTaiXe, $thangTruoc, $namTruoc]
+            "SELECT remaining FROM payroll
+             WHERE driver_id = ? AND (year * 12 + month) < (? * 12 + ?)
+             ORDER BY (year * 12 + month) DESC
+             LIMIT 1",
+            [(int)$idTaiXe, (int)$nam, (int)$thang]
         );
         return $soDu === false || $soDu === null ? 0 : (float)$soDu;
+    }
+
+    /**
+     * Cac ky CO bang luong nam SAU ky da cho, cua cung 1 tai xe - theo thu tu
+     * thoi gian. Dung de tinh lai day chuyen.
+     */
+    public function cacKySau($idTaiXe, $thang, $nam)
+    {
+        return $this->truyVan(
+            "SELECT month, year FROM payroll
+             WHERE driver_id = ? AND (year * 12 + month) > (? * 12 + ?)
+             ORDER BY (year * 12 + month) ASC",
+            [(int)$idTaiXe, (int)$nam, (int)$thang]
+        );
     }
 
     /**
@@ -69,7 +90,31 @@ class LuongModel extends Model
      * III. Hoan tien  = Hoan tien VND + (Hoan tien USD quy doi)
      * Con lai (IV)    = (I) - (II) + (III) - Cty da tra
      */
-    public function tinhLai($idTaiXe, $thang, $nam)
+    public function tinhLai($idTaiXe, $thang, $nam, $lanSangKySau = true)
+    {
+        $this->ghiBangLuong($this->tinhSoLieu($idTaiXe, $thang, $nam));
+
+        // Cac ky sau mang so du cua ky nay sang, nen sua ky nay la phai tinh
+        // lai het chuoi phia sau - neu khong, so du mang sang cua chung van la
+        // con so cu va tien lech keo dai mai ve sau. Chinh la ly do truoc day
+        // phai bam "Tinh lai" cho tung thang mot.
+        if ($lanSangKySau) {
+            foreach ($this->cacKySau($idTaiXe, $thang, $nam) as $ky) {
+                $this->ghiBangLuong($this->tinhSoLieu($idTaiXe, (int)$ky['month'], (int)$ky['year']));
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Tinh ra toan bo con so cua 1 ky - KHONG ghi vao CSDL.
+     *
+     * Tach rieng khoi tinhLai() de con dung lai duoc cho viec DO LECH: tinh
+     * thu roi doi chieu voi so dang luu, phat hien som neu co duong nao do
+     * lam sai lech ma khong ai hay.
+     */
+    public function tinhSoLieu($idTaiXe, $thang, $nam)
     {
         require_once DUONG_DAN_GOC . '/models/ChuyenXeModel.php';
         require_once DUONG_DAN_GOC . '/models/TaiXeModel.php';
@@ -115,7 +160,23 @@ class LuongModel extends Model
 
         $conLai = $tongLuong + $soDuTruoc - $thuKhachConverted + $hoanTienConverted - $ctyDaTra;
 
-        $trangThai = $this->tinhTrangThai($tongLuong, $soDuTruoc, $tongHop['so_chuyen'], $conLai);
+        return [
+            'id_tai_xe' => (int)$idTaiXe, 'thang' => (int)$thang, 'nam' => (int)$nam,
+            'tu_ngay' => $tuNgay, 'den_ngay' => $denNgay,
+            'tong_hop' => $tongHop, 'bao_hiem' => $baoHiem,
+            'ty_gia_usd' => $tyGiaUsd, 'ty_gia_eur' => $tyGiaEur,
+            'thu_khach_quy_doi' => $thuKhachConverted,
+            'hoan_tien_quy_doi' => $hoanTienConverted,
+            'so_du_truoc' => $soDuTruoc, 'tong_luong' => $tongLuong,
+            'cty_da_tra' => $ctyDaTra, 'con_lai' => $conLai, 'ghi_chu' => $ghiChu,
+            'trang_thai' => $this->tinhTrangThai($tongLuong, $soDuTruoc, $tongHop['so_chuyen'], $conLai),
+        ];
+    }
+
+    /** Ghi ket qua cua tinhSoLieu() xuong bang payroll */
+    private function ghiBangLuong(array $so)
+    {
+        $tongHop = $so['tong_hop'];
 
         $this->thucThi(
             "INSERT INTO payroll
@@ -144,20 +205,20 @@ class LuongModel extends Model
                 prev_balance=VALUES(prev_balance), total_salary=VALUES(total_salary),
                 remaining=VALUES(remaining), status=VALUES(status)",
             [
-                (int)$idTaiXe, (int)$thang, (int)$nam, $tuNgay, $denNgay,
+                $so['id_tai_xe'], $so['thang'], $so['nam'], $so['tu_ngay'], $so['den_ngay'],
                 (int)$tongHop['so_chuyen'],
                 (float)$tongHop['luu_dem'], (float)$tongHop['phi_san_bay'],
                 (float)$tongHop['phat_sinh'], (float)$tongHop['xang_dau_hoan'],
                 (float)$tongHop['tien_tai'], (float)$tongHop['phu_phi_khac'],
-                (float)$tongHop['phat'], (float)$tongHop['tam_ung'], $baoHiem,
+                (float)$tongHop['phat'], (float)$tongHop['tam_ung'], $so['bao_hiem'],
                 (float)$tongHop['thu_khach'], (float)$tongHop['thu_khach_usd'], (float)$tongHop['thu_khach_eur'],
-                (float)$tongHop['hoan_tien'], (float)$tongHop['hoan_tien_usd'], $tyGiaUsd, $tyGiaEur,
-                $thuKhachConverted, $hoanTienConverted,
-                $soDuTruoc, $tongLuong, $ctyDaTra, $conLai, $trangThai, $ghiChu,
+                (float)$tongHop['hoan_tien'], (float)$tongHop['hoan_tien_usd'],
+                $so['ty_gia_usd'], $so['ty_gia_eur'],
+                $so['thu_khach_quy_doi'], $so['hoan_tien_quy_doi'],
+                $so['so_du_truoc'], $so['tong_luong'], $so['cty_da_tra'],
+                $so['con_lai'], $so['trang_thai'], $so['ghi_chu'],
             ]
         );
-
-        return true;
     }
 
     /** Tinh lai cho toan bo tai xe dang lam viec trong 1 ky */
@@ -187,10 +248,97 @@ class LuongModel extends Model
 
         $trangThai = $this->tinhTrangThai($banGhi['total_salary'], $banGhi['prev_balance'], $banGhi['trip_count'], $conLai);
 
-        return $this->thucThi(
+        $this->thucThi(
             "UPDATE payroll SET company_paid = ?, remaining = ?, status = ?, note = ? WHERE id = ?",
             [(float)$ctyDaTra, $conLai, $trangThai, $ghiChu, (int)$id]
         );
+
+        // Tra tien ky nay lam doi so du mang sang cua moi ky phia sau
+        foreach ($this->cacKySau($banGhi['driver_id'], $banGhi['month'], $banGhi['year']) as $ky) {
+            $this->ghiBangLuong($this->tinhSoLieu($banGhi['driver_id'], (int)$ky['month'], (int)$ky['year']));
+        }
+
+        return true;
+    }
+
+    // -----------------------------------------------------------------
+    // Tinh lai hang loat + tu do lech
+    // -----------------------------------------------------------------
+
+    /**
+     * Tinh lai TAT CA cac ky dang co cua 1 tai xe, theo dung thu tu thoi gian.
+     * Dung khi co gi do anh huong den moi ky cua rieng nguoi do - vi du sua
+     * muc bao hiem hang thang.
+     */
+    public function tinhLaiMoiKyCuaTaiXe($idTaiXe)
+    {
+        $ds = $this->truyVan(
+            "SELECT month, year FROM payroll WHERE driver_id = ?
+             ORDER BY (year * 12 + month) ASC",
+            [(int)$idTaiXe]
+        );
+        foreach ($ds as $ky) {
+            $this->ghiBangLuong($this->tinhSoLieu($idTaiXe, (int)$ky['month'], (int)$ky['year']));
+        }
+        return count($ds);
+    }
+
+    /**
+     * Tinh lai TOAN BO bang luong dang co (moi tai xe, moi ky), dung thu tu
+     * thoi gian trong tung tai xe. Dung khi co gi do anh huong den tat ca -
+     * vi du doi ty gia USD/EUR.
+     */
+    public function tinhLaiToanBo()
+    {
+        $ds = $this->truyVan(
+            "SELECT driver_id, month, year FROM payroll
+             ORDER BY driver_id ASC, (year * 12 + month) ASC"
+        );
+        foreach ($ds as $ky) {
+            $this->ghiBangLuong($this->tinhSoLieu((int)$ky['driver_id'], (int)$ky['month'], (int)$ky['year']));
+        }
+        return count($ds);
+    }
+
+    /**
+     * Do lech: tinh thu lai tung ky roi doi chieu voi con so dang luu.
+     *
+     * Tien luong khong duoc phep sai, nen ngoai viec tu tinh lai o moi cho
+     * lam thay doi so lieu, van can mot vong kiem tra doc lap - de neu sau
+     * nay co them duong nao do lam lech ma khong ai hay thi biet ngay, thay
+     * vi cho den luc tai xe keu.
+     *
+     * Tra ve danh sach cac ky lech, moi dong gom ky, ten tai xe, so dang luu
+     * va so dung. Mang rong = khong co gi lech.
+     */
+    public function doLech($saiSoChoPhep = 1)
+    {
+        $ds = $this->truyVan(
+            "SELECT p.driver_id, p.month, p.year, p.remaining, p.total_salary, p.prev_balance,
+                    d.full_name AS ten_tai_xe
+             FROM payroll p
+             LEFT JOIN drivers d ON d.id = p.driver_id
+             ORDER BY p.driver_id ASC, (p.year * 12 + p.month) ASC"
+        );
+
+        $lech = [];
+        foreach ($ds as $ky) {
+            $dung = $this->tinhSoLieu((int)$ky['driver_id'], (int)$ky['month'], (int)$ky['year']);
+
+            if (abs((float)$ky['remaining'] - $dung['con_lai']) > $saiSoChoPhep
+                || abs((float)$ky['total_salary'] - $dung['tong_luong']) > $saiSoChoPhep
+                || abs((float)$ky['prev_balance'] - $dung['so_du_truoc']) > $saiSoChoPhep) {
+                $lech[] = [
+                    'id_tai_xe'    => (int)$ky['driver_id'],
+                    'ten_tai_xe'   => $ky['ten_tai_xe'],
+                    'thang'        => (int)$ky['month'],
+                    'nam'          => (int)$ky['year'],
+                    'con_lai_luu'  => (float)$ky['remaining'],
+                    'con_lai_dung' => $dung['con_lai'],
+                ];
+            }
+        }
+        return $lech;
     }
 
     /**

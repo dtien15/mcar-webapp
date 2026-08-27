@@ -56,10 +56,25 @@ class CaiDatController extends Controller
         $this->yeuCauPost();
 
         $caiDatModel = $this->model('CaiDatModel');
-        $caiDatModel->luuCaiDat('ty_gia_usd', $this->soTuForm('ty_gia_usd'));
-        $caiDatModel->luuCaiDat('ty_gia_eur', $this->soTuForm('ty_gia_eur'));
+        $tyGiaCuUsd  = $caiDatModel->layTyGiaUsd();
+        $tyGiaCuEur  = $caiDatModel->layTyGiaEur();
 
-        datThongBao('Đã lưu tỷ giá. Bấm "Tính lại lương" ở trang Bảng lương để áp dụng tỷ giá mới cho kỳ hiện tại.');
+        $tyGiaUsd = $this->soTuForm('ty_gia_usd');
+        $tyGiaEur = $this->soTuForm('ty_gia_eur');
+        $caiDatModel->luuCaiDat('ty_gia_usd', $tyGiaUsd);
+        $caiDatModel->luuCaiDat('ty_gia_eur', $tyGiaEur);
+
+        // Ty gia nam trong cong thuc quy doi tien khach tra bang USD/EUR, nen
+        // doi ty gia la moi bang luong co ngoai te deu sai ngay. Tinh lai het
+        // tai cho, khong de nguoi dung phai nho bam "Tinh lai luong".
+        if ($tyGiaUsd != $tyGiaCuUsd || $tyGiaEur != $tyGiaCuEur) {
+            $soKy = $this->model('LuongModel')->tinhLaiToanBo();
+            datThongBao('Đã lưu tỷ giá và tính lại ' . $soKy . ' bảng lương theo tỷ giá mới.');
+            baoThucRealtimeQuanLy();
+        } else {
+            datThongBao('Đã lưu tỷ giá.');
+        }
+
         chuyenTrang('caidat');
     }
 
