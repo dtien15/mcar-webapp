@@ -239,7 +239,24 @@ class HeThongModel extends Model
             }
         }
 
-        // 6) Bang luong lech so voi du lieu chuyen xe that
+        // 6) Chuyen dam lich - mot xe / mot tai xe khong the o hai noi cung luc
+        require_once DUONG_DAN_GOC . '/models/ChuyenXeModel.php';
+        $damLich = (new ChuyenXeModel())->cacChuyenDamLich(date('Y-m-d'), date('Y-m-d', strtotime('+14 days')), 20);
+        if ($damLich) {
+            $moTa = [];
+            foreach (array_slice($damLich, 0, 3) as $d) {
+                $moTa[] = dinhDangNgay($d['trip_date']) . ' — '
+                        . ($d['trung_xe'] && $d['trung_tai_xe'] ? 'cùng xe và tài xế'
+                            : ($d['trung_xe'] ? 'cùng xe ' . trim($d['ten_xe'] . ' ' . $d['bien_so'])
+                               : 'cùng tài xế ' . $d['ten_tai_xe']))
+                        . ' (#' . $d['id_a'] . ' và #' . $d['id_b'] . ')';
+            }
+            $ds[] = ['canh_bao', count($damLich) . ' cặp chuyến đang đâm lịch nhau trong 14 ngày tới: '
+                   . implode('; ', $moTa) . (count($damLich) > 3 ? '; …' : '')
+                   . '. Một xe hoặc một tài xế không thể ở hai nơi cùng lúc.'];
+        }
+
+        // 7) Bang luong lech so voi du lieu chuyen xe that
         //
         // Luong duoc tinh lai tu dong o moi cho lam thay doi so lieu, nhung day
         // la tien nen van phai co mot vong kiem tra doc lap: neu sau nay them

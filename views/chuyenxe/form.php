@@ -231,6 +231,13 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                 <?php endif; ?>
               </div>
 
+              <!-- Canh bao dam lich: hien ngay khi chon xong ngay + xe/tai xe,
+                   truoc khi bam Luu. Chi canh bao chu khong chan - 1 xe chay 2
+                   cuoc trong ngay la binh thuong. -->
+              <div class="col-12">
+                <div id="canhBaoDamLich" data-api="<?= duongDan('chuyenxe/kiemtradamlich') ?>" hidden></div>
+              </div>
+
               <div class="col-12 col-md-6">
                 <label class="form-label">Gợi ý giá từ bảng giá</label>
                 <select id="oBangGia" class="form-select" <?= $chiXemSel ?>>

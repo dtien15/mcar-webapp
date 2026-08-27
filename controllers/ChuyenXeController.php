@@ -310,6 +310,64 @@ class ChuyenXeController extends Controller
     }
 
     /**
+     * API: chuyen dinh giao co dam lich voi chuyen nao khong.
+     *
+     * Goi ngay trong luc nguoi dieu phoi dang chon ngay / xe / tai xe tren
+     * form, de biet truoc khi bam Luu - thay vi den luc tai xe goi dien hoi
+     * "sao hai cuoc cung gio" moi phat hien.
+     */
+    public function kiemTraDamLich()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan', 'taixe']);
+        header('Content-Type: application/json; charset=utf-8');
+
+        $dsDam = $this->model('ChuyenXeModel')->timChuyenDamLich(
+            $_GET['ngay']    ?? '',
+            $_GET['id_xe']   ?? 0,
+            $_GET['id_tai_xe'] ?? 0,
+            $_GET['gio']     ?? '',
+            $_GET['bo_qua']  ?? 0
+        );
+
+        $dong = [];
+        foreach ($dsDam as $c) {
+            $dong[] = [
+                'id'      => (int)$c['id'],
+                'muc_do'  => $c['muc_do'],
+                'duong_dan' => duongDan('chuyenxe/chitiet/' . $c['id']),
+                'mo_ta'   => $this->moTaDamLich($c),
+            ];
+        }
+
+        echo json_encode(['ok' => true, 'so_dam' => count($dong), 'ds' => $dong]);
+        exit;
+    }
+
+    /** Cau mo ta 1 chuyen bi dam lich, viet cho nguoi dieu phoi doc luot la hieu */
+    private function moTaDamLich(array $c)
+    {
+        $ai = $c['trung_gi'] === 'ca_hai'
+            ? 'Cùng xe và cùng tài xế'
+            : ($c['trung_gi'] === 'xe' ? 'Cùng xe' : 'Cùng tài xế');
+
+        $gio = trim((string)$c['pickup_time']) !== ''
+            ? ' lúc ' . $c['pickup_time']
+            : ' (chưa ghi giờ đón)';
+
+        $cach = '';
+        if ($c['cach_nhau'] !== null) {
+            $gioCach = floor($c['cach_nhau'] / 60);
+            $phut    = $c['cach_nhau'] % 60;
+            $cach = ' — cách nhau '
+                  . ($gioCach > 0 ? $gioCach . ' giờ' : '')
+                  . ($phut > 0 ? ($gioCach > 0 ? ' ' : '') . $phut . ' phút' : '')
+                  . ($c['cach_nhau'] === 0 ? 'đúng cùng giờ' : '');
+        }
+
+        return $ai . ': ' . trim($c['route'] ?: 'chuyến #' . $c['id']) . $gio . $cach;
+    }
+
+    /**
      * Huy chuyen xe. Khac han xoa: xoa la go nham, huy la chuyen kinh doanh
      * co that - van giu lai de con biet thang nay rot bao nhieu cuoc.
      *

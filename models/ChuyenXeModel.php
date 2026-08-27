@@ -43,7 +43,16 @@ class ChuyenXeModel extends Model
             "SELECT t.*,
                     c.name AS ten_xe, c.plate_number AS bien_so, c.seats AS so_cho,
                     d.full_name AS ten_tai_xe,
-                    ct.name AS ten_loai_keo
+                    ct.name AS ten_loai_keo,
+                    -- Co chuyen khac cung ngay dung chung xe hoac chung tai xe khong
+                    EXISTS (
+                        SELECT 1 FROM trips k
+                         WHERE k.id <> t.id
+                           AND k.trip_date = t.trip_date
+                           AND k.deleted_at IS NULL AND k.status <> 'da_huy'
+                           AND ((t.car_id    IS NOT NULL AND k.car_id    = t.car_id)
+                             OR (t.driver_id IS NOT NULL AND k.driver_id = t.driver_id))
+                    ) AS dam_lich
              FROM trips t
              LEFT JOIN cars c ON c.id = t.car_id
              LEFT JOIN drivers d ON d.id = t.driver_id
@@ -522,6 +531,105 @@ class ChuyenXeModel extends Model
              WHERE public_submitted = 1 AND deleted_at IS NULL
                AND MONTH(created_at) = ? AND YEAR(created_at) = ?",
             [(int)$thang, (int)$nam]
+        );
+    }
+
+// -----------------------------------------------------------------
+    // Canh bao trung lich
+    //
+    // Mot xe hoac mot tai xe khong the o hai noi cung luc. Truoc day giao 2
+    // chuyen cung gio cho cung mot xe thi ung dung im lang cho qua, den luc
+    // tai xe goi dien hoi moi biet. Gio phat hien ngay tu luc dang nhap form.
+    //
+    // Chi CANH BAO chu khong chan: mot xe chay 2 cuoc trong ngay la binh
+    // thuong, nguoi dieu phoi moi la nguoi biet co kip hay khong.
+    // -----------------------------------------------------------------
+
+    /**
+     * Tim cac chuyen dam lich voi mot chuyen dinh giao.
+     *
+     * Tra ve mang, moi dong co them:
+     *   'trung_gi'  : 'xe' | 'tai_xe' | 'ca_hai'
+     *   'muc_do'    : 'nang' (gio sat nhau hoac khong ro gio) | 'nhe' (gio cach xa)
+     *   'cach_nhau' : so phut chenh lech, null neu mot ben khong ro gio
+     */
+    public function timChuyenDamLich($ngay, $idXe, $idTaiXe, $gioDon = '', $boQuaId = 0)
+    {
+        $idXe    = (int)$idXe;
+        $idTaiXe = (int)$idTaiXe;
+        if (!$ngay || (!$idXe && !$idTaiXe)) {
+            return [];
+        }
+
+        $ds = $this->truyVan(
+            "SELECT t.id, t.trip_date, t.pickup_time, t.route, t.status,
+                    t.car_id, t.driver_id,
+                    c.name AS ten_xe, c.plate_number AS bien_so,
+                    d.full_name AS ten_tai_xe
+             FROM trips t
+             LEFT JOIN cars c ON c.id = t.car_id
+             LEFT JOIN drivers d ON d.id = t.driver_id
+             WHERE t.trip_date = ?
+               AND t.id <> ?
+               AND t.deleted_at IS NULL
+               AND t.status <> 'da_huy'
+               AND ((? > 0 AND t.car_id = ?) OR (? > 0 AND t.driver_id = ?))
+             ORDER BY t.pickup_time, t.id",
+            [$ngay, (int)$boQuaId, $idXe, $idXe, $idTaiXe, $idTaiXe]
+        );
+
+        $phutMoi = phutTuGioDon($gioDon);
+        $ketQua  = [];
+
+        foreach ($ds as $chuyen) {
+            $trungXe    = $idXe && (int)$chuyen['car_id'] === $idXe;
+            $trungTaiXe = $idTaiXe && (int)$chuyen['driver_id'] === $idTaiXe;
+
+            $phutCu   = phutTuGioDon($chuyen['pickup_time']);
+            $cachNhau = ($phutMoi === null || $phutCu === null)
+                ? null
+                : abs($phutMoi - $phutCu);
+
+            // Khong ro gio thi cu coi la nang - de nguoi dieu phoi tu nhin
+            $chuyen['trung_gi']  = $trungXe && $trungTaiXe ? 'ca_hai' : ($trungXe ? 'xe' : 'tai_xe');
+            $chuyen['cach_nhau'] = $cachNhau;
+            $chuyen['muc_do']    = ($cachNhau === null || $cachNhau < GIO_COI_LA_TRUNG * 60)
+                ? 'nang' : 'nhe';
+
+            $ketQua[] = $chuyen;
+        }
+
+        return $ketQua;
+    }
+
+    /**
+     * Danh sach cac cap chuyen dang dam lich trong khoang ngay - dung cho
+     * canh bao tong o trang Theo doi he thong.
+     */
+    public function cacChuyenDamLich($tuNgay, $denNgay, $gioiHan = 50)
+    {
+        return $this->truyVan(
+            "SELECT a.id AS id_a, b.id AS id_b, a.trip_date,
+                    a.pickup_time AS gio_a, b.pickup_time AS gio_b,
+                    a.route AS lo_trinh_a, b.route AS lo_trinh_b,
+                    c.name AS ten_xe, c.plate_number AS bien_so,
+                    d.full_name AS ten_tai_xe,
+                    (a.car_id IS NOT NULL AND a.car_id = b.car_id)       AS trung_xe,
+                    (a.driver_id IS NOT NULL AND a.driver_id = b.driver_id) AS trung_tai_xe
+             FROM trips a
+             JOIN trips b
+               ON b.trip_date = a.trip_date
+              AND b.id > a.id
+              AND b.deleted_at IS NULL AND b.status <> 'da_huy'
+              AND ((a.car_id IS NOT NULL AND a.car_id = b.car_id)
+                OR (a.driver_id IS NOT NULL AND a.driver_id = b.driver_id))
+             LEFT JOIN cars c ON c.id = a.car_id
+             LEFT JOIN drivers d ON d.id = a.driver_id
+             WHERE a.trip_date BETWEEN ? AND ?
+               AND a.deleted_at IS NULL AND a.status <> 'da_huy'
+             ORDER BY a.trip_date DESC, a.id DESC
+             LIMIT " . (int)$gioiHan,
+            [$tuNgay, $denNgay]
         );
     }
 

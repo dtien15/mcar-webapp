@@ -359,6 +359,36 @@ function trangThaiTruocKhiHuy(array $chuyen)
     return 'moi';
 }
 
+/**
+ * Doi gio don (o nay nguoi dung go tu do: "8:00", "08h30", "14:15"...) thanh
+ * so phut tu 0h. Tra ve null neu khong doc duoc gio.
+ */
+function phutTuGioDon($gio)
+{
+    $gio = trim((string)$gio);
+    if ($gio === '') {
+        return null;
+    }
+    if (!preg_match('/(\d{1,2})\s*[:hHgG.]\s*(\d{1,2})?/u', $gio, $khop)) {
+        // Chi co so, vi du "8" hoac "14"
+        if (preg_match('/^\s*(\d{1,2})\s*$/u', $gio, $k2)) {
+            $g = (int)$k2[1];
+            return $g >= 0 && $g <= 23 ? $g * 60 : null;
+        }
+        return null;
+    }
+
+    $g = (int)$khop[1];
+    $p = isset($khop[2]) && $khop[2] !== '' ? (int)$khop[2] : 0;
+    if ($g < 0 || $g > 23 || $p < 0 || $p > 59) {
+        return null;
+    }
+    return $g * 60 + $p;
+}
+
+/** Trong bao nhieu tieng thi coi 2 chuyen la dam nhau */
+const GIO_COI_LA_TRUNG = 4;
+
 /** Doi so tien thanh chu (dung cho phieu luong) */
 function doiTienSangChu($so)
 {
