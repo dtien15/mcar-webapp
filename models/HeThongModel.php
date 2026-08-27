@@ -22,36 +22,130 @@ class HeThongModel extends Model
     ];
 
     /**
-     * Dung luong + so dong cua tung bang. Doc tu information_schema nen
-     * rat nhanh (khong quet du lieu that), nhung so dong o day la SO UOC
-     * TINH cua MySQL - dung de theo doi xu huong phinh to, khong phai de
-     * doi chieu chinh xac.
+     * Dung luong + so dong cua tung bang.
+     *
+     * SO DONG: dem that bang COUNT(*). Con so uoc tinh cua MySQL trong
+     * information_schema hay lech xa, ma day dung la cho nguoi dung nhin vao
+     * de kiem chung "vua xoa xong co giam khong" - lech mot con so o day la
+     * mat long tin vao ca trang. Cac bang o day deu nho nen dem that khong
+     * dang ke.
+     *
+     * DUNG LUONG: uu tien lay kich thuoc THAT cua file tren o dia. Cot
+     * DATA_LENGTH quen thuoc cua information_schema.TABLES bi MySQL luu tam
+     * rat lau - do duoc 30.000 dong ma no van bao 64KB trong khi file that
+     * da 27MB - nen khong dung mot minh duoc. Neu hosting khong cho doc bang
+     * tablespaces (thieu quyen PROCESS) thi moi quay ve cach cu.
      */
     public function thongKeBang()
     {
-        $ds = $this->truyVan(
-            "SELECT TABLE_NAME AS ten,
-                    TABLE_ROWS AS so_dong,
-                    ROUND((DATA_LENGTH + INDEX_LENGTH) / 1048576, 2) AS mb
-             FROM information_schema.TABLES
-             WHERE TABLE_SCHEMA = DATABASE()
-             ORDER BY (DATA_LENGTH + INDEX_LENGTH) DESC"
-        );
+        $kichThuoc = $this->kichThuocFileThat() ?: $this->kichThuocUocTinh();
 
         $ketQua = [];
         $tongMb = 0;
-        foreach ($ds as $b) {
-            $tongMb += (float)$b['mb'];
-            if (isset($this->bangTheoDoi[$b['ten']])) {
+        foreach ($kichThuoc as $ten => $mb) {
+            $tongMb += $mb;
+            if (isset($this->bangTheoDoi[$ten])) {
                 $ketQua[] = [
-                    'ten'     => $b['ten'],
-                    'nhan'    => $this->bangTheoDoi[$b['ten']],
-                    'so_dong' => (int)$b['so_dong'],
-                    'mb'      => (float)$b['mb'],
+                    'ten'     => $ten,
+                    'nhan'    => $this->bangTheoDoi[$ten],
+                    'so_dong' => $this->demChinhXac($ten),
+                    'mb'      => $mb,
                 ];
             }
         }
+
+        // Bang chua bao gio duoc ghi co the khong xuat hien o tren - van phai liet ke
+        foreach ($this->bangTheoDoi as $ten => $nhan) {
+            if (!isset($kichThuoc[$ten])) {
+                $ketQua[] = ['ten' => $ten, 'nhan' => $nhan, 'so_dong' => $this->demChinhXac($ten), 'mb' => 0.0];
+            }
+        }
+
+        usort($ketQua, function ($a, $b) { return $b['mb'] <=> $a['mb']; });
         return ['bang' => $ketQua, 'tong_mb' => round($tongMb, 2)];
+    }
+
+    /**
+     * Kich thuoc THAT cua tung file bang tren o dia, dang [ten bang => MB].
+     * Tra ve mang rong neu hosting khong cho doc (khi do dung kichThuocUocTinh).
+     */
+    private function kichThuocFileThat()
+    {
+        // MariaDB dung INNODB_SYS_TABLESPACES, MySQL 8 doi ten thanh INNODB_TABLESPACES
+        foreach (['INNODB_SYS_TABLESPACES', 'INNODB_TABLESPACES'] as $bangHeThong) {
+            try {
+                $ds = $this->truyVan(
+                    "SELECT SUBSTRING_INDEX(NAME, '/', -1) AS ten,
+                            ROUND(FILE_SIZE / 1048576, 2) AS mb
+                     FROM information_schema.{$bangHeThong}
+                     WHERE NAME LIKE CONCAT(DATABASE(), '/%')"
+                );
+            } catch (PDOException $loi) {
+                continue;
+            }
+
+            if ($ds) {
+                $kq = [];
+                foreach ($ds as $b) {
+                    $kq[$b['ten']] = (float)$b['mb'];
+                }
+                return $kq;
+            }
+        }
+        return [];
+    }
+
+    /** Cach cu: doc DATA_LENGTH tu information_schema (co the la so cu) */
+    private function kichThuocUocTinh()
+    {
+        $ds = $this->truyVan(
+            "SELECT TABLE_NAME AS ten,
+                    ROUND((DATA_LENGTH + INDEX_LENGTH) / 1048576, 2) AS mb
+             FROM information_schema.TABLES
+             WHERE TABLE_SCHEMA = DATABASE()"
+        );
+
+        $kq = [];
+        foreach ($ds as $b) {
+            $kq[$b['ten']] = (float)$b['mb'];
+        }
+        return $kq;
+    }
+
+    /**
+     * Thu gon lai cac bang de tra dung luong trong ve cho o dia.
+     *
+     * Xoa ban ghi trong InnoDB KHONG lam file nho lai: cho vua trong duoc giu
+     * lai de ghi du lieu moi vao, nen sau khi don sach thong bao / tin nhan ma
+     * nhin vao "Dung luong du lieu" van thay y nguyen. OPTIMIZE TABLE dung lai
+     * bang tu dau, luc do so MB moi that su tut xuong.
+     *
+     * Chi goi khi nguoi dung bam nut (khong tu chay): moi bang bi khoa trong
+     * luc dung lai. Voi co du lieu cua ung dung nay chi mat vai phan nghin giay.
+     *
+     * Tra ve: [so bang da thu gon, MB truoc, MB sau]
+     */
+    public function thuGonBang()
+    {
+        $truoc = $this->thongKeBang()['tong_mb'];
+        $soBang = 0;
+
+        foreach (array_keys($this->bangTheoDoi) as $ten) {
+            // $ten lay tu danh sach cung trong lop nay nen khong co rui ro chen SQL
+            try {
+                $this->db->query("OPTIMIZE TABLE `{$ten}`")->fetchAll();
+                $soBang++;
+            } catch (PDOException $loi) {
+                // Bang khong ton tai hoac hosting khong cho phep - bo qua bang do,
+                // van thu gon nhung bang con lai
+            }
+        }
+
+        return [
+            'so_bang' => $soBang,
+            'mb_truoc' => $truoc,
+            'mb_sau'   => $this->thongKeBang()['tong_mb'],
+        ];
     }
 
     /** So dong CHINH XAC cua 1 bang (dung cho vai con so quan trong can dung tuyet doi) */

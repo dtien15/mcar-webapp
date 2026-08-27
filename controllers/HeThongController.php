@@ -27,6 +27,31 @@ class HeThongController extends Controller
         $this->traJson(['ok' => true, 'html' => $this->dungView('hethong/_noidung', $this->layDuLieu())]);
     }
 
+    /**
+     * Thu gon dung luong CSDL (nguoi dung bam nut trong the "Dung luong du lieu").
+     *
+     * Can co vi xoa ban ghi khong lam file nho lai - xem thuGonBang() de biet ly do.
+     */
+    public function thuGon()
+    {
+        $this->yeuCauQuyen(['admin']);
+        $this->yeuCauPostAjax();
+
+        $kq = $this->model('HeThongModel')->thuGonBang();
+        $giam = round($kq['mb_truoc'] - $kq['mb_sau'], 2);
+
+        $this->traJson([
+            'ok'   => true,
+            'nhan' => $giam > 0
+                ? 'Đã thu gọn ' . $kq['so_bang'] . ' bảng, dung lượng giảm từ '
+                  . $kq['mb_truoc'] . ' MB xuống ' . $kq['mb_sau'] . ' MB.'
+                : 'Đã thu gọn ' . $kq['so_bang'] . ' bảng. Dung lượng giữ nguyên '
+                  . $kq['mb_sau'] . ' MB — không còn chỗ trống nào để trả lại.',
+            'loaiNhan' => $giam > 0 ? 'success' : 'secondary',
+            'html'     => $this->dungView('hethong/_noidung', $this->layDuLieu()),
+        ]);
+    }
+
     // -----------------------------------------------------------------
     // Khu "Quan ly du lieu" - toan bo chay bang AJAX
     //

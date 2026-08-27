@@ -30,5 +30,37 @@ require __DIR__ . '/_quan_ly_du_lieu.php';
   setInterval(capNhat, 20000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) capNhat(); });
   if (window.mcarRealtime) window.mcarRealtime.dangKy('nudge', capNhat);
+
+  // ---- Nut "Thu gon" trong the Dung luong du lieu ----
+  // Nut nam ben trong khoi tu lam moi 20 giay nen phai bat su kien tu ngoai,
+  // khong gan truc tiep vao nut (nut se bi thay moi sau moi lan lam moi).
+  var khoi = document.getElementById('heThongNoiDung');
+
+  khoi.addEventListener('click', function (su) {
+    var nut = su.target.closest && su.target.closest('[data-ht-thugon]');
+    if (!nut || dangTai) return;
+
+    if (!confirm('Thu gọn lại các bảng để trả phần dung lượng trống về cho ổ đĩa? '
+               + 'Dữ liệu giữ nguyên, chỉ dọn lại chỗ mà các bản ghi đã xóa để lại. '
+               + 'Trong lúc thu gọn web có thể chậm một chút.')) return;
+
+    dangTai = true;
+    nut.disabled = true;
+    nut.textContent = 'Đang thu gọn…';
+
+    var than = new FormData();
+    than.append('token', <?= json_encode(taoToken()) ?>);
+
+    fetch('<?= duongDan('hethong/thugon') ?>', { method: 'POST', body: than, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (kq) {
+        if (kq && kq.ok) {
+          khoi.innerHTML = kq.html;
+        }
+        alert((kq && kq.nhan) || 'Không thu gọn được, hãy thử lại.');
+      })
+      .catch(function () { alert('Mất kết nối tới máy chủ, hãy thử lại.'); })
+      .then(function () { dangTai = false; });
+  });
 })();
 </script>

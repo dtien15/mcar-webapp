@@ -170,7 +170,10 @@ $ramCao = $realtime && $realtime['ram_dang_dung'] > 150;
     <div class="the h-100">
       <div class="the-dau">
         <span><?= bieuTuong('database') ?> Dung lượng dữ liệu</span>
-        <span class="text-muted" style="font-size:12px">Tổng <?= h($tongMb) ?> MB</span>
+        <span class="d-flex align-items-center gap-2">
+          <span class="text-muted" style="font-size:12px">Tổng <?= h($tongMb) ?> MB</span>
+          <button class="btn btn-sm btn-outline-secondary" data-ht-thugon>Thu gọn</button>
+        </span>
       </div>
       <div class="the-than the-than-khong-dem bang-cuon">
         <table class="bang">
