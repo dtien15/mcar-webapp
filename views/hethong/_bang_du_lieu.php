@@ -122,7 +122,7 @@ $oTimKiem = [
             <td class="text-muted"><?= (int)$d['id'] ?></td>
 
             <?php if ($tab === 'chuyen'): ?>
-              <?php $tt = nhanTrangThaiChuyen($d['status']); ?>
+              <?php $tt = nhanTrangThaiChuyen($d['status'], !empty($d['driver_id'])); ?>
               <td><?= dinhDangNgay($d['trip_date']) ?></td>
               <td><?= h($d['route']) ?></td>
               <td><?= h(trim($d['ten_xe'] . ' ' . $d['bien_so'])) ?></td>

@@ -62,6 +62,7 @@ class ChuyenXeController extends Controller
         $modalNopLaiHtml  = '';
         $modalSuaPhuPhiHtml = '';
         $modalNhoTaiKhacHtml = '';
+        $modalHuyHtml        = '';
         foreach ($danhSach as $chuyen) {
             $duLieuThe = ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai, 'dsTaiXeDangChay' => $dsTaiXeDangChay];
             $theHtml             .= $this->dungView('chuyenxe/_the_chuyen', $duLieuThe);
@@ -70,6 +71,15 @@ class ChuyenXeController extends Controller
             $modalNopLaiHtml     .= $this->dungView('chuyenxe/_modal_noplai', ['chuyen' => $chuyen]);
             $modalSuaPhuPhiHtml  .= $this->dungView('chuyenxe/_modal_suaphuphi', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
             $modalNhoTaiKhacHtml .= $this->dungView('chuyenxe/_modal_nhotaikhac', $duLieuThe);
+
+            // Chuyen tai them cung phai co hop thoai Huy / Bao khach huy,
+            // khong thi bam nut Huy o nhung dong do se khong ra gi ca
+            if (laQuanLy() && $chuyen['status'] !== 'da_huy') {
+                $modalHuyHtml .= $this->dungView('chuyenxe/_modal_huy', ['chuyen' => $chuyen]);
+            } elseif (laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai
+                      && !in_array($chuyen['status'], ['da_huy', 'hoan_thanh'], true)) {
+                $modalHuyHtml .= $this->dungView('chuyenxe/_modal_baohuy', ['chuyen' => $chuyen]);
+            }
         }
 
         echo json_encode([
@@ -80,6 +90,7 @@ class ChuyenXeController extends Controller
             'modal_noplai_html'     => $modalNopLaiHtml,
             'modal_suaphuphi_html'  => $modalSuaPhuPhiHtml,
             'modal_nhotaikhac_html' => $modalNhoTaiKhacHtml,
+            'modal_huy_html'        => $modalHuyHtml,
             'so_dong_them'          => count($danhSach),
             'con_them'              => $tongSo > ($boQua + count($danhSach)),
         ]);
@@ -365,6 +376,129 @@ class ChuyenXeController extends Controller
         }
 
         return $ai . ': ' . trim($c['route'] ?: 'chuyến #' . $c['id']) . $gio . $cach;
+    }
+
+    /**
+     * Tao NHIEU chuyen cung luc tu bang xem truoc cua "Them nhanh".
+     *
+     * Cac chuyen tao ra CHUA gan tai xe - dung luong lam viec that: nguoi
+     * dieu phoi nhan mot anh lich trinh nhieu chang, tao het cac chang do
+     * truoc da, roi moi lan luot chon tai xe cho tung chuyen.
+     */
+    public function taoNhanh()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->yeuCauPostAjaxChuyen();
+
+        $dsGui = $_POST['chuyen'] ?? [];
+        if (!is_array($dsGui) || !$dsGui) {
+            $this->traJsonChuyen(['ok' => false, 'loi' => 'Chưa có chuyến nào để tạo.']);
+        }
+        if (count($dsGui) > 50) {
+            $this->traJsonChuyen(['ok' => false, 'loi' => 'Mỗi lần chỉ tạo tối đa 50 chuyến.']);
+        }
+
+        $dsLuu = [];
+        foreach ($dsGui as $c) {
+            $ngay = trim($c['ngay_chay'] ?? '');
+            if ($ngay === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $ngay)) {
+                continue;   // khong co ngay chay hop le thi bo qua dong do
+            }
+
+            $dsLuu[] = [
+                'trip_date'       => $ngay,
+                'pickup_time'     => mb_substr(trim($c['gio_don'] ?? ''), 0, 20, 'UTF-8'),
+                'route'           => mb_substr(trim($c['hanh_trinh'] ?? ''), 0, 150, 'UTF-8'),
+                'pickup_location' => mb_substr(trim($c['dia_diem_don'] ?? ''), 0, 255, 'UTF-8'),
+                'dropoff_location' => mb_substr(trim($c['dia_diem_tra'] ?? ''), 0, 255, 'UTF-8'),
+                'customer_name'   => mb_substr(trim($c['ten_khach'] ?? ''), 0, 150, 'UTF-8'),
+                'customer_phone'  => mb_substr(trim($c['sdt_khach'] ?? ''), 0, 30, 'UTF-8'),
+                'passenger_count' => (int)($c['so_luong_khach'] ?? 0) ?: null,
+                'revenue_vnd'     => (float)preg_replace('/[^\d]/', '', (string)($c['thu_vnd'] ?? 0)),
+                'customer_note'   => mb_substr(trim($c['ghi_chu_khach'] ?? ''), 0, 255, 'UTF-8'),
+                'contract_type_id' => !empty($c['id_loai_keo']) ? (int)$c['id_loai_keo'] : null,
+                'driver_id'       => null,   // chua giao - chon tai xe o danh sach
+                'car_id'          => null,
+                'status'          => 'moi',
+            ];
+        }
+
+        if (!$dsLuu) {
+            $this->traJsonChuyen(['ok' => false, 'loi' => 'Không dòng nào có ngày chạy hợp lệ.']);
+        }
+
+        $dsId = $this->model('ChuyenXeModel')->themNhieu($dsLuu);
+
+        datThongBao('Đã tạo ' . count($dsId) . ' chuyến, chưa giao cho tài xế nào. '
+                  . 'Chọn tài xế ngay trên danh sách để giao.');
+        baoThucRealtimeQuanLy();
+
+        // Tra ve khoang ngay cua cac chuyen vua tao de danh sach nhay thang
+        // toi do. Khong co no thi tao chuyen thang sau xong nhin vao danh
+        // sach (dang loc thang nay) khong thay gi ca, tuong la tao hong.
+        $dsNgay = array_column($dsLuu, 'trip_date');
+        sort($dsNgay);
+
+        $this->traJsonChuyen([
+            'ok'      => true,
+            'so_tao'  => count($dsId),
+            'ds_id'   => $dsId,
+            'tu_ngay' => $dsNgay ? reset($dsNgay) : '',
+            'den_ngay' => $dsNgay ? end($dsNgay) : '',
+        ]);
+    }
+
+    /**
+     * Giao 1 chuyen chua co tai xe cho mot tai xe, ngay tren danh sach.
+     * Giao xong bao cho tai xe biet nhu chuyen tao binh thuong.
+     */
+    public function giaoChuyen()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->yeuCauPostAjaxChuyen();
+
+        $id      = (int)($_POST['id'] ?? 0);
+        $idTaiXe = (int)($_POST['id_tai_xe'] ?? 0);
+        $idXe    = (int)($_POST['id_xe'] ?? 0);
+
+        $chuyenXeModel = $this->model('ChuyenXeModel');
+
+        if (!$idTaiXe) {
+            $this->traJsonChuyen(['ok' => false, 'loi' => 'Chưa chọn tài xế.']);
+        }
+        if (!$chuyenXeModel->giaoChoTaiXe($id, $idTaiXe, $idXe)) {
+            $this->traJsonChuyen(['ok' => false,
+                'loi' => 'Không giao được — chuyến này đã có tài xế, hoặc tài xế đã nghỉ.']);
+        }
+
+        // Lay lai de co day du so lieu cho thong bao
+        $chuyen = $chuyenXeModel->layChiTiet($id);
+        $this->baoChuyenXeMoi($id, $chuyen);
+
+        datThongBao('Đã giao chuyến cho ' . $chuyen['ten_tai_xe'] . '.');
+        baoThucRealtimeChuyenXe($idTaiXe);
+
+        $this->traJsonChuyen(['ok' => true, 'ten_tai_xe' => $chuyen['ten_tai_xe']]);
+    }
+
+    /** POST hop le, luon tra JSON (dung cho cac API cua man hinh chuyen xe) */
+    private function yeuCauPostAjaxChuyen()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->traJsonChuyen(['ok' => false, 'loi' => 'Yêu cầu không hợp lệ.'], 405);
+        }
+        if (!kiemTraToken($_POST['token'] ?? '')) {
+            $this->traJsonChuyen(['ok' => false,
+                'loi' => 'Phiên làm việc đã hết hạn. Hãy tải lại trang rồi thử lại.'], 400);
+        }
+    }
+
+    private function traJsonChuyen(array $duLieu, $maTrangThai = 200)
+    {
+        http_response_code($maTrangThai);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($duLieu, JSON_UNESCAPED_UNICODE);
+        exit;
     }
 
     /**
@@ -676,7 +810,7 @@ class ChuyenXeController extends Controller
 
         echo json_encode([
             'ok'         => true,
-            'trang_thai' => nhanTrangThaiChuyen($chuyen['status']),
+            'trang_thai' => nhanTrangThaiChuyen($chuyen['status'], !empty($chuyen['driver_id'])),
             'html'       => $this->dungView('chuyenxe/_noidung_chitiet', [
                 'chuyen'           => $chuyen,
                 'lichSuChuyenGiao' => $chuyenXeModel->layLichSuChuyenGiao((int)$id),
@@ -991,7 +1125,7 @@ class ChuyenXeController extends Controller
                 $dong['maintenance'],
                 $dong['fine'],
                 $dong['cash_advance'],
-                nhanTrangThaiChuyen($dong['status'])['nhan'],
+                nhanTrangThaiChuyen($dong['status'], !empty($dong['driver_id']))['nhan'],
                 $dong['note'],
             ]);
         }

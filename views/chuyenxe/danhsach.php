@@ -106,7 +106,11 @@ $dsTab = [
       <div class="col-12 d-flex gap-2">
         <button class="btn btn-primary btn-sm"><?= bieuTuong('search') ?> Lọc</button>
         <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light btn-sm">Bỏ lọc</a>
-        <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm ms-auto"><?= bieuTuong('plus') ?> Thêm chuyến xe</a>
+        <button type="button" class="btn btn-primary btn-sm ms-auto"
+                data-bs-toggle="modal" data-bs-target="#themNhanh">
+          <?= bieuTuong('sparkles') ?> Thêm nhanh từ ảnh
+        </button>
+        <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm"><?= bieuTuong('plus') ?> Thêm chuyến xe</a>
         <a href="<?= duongDan('chuyenxe/xuatcsv?' . http_build_query($loc)) ?>" class="btn btn-light btn-sm"><?= bieuTuong('download') ?> Xuất Excel</a>
       </div>
     </form>
@@ -235,6 +239,10 @@ $dsTab = [
   <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_nhotaikhac.php'; endforeach; ?>
 </div>
 
+<?php if (laQuanLy()): ?>
+  <?php include DUONG_DAN_GOC . '/views/chuyenxe/_modal_them_nhanh.php'; ?>
+<?php endif; ?>
+
 <!-- Hop thoai huy chuyen (quan ly) va bao khach huy (tai xe) -->
 <div id="khoiModalHuy">
   <?php foreach ($danhSach as $chuyen): ?>
@@ -280,6 +288,7 @@ $dsTab = [
         document.getElementById('khoiModalNopLai').insertAdjacentHTML('beforeend', kq.modal_noplai_html);
         document.getElementById('khoiModalSuaPhuPhi').insertAdjacentHTML('beforeend', kq.modal_suaphuphi_html);
         document.getElementById('khoiModalNhoTaiKhac').insertAdjacentHTML('beforeend', kq.modal_nhotaikhac_html);
+        document.getElementById('khoiModalHuy').insertAdjacentHTML('beforeend', kq.modal_huy_html);
 
         boQua += kq.so_dong_them;
 
@@ -324,6 +333,7 @@ $dsTab = [
         document.getElementById('khoiModalNopLai').innerHTML = kq.modal_noplai_html;
         document.getElementById('khoiModalSuaPhuPhi').innerHTML = kq.modal_suaphuphi_html;
         document.getElementById('khoiModalNhoTaiKhac').innerHTML = kq.modal_nhotaikhac_html;
+        document.getElementById('khoiModalHuy').innerHTML = kq.modal_huy_html;
 
         if (kq.con_them) {
           document.getElementById('khoiXemThem').removeAttribute('hidden');

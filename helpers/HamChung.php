@@ -229,8 +229,15 @@ function thoiGianTuongDoi($thoiDiem)
 }
 
 /** Nhan hien thi cua trang thai chuyen xe */
-function nhanTrangThaiChuyen($trangThai)
+function nhanTrangThaiChuyen($trangThai, $coTaiXe = true)
 {
+    // Chuyen vua tao hang loat tu anh thi chua gan ai - phai phan biet han
+    // voi "Moi giao" (da co tai xe, dang cho ho xac nhan), khong thi nguoi
+    // dieu phoi tuong da giao roi va cu the ma cho.
+    if ($trangThai === 'moi' && !$coTaiXe) {
+        return ['nhan' => 'Chưa giao', 'mau' => 'warning'];
+    }
+
     $danhSach = [
         'moi'              => ['nhan' => 'Mới giao',            'mau' => 'secondary'],
         'tai_xe_xac_nhan'  => ['nhan' => 'Tài xế đã xác nhận',  'mau' => 'warning'],

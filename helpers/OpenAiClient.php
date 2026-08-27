@@ -7,7 +7,16 @@
 
 class OpenAiClient
 {
-    const DIA_CHI = 'https://api.openai.com/v1/chat/completions';
+    const DIA_CHI_MAC_DINH = 'https://api.openai.com/v1/chat/completions';
+
+    /**
+     * Dia chi API. Khai bao OPENAI_URL trong config/cauhinh.php de tro sang
+     * mot endpoint tuong thich khac (proxy noi bo, hoac may chu gia khi kiem thu).
+     */
+    public static function diaChi()
+    {
+        return defined('OPENAI_URL') && OPENAI_URL !== '' ? OPENAI_URL : self::DIA_CHI_MAC_DINH;
+    }
 
     /**
      * Goi Chat Completions API.
@@ -36,7 +45,7 @@ class OpenAiClient
             $than['response_format'] = ['type' => 'json_object'];
         }
 
-        $ch = curl_init(self::DIA_CHI);
+        $ch = curl_init(self::diaChi());
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,

@@ -6,7 +6,7 @@
  * Nhan vao: $chuyenGanDay
  */
 ?>
-<?php foreach ($chuyenGanDay as $chuyen): $tt = nhanTrangThaiChuyen($chuyen['status']); ?>
+<?php foreach ($chuyenGanDay as $chuyen): $tt = nhanTrangThaiChuyen($chuyen['status'], !empty($chuyen['driver_id'])); ?>
   <tr>
     <td><?= dinhDangNgay($chuyen['trip_date']) ?></td>
     <td><?= h($chuyen['route']) ?></td>

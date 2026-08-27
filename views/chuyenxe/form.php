@@ -60,7 +60,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
   <div class="the">
     <div class="the-dau">
       <span><?= $dangSua ? bieuTuong('pencil') . ' Sửa chuyến xe #' . (int)$chuyenXe['id'] : bieuTuong('plus') . ' Thêm chuyến xe mới' ?></span>
-      <?php if ($dangSua): $tt = nhanTrangThaiChuyen($chuyenXe['status']); ?>
+      <?php if ($dangSua): $tt = nhanTrangThaiChuyen($chuyenXe['status'], !empty($chuyenXe['driver_id'])); ?>
         <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
       <?php endif; ?>
     </div>

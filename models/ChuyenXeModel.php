@@ -691,6 +691,76 @@ class ChuyenXeModel extends Model
         return $ketQua;
     }
 
+// -----------------------------------------------------------------
+    // Them nhanh nhieu chuyen + giao chuyen sau
+    //
+    // Luong thuc te cua nguoi dieu phoi: nhan mot anh lich trinh co nhieu
+    // chang, can tao het cac chuyen do TRUOC da (chua biet giao cho ai),
+    // roi moi lan luot chon tai xe cho tung chuyen. Truoc day bat buoc phai
+    // chon tai xe ngay luc tao nen ho phai mo form 5 lan cho 5 chang.
+    // -----------------------------------------------------------------
+
+    /**
+     * Tao nhieu chuyen cung luc, CHUA gan tai xe.
+     * Tra ve mang id cac chuyen vua tao.
+     */
+    public function themNhieu(array $dsChuyen)
+    {
+        $dsId = [];
+        foreach ($dsChuyen as $duLieu) {
+            if (empty($duLieu['trip_date'])) {
+                continue;   // khong co ngay chay thi khong phai chuyen xe
+            }
+            $dsId[] = $this->them($duLieu);
+        }
+        return $dsId;
+    }
+
+    /**
+     * Giao 1 chuyen CHUA co tai xe cho mot tai xe. Xe lay theo xe mac dinh
+     * cua tai xe do neu chuyen chua chon xe.
+     *
+     * Chi ap dung cho chuyen con "Moi giao" va chua gan ai - de khong ai lo
+     * tay doi tai xe cua chuyen dang chay bang duong nay.
+     */
+    public function giaoChoTaiXe($id, $idTaiXe, $idXe = null)
+    {
+        $chuyen = $this->motDong(
+            "SELECT * FROM trips
+              WHERE id = ? AND driver_id IS NULL AND status = 'moi' AND deleted_at IS NULL",
+            [(int)$id]
+        );
+        if (!$chuyen) {
+            return false;
+        }
+
+        $taiXe = $this->motDong(
+            "SELECT id, car_id FROM drivers WHERE id = ? AND status = 'active'",
+            [(int)$idTaiXe]
+        );
+        if (!$taiXe) {
+            return false;
+        }
+
+        // Uu tien xe nguoi dung chon; khong chon thi lay xe san co cua chuyen,
+        // cuoi cung moi den xe mac dinh cua tai xe
+        $xe = $idXe ? (int)$idXe : ($chuyen['car_id'] ?: $taiXe['car_id']);
+
+        return $this->soDongBiAnhHuong(
+            "UPDATE trips SET driver_id = ?, car_id = ? WHERE id = ? AND driver_id IS NULL",
+            [(int)$idTaiXe, $xe ? (int)$xe : null, (int)$id]
+        ) > 0;
+    }
+
+    /** Dem so chuyen da tao nhung chua giao cho tai xe nao */
+    public function demChuaGiao()
+    {
+        return (int)$this->motGiaTri(
+            "SELECT COUNT(*) FROM trips
+              WHERE driver_id IS NULL AND status = 'moi' AND deleted_at IS NULL"
+        );
+    }
+
     // -----------------------------------------------------------------
     // Canh bao trung lich
     //

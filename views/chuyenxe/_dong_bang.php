@@ -3,7 +3,7 @@
  * Partial: 1 dong bang chuyen xe (may tinh). Nhan vao $chuyen, $idTaiXeHienTai.
  * Dung chung cho lan tai trang dau (danhsach.php) va AJAX "xem them" (taiThem()).
  */
-$tt          = nhanTrangThaiChuyen($chuyen['status']);
+$tt          = nhanTrangThaiChuyen($chuyen['status'], !empty($chuyen['driver_id']));
 $cuaToi      = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
 $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
 ?>
@@ -19,7 +19,9 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
     <?php endif; ?>
   </td>
   <td><?= h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?></td>
-  <?php if (laQuanLy()): ?><td><?= h($chuyen['ten_tai_xe']) ?></td><?php endif; ?>
+  <?php if (laQuanLy()): ?>
+    <td><?php include __DIR__ . '/_o_giao_tai_xe.php'; ?></td>
+  <?php endif; ?>
   <td class="canh-phai"><?= dinhDangTien($chuyen['revenue_vnd']) ?></td>
   <td class="canh-phai"><?= dinhDangTien($chuyen['trip_fee']) ?></td>
   <?php if (laTaiXe()): ?><td class="canh-phai"><?= dinhDangTien($chuyen['fuel_cost']) ?></td><?php endif; ?>

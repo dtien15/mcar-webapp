@@ -1,4 +1,4 @@
-<?php $tt = nhanTrangThaiChuyen($chuyen['status']); ?>
+<?php $tt = nhanTrangThaiChuyen($chuyen['status'], !empty($chuyen['driver_id'])); ?>
 
 <div class="khong-in mb-3 d-flex gap-2 flex-wrap align-items-center">
   <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light btn-sm"><?= bieuTuong('arrow-left') ?> Quay lại danh sách</a>

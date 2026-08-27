@@ -214,6 +214,7 @@ window.mcarRealtime = {
 <script src="<?= duongDanTinh('assets/js/dan-nhanh.js') ?>"></script>
 <script src="<?= duongDanTinh('assets/js/dam-lich.js') ?>"></script>
 <script src="<?= duongDanTinh('assets/js/phan-tich-ai.js') ?>"></script>
+<script src="<?= duongDanTinh('assets/js/them-nhanh.js') ?>"></script>
 <script>
 // ---------------------------------------------------------------
 // Mo/dong thanh ben tren dien thoai

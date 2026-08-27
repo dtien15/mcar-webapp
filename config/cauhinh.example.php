@@ -31,3 +31,7 @@ define('TEN_CONG_TY', 'CÔNG TY CP NỤ CƯỜI MŨI NÉ');
 define('WS_URL', '');
 define('WS_BROADCAST_URL', '');
 define('WS_SHARED_SECRET', '');
+
+// Dia chi API cua OpenAI. De trong / khong khai bao thi dung dia chi chinh thuc.
+// Chi can khai khi phai di qua proxy noi bo hoac dung mot dich vu tuong thich khac.
+// define('OPENAI_URL', 'https://api.openai.com/v1/chat/completions');
