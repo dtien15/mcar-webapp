@@ -95,10 +95,13 @@ $ramCao = $realtime && $realtime['ram_dang_dung'] > 150;
             <div class="gia-tri" style="font-size:17px"><?= (int)$realtime['so_tai_khoan'] ?> <span class="don-vi">người</span></div>
           </div>
         </div>
-        <div class="o-thong-ke">
+        <?php // KHONG phai thong bao gui cho nguoi dung. Day la so lan may chu
+              // realtime hich cac tab dang mo tu tai lai so lieu - bo dem nam
+              // trong bo nho cua tien trinh Node, ve 0 moi lan Restart app. ?>
+        <div class="o-thong-ke" title="Số lần máy chủ realtime báo cho các tab đang mở tự tải lại số liệu, tính từ lúc khởi động. Không liên quan tới thông báo gửi cho tài xế.">
           <div class="bieu-tuong nen-vang"><?= bieuTuong('send') ?></div>
           <div>
-            <div class="nhan">Tin báo đã gửi</div>
+            <div class="nhan">Lượt đẩy cập nhật</div>
             <div class="gia-tri" style="font-size:17px"><?= dinhDangTien($realtime['so_nhac_da_gui']) ?></div>
           </div>
         </div>
