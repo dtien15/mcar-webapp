@@ -24,7 +24,7 @@ if (!laQuanLy()) {
       </option>
     <?php endforeach; ?>
   </select>
-  <button type="button" class="btn btn-sm btn-primary nut-giao-chuyen" disabled>
-    <?= bieuTuong('send') ?> Giao
+  <button type="button" class="btn btn-sm btn-primary nut-giao-chuyen" disabled title="Giao chuyến cho tài xế này">
+    <?= bieuTuong('send') ?> <span class="chu-giao">Giao</span>
   </button>
 </div>

@@ -240,7 +240,8 @@ function nhanTrangThaiChuyen($trangThai, $coTaiXe = true)
 
     $danhSach = [
         'moi'              => ['nhan' => 'Mới giao',            'mau' => 'secondary'],
-        'tai_xe_xac_nhan'  => ['nhan' => 'Tài xế đã xác nhận',  'mau' => 'warning'],
+        // Trong bang da co cot Tai xe roi nen khong can lap lai chu "Tai xe"
+        'tai_xe_xac_nhan'  => ['nhan' => 'Đã xác nhận',          'mau' => 'warning'],
         'hoan_thanh'       => ['nhan' => 'Hoàn thành',          'mau' => 'success'],
         'da_huy'           => ['nhan' => 'Đã hủy',              'mau' => 'danger'],
     ];

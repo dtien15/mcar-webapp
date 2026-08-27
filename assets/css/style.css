@@ -927,3 +927,86 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
   .o-giao-tai-xe { flex-direction: column; align-items: stretch; width: 100%; }
   .o-giao-tai-xe .nut-giao-chuyen { min-height: 38px; }
 }
+
+/* =====================================================================
+   Bang chuyen xe - thu gon cho vua mot man hinh
+   Truoc day cot Trang thai do toi 3 huy hieu chu dai ("Tai xe da xac nhan"
+   + "Trung lich" + "Chua nop lai") day ca bang rong ra, phai keo thanh cuon
+   ngang moi doc het - rat kho chiu vi thao tac lai nam o cot cuoi.
+   ===================================================================== */
+
+/* Cot Trang thai: 1 nhan chu + cac dau hieu phu thu nho thanh bieu tuong */
+.o-trang-thai { white-space: nowrap; }
+.o-trang-thai .dau-hieu {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-left: 3px;
+  vertical-align: middle;
+  cursor: help;
+}
+.o-trang-thai .dau-hieu.dh-canh-bao { background: #fdf1de; color: #a8650f; }
+.o-trang-thai .dau-hieu.dh-tot      { background: #e2f1ea; color: #14724e; }
+
+/* Cot Xe: bien so dam, ten xe lam dong phu mo - hep hon han mot dong dai */
+.o-xe .bien-so { font-weight: 600; white-space: nowrap; }
+.o-xe .dong-phu {
+  font-size: 11px;
+  color: var(--mau-chu-nhat);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+}
+
+/* Ghim be rong cac cot de bang khong tu keo gian theo noi dung dai nhat */
+.bang .o-trang-thai { width: 1%; }
+.bang .o-xe         { width: 110px; }
+
+/* Man hinh 13 inch (1280): bop them dem hai ben o va rut ngan doan dia diem
+   de bang van vua tron khung. Duoi nua thi da chuyen han sang giao dien the. */
+@media (max-width: 1400px) {
+  table.bang th,
+  table.bang td { padding-left: 8px; padding-right: 8px; }
+  .bang .doan-dia-diem { max-width: 150px; }
+  .bang .o-xe { width: 96px; }
+  .o-giao-tai-xe .o-chon-tai-xe { width: 96px; }
+}
+
+/* O chon tai xe + nut Giao: bop lai cho do chiem cot */
+.o-giao-tai-xe .o-chon-tai-xe {
+  min-width: 0;
+  width: 108px;
+  font-size: 12.5px;
+}
+@media (max-width: 1399.98px) {
+  /* Man hinh vua: nut Giao chi con bieu tuong */
+  .o-giao-tai-xe .chu-giao { display: none; }
+}
+
+/* Man hinh vua (13-14 inch): nut Chi tiet cung chi con bieu tuong, du de
+   ca bang vua tron khung ma khong phai cuon ngang. Man hinh rong van hien
+   day du chu. */
+@media (max-width: 1550px) {
+  .cum-thao-tac.ngang a.nut-phu .chu-nut { display: none; }
+}
+
+/* Man hinh 13 inch: thu hep thanh menu ben trai lay them cho cho bang.
+   Menu chi la duong dan - khong dang chiem 300px khi bang dang thieu cho. */
+@media (min-width: 992px) and (max-width: 1400px) {
+  :root { --rong-ben: 200px; }
+  .thanh-ben-dau .mo-ta { display: none; }
+  .muc-menu { padding-left: 12px; padding-right: 12px; }
+}
+
+/* Man hinh hep (duoi 1200px, vd laptop 11-12 inch hoac cua so chia doi):
+   bang 8 cot khong the vua du bop the nao - chuyen han sang giao dien the
+   giong dien thoai. Doc thoai hon han viec keo thanh cuon ngang qua lai. */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .ds-the-dien-thoai { display: block; }
+  .bang-may-tinh { display: none; }
+}
