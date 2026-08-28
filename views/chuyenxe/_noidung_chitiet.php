@@ -27,7 +27,7 @@
         </div>
         <div class="col-6 col-md-3">
           <label class="form-label">Hành trình</label>
-          <input class="form-control form-control-sm" value="<?= h($chuyen['route']) ?>" readonly>
+          <textarea rows="1" class="form-control form-control-sm tu-dong-gian" readonly><?= h($chuyen['route']) ?></textarea>
         </div>
         <div class="col-6 col-md-3">
           <label class="form-label">Xe</label>
@@ -51,22 +51,22 @@
         <?php endif; ?>
         <div class="col-6 col-md-3">
           <label class="form-label">Điểm đón</label>
-          <input class="form-control form-control-sm" value="<?= h($chuyen['pickup_location']) ?>" readonly>
+          <textarea rows="1" class="form-control form-control-sm tu-dong-gian" readonly><?= h($chuyen['pickup_location']) ?></textarea>
         </div>
         <div class="col-6 col-md-3">
           <label class="form-label">Điểm trả</label>
-          <input class="form-control form-control-sm" value="<?= h($chuyen['dropoff_location']) ?>" readonly>
+          <textarea rows="1" class="form-control form-control-sm tu-dong-gian" readonly><?= h($chuyen['dropoff_location']) ?></textarea>
         </div>
         <?php if (!empty($chuyen['pickup_sign'])): ?>
         <div class="col-6 col-md-3">
           <label class="form-label">Bảng đón khách</label>
-          <input class="form-control form-control-sm" value="<?= h($chuyen['pickup_sign']) ?>" readonly>
+          <textarea rows="1" class="form-control form-control-sm tu-dong-gian" readonly><?= h($chuyen['pickup_sign']) ?></textarea>
         </div>
         <?php endif; ?>
         <?php if (!empty($chuyen['customer_name']) || !empty($chuyen['customer_phone'])): ?>
         <div class="col-6 col-md-3">
           <label class="form-label">Họ tên khách</label>
-          <input class="form-control form-control-sm" value="<?= h($chuyen['customer_name']) ?>" readonly>
+          <textarea rows="1" class="form-control form-control-sm tu-dong-gian" readonly><?= h($chuyen['customer_name']) ?></textarea>
         </div>
         <div class="col-6 col-md-3">
           <label class="form-label">SĐT khách</label>
@@ -76,13 +76,13 @@
         <?php if (!empty($chuyen['customer_note'])): ?>
         <div class="col-12">
           <label class="form-label">Ghi chú khách</label>
-          <input class="form-control form-control-sm" value="<?= h($chuyen['customer_note']) ?>" readonly>
+          <textarea rows="1" class="form-control form-control-sm tu-dong-gian" readonly><?= h($chuyen['customer_note']) ?></textarea>
         </div>
         <?php endif; ?>
         <?php if (!empty($chuyen['company_note'])): ?>
         <div class="col-12">
           <label class="form-label">Lưu ý từ công ty</label>
-          <input class="form-control form-control-sm text-danger" value="<?= h($chuyen['company_note']) ?>" readonly>
+          <textarea rows="1" class="form-control form-control-sm tu-dong-gian text-danger" readonly><?= h($chuyen['company_note']) ?></textarea>
         </div>
         <?php endif; ?>
       </div>

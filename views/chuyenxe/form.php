@@ -120,8 +120,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               </div>
               <div class="col-6 col-md-3">
                 <label class="form-label">Hành trình</label>
-                <input name="hanh_trinh" id="oHanhTrinh" class="form-control" <?= $chiXem ?>
-                       value="<?= h(giaTri($chuyenXe, 'route')) ?>">
+                <textarea name="hanh_trinh" id="oHanhTrinh" rows="1" class="form-control tu-dong-gian" <?= $chiXem ?>><?= h(giaTri($chuyenXe, 'route')) ?></textarea>
               </div>
               <div class="col-6 col-md-3">
                 <label class="form-label">Số lượng khách</label>
@@ -131,24 +130,20 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
 
               <div class="col-6 col-md-4">
                 <label class="form-label">Điểm đón</label>
-                <input name="dia_diem_don" class="form-control" <?= $chiXem ?>
-                       value="<?= h(giaTri($chuyenXe, 'pickup_location')) ?>">
+                <textarea name="dia_diem_don" rows="1" class="form-control tu-dong-gian" <?= $chiXem ?>><?= h(giaTri($chuyenXe, 'pickup_location')) ?></textarea>
               </div>
               <div class="col-6 col-md-4">
                 <label class="form-label">Điểm trả</label>
-                <input name="dia_diem_tra" class="form-control" <?= $chiXem ?>
-                       value="<?= h(giaTri($chuyenXe, 'dropoff_location')) ?>">
+                <textarea name="dia_diem_tra" rows="1" class="form-control tu-dong-gian" <?= $chiXem ?>><?= h(giaTri($chuyenXe, 'dropoff_location')) ?></textarea>
               </div>
               <div class="col-12 col-md-4">
                 <label class="form-label">Bảng đón khách <span class="text-muted">(nếu có)</span></label>
-                <input name="bang_don" class="form-control" <?= $chiXem ?>
-                       value="<?= h(giaTri($chuyenXe, 'pickup_sign')) ?>">
+                <textarea name="bang_don" rows="1" class="form-control tu-dong-gian" <?= $chiXem ?>><?= h(giaTri($chuyenXe, 'pickup_sign')) ?></textarea>
               </div>
 
               <div class="col-6 col-md-4">
                 <label class="form-label">Họ tên khách</label>
-                <input name="ten_khach" class="form-control" <?= $chiXem ?>
-                       value="<?= h(giaTri($chuyenXe, 'customer_name')) ?>">
+                <textarea name="ten_khach" rows="1" class="form-control tu-dong-gian" <?= $chiXem ?>><?= h(giaTri($chuyenXe, 'customer_name')) ?></textarea>
               </div>
               <div class="col-6 col-md-4">
                 <label class="form-label">SĐT khách</label>
@@ -157,8 +152,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               </div>
               <div class="col-12 col-md-4">
                 <label class="form-label">Ghi chú khách <span class="text-muted">(nếu có)</span></label>
-                <input name="ghi_chu_khach" class="form-control" <?= $chiXem ?>
-                       value="<?= h(giaTri($chuyenXe, 'customer_note')) ?>">
+                <textarea name="ghi_chu_khach" rows="1" class="form-control tu-dong-gian" <?= $chiXem ?>><?= h(giaTri($chuyenXe, 'customer_note')) ?></textarea>
               </div>
             </div>
           </div>
@@ -250,8 +244,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               </div>
               <div class="col-12 col-md-6">
                 <label class="form-label">Lưu ý từ công ty <span class="text-muted">(nếu có)</span></label>
-                <input name="luu_y_cty" class="form-control" <?= $chiXem ?>
-                       value="<?= h(giaTri($chuyenXe, 'company_note')) ?>">
+                <textarea name="luu_y_cty" rows="1" class="form-control tu-dong-gian" <?= $chiXem ?>><?= h(giaTri($chuyenXe, 'company_note')) ?></textarea>
               </div>
             </div>
           </div>

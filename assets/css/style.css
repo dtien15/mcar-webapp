@@ -410,6 +410,22 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
   box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
 }
 .form-control[readonly] { background: #f8fafc; color: var(--mau-chu-nhat); }
+
+/*
+ * O nhap "tu dong gian" (dia chi, ten khach, ghi chu...): truoc la <input> 1
+ * dong nen chu dai (ten khach san, dia diem don/tra day du...) bi cat mat
+ * trong khung nho, phai bam vao roi cuon ngang moi doc het. Doi sang
+ * <textarea rows="1"> + JS tu resize chieu cao (o-tu-dong-gian.js): ngan thi
+ * gon 1 dong y het input binh thuong, dai thi tu xuong dong hien du chu.
+ */
+textarea.tu-dong-gian {
+  resize: none;
+  overflow: hidden;
+  min-height: 36px;
+  line-height: 1.4;
+  font-family: inherit;
+}
+.form-control-sm.tu-dong-gian { min-height: 30px; padding-top: 5px; padding-bottom: 5px; }
 .nhom-truong {
   border: 1px solid var(--mau-vien);
   border-radius: 10px;

@@ -222,6 +222,7 @@ window.mcarRealtime = {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="<?= duongDanTinh('assets/js/o-tu-dong-gian.js') ?>"></script>
 <script src="<?= duongDanTinh('assets/js/tien.js') ?>"></script>
 <script src="<?= duongDanTinh('assets/js/dan-nhanh.js') ?>"></script>
 <script src="<?= duongDanTinh('assets/js/dam-lich.js') ?>"></script>

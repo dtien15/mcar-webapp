@@ -165,6 +165,17 @@
       return sel;
     }
 
+    // Truong chu dai (dia chi, ten khach...) dung textarea tu gian chieu cao -
+    // ten khach san/dia diem day du thuong dai hon 1 o input hien duoc, khong
+    // thi nhin vao bang bi cat mat chu, phai bam vao tung o moi doc het.
+    if (cot.kieu === 'text') {
+      var ta = document.createElement('textarea');
+      ta.rows = 1;
+      ta.className = 'form-control form-control-sm tu-dong-gian';
+      ta.value = giaTri == null ? '' : String(giaTri);
+      return ta;
+    }
+
     var o = document.createElement('input');
     o.className = 'form-control form-control-sm';
     o.type = cot.kieu === 'date' ? 'date'
