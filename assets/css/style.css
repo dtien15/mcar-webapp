@@ -713,6 +713,28 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
   .khung-ds-thong-bao { width: calc(100vw - 20px); }
 }
 
+/*
+ * Hang nut Loc/Bo loc/Them chuyen/Xuat Excel tren trang Chuyen xe: man rong
+ * du cho ca 5 nut nam mot hang, nhung man hep (dien thoai) cung ep vao 1
+ * hang thi moi nut bi bop con vai chuc px, chu bi vo xuong nhieu dong nhin
+ * roi mat. Duoi 768px doi sang luoi 2 cot ro rang, gop 2 nut it dung nhat
+ * (Them nhanh tu anh, Xuat Excel) vao nut "..." cho gon - giong het kieu
+ * nut thao tac trong danh sach chuyen xe (mot nut chinh + menu "Khac").
+ */
+.hang-nut-bo-loc {
+  display: flex;
+  gap: 8px;
+}
+@media (max-width: 767.98px) {
+  .hang-nut-bo-loc {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .hang-nut-bo-loc > .btn,
+  .hang-nut-bo-loc > .dropdown { margin-left: 0 !important; width: 100%; }
+  .hang-nut-bo-loc .dropdown .btn { width: 100%; height: 100%; }
+}
+
 /* =====================================================================
    Nhom truong tien trong form chuyen xe
    Truoc day toan bo khoi "Doanh thu & thu tien" la mot day o 3-cot deu

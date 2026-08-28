@@ -103,15 +103,35 @@ $dsTab = [
         <label class="form-label">Tìm kiếm</label>
         <input type="text" name="tu_khoa" class="form-control form-control-sm" placeholder="Điểm đón, ghi chú..." value="<?= h($loc['tu_khoa']) ?>">
       </div>
-      <div class="col-12 d-flex gap-2">
-        <button class="btn btn-primary btn-sm"><?= bieuTuong('search') ?> Lọc</button>
-        <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light btn-sm">Bỏ lọc</a>
-        <button type="button" class="btn btn-primary btn-sm ms-auto"
+      <div class="col-12 hang-nut-bo-loc">
+        <button class="btn btn-primary btn-sm nut-loc"><?= bieuTuong('search') ?> Lọc</button>
+        <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light btn-sm nut-bo-loc">Bỏ lọc</a>
+
+        <?php // Man rong: moi nut hien rieng. Man hep: 2 nut it dung nhat gop vao "Khac" cho gon ?>
+        <button type="button" class="btn btn-primary btn-sm ms-auto d-none d-md-inline-flex"
                 data-bs-toggle="modal" data-bs-target="#themNhanh">
           <?= bieuTuong('sparkles') ?> Thêm nhanh từ ảnh
         </button>
-        <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm"><?= bieuTuong('plus') ?> Thêm chuyến xe</a>
-        <a href="<?= duongDan('chuyenxe/xuatcsv?' . http_build_query($loc)) ?>" class="btn btn-light btn-sm"><?= bieuTuong('download') ?> Xuất Excel</a>
+        <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm nut-them-chuyen"><?= bieuTuong('plus') ?> Thêm chuyến xe</a>
+        <a href="<?= duongDan('chuyenxe/xuatcsv?' . http_build_query($loc)) ?>" class="btn btn-light btn-sm d-none d-md-inline-flex"><?= bieuTuong('download') ?> Xuất Excel</a>
+
+        <div class="dropdown d-md-none nut-khac-loc">
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false" title="Việc khác">
+            <?= bieuTuong('dots') ?>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#themNhanh">
+                <?= bieuTuong('sparkles') ?> Thêm nhanh từ ảnh
+              </button>
+            </li>
+            <li>
+              <a class="dropdown-item" href="<?= duongDan('chuyenxe/xuatcsv?' . http_build_query($loc)) ?>">
+                <?= bieuTuong('download') ?> Xuất Excel
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
     </form>
   </div>
