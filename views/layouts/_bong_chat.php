@@ -40,7 +40,13 @@ $laQuanLyChat = laQuanLy();
 </div>
 
 <style>
-#bongChat { position: fixed; right: 18px; bottom: 18px; z-index: 1045; }
+#bongChat {
+  position: fixed;
+  right: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  z-index: 1045;
+  transition: bottom .15s ease;
+}
 #nutBongChat {
   width: 54px; height: 54px; border-radius: 50%; border: none; cursor: pointer;
   background: var(--mau-chinh, #2563eb); color: #fff; font-size: 24px;

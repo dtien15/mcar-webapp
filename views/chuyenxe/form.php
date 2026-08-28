@@ -513,12 +513,14 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
       </div>
 
       <div class="d-flex gap-2 thanh-hanh-dong-form">
+        <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-outline-secondary nut-quay-lai-form">
+          <?= bieuTuong('arrow-left') ?> Quay lại
+        </a>
         <?php if (!$khoaSua): $nhanNut = $dangSua
               ? (bieuTuong('device-floppy') . ' Cập nhật')
               : (laTaiXe() ? (bieuTuong('plus') . ' Tạo chuyến xe') : (bieuTuong('plus') . ' Thêm & giao cho tài xế')); ?>
           <button class="btn btn-primary flex-fill"><?= $nhanNut ?></button>
         <?php endif; ?>
-        <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light">Quay lại</a>
       </div>
     </div>
   </div>
