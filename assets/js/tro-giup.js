@@ -103,9 +103,29 @@
     return buoc.concat(trang === 'tongquan' || !timTheoTrang ? tourTongQuan() : []);
   }
 
+  /**
+   * Mot so buoc dung selector gop CA 2 GIAO DIEN (bang may tinh + the mobile),
+   * vi du 'tbody tr .o-trang-thai, .the-chuyen-xe .huy-hieu-trang-thai' - luc
+   * nao cung chi MOT trong hai ben dang hien (ben kia bi an bang display:none).
+   *
+   * document.querySelector() voi danh sach nhieu selector chon phan tu dau
+   * tien theo THU TU TRONG HTML, khong quan tam no co dang an hay khong - neu
+   * ban mobile nam truoc ban may tinh trong HTML (du dang an tren man rong),
+   * no se bi chon nham, khien driver.js ghim tour vao mot phan tu co kich
+   * thuoc 0x0 (popover chay ve goc trai man hinh). Ham nay quet qua TAT CA
+   * phan tu khop, chi lay phan tu dang thuc su hien (offsetParent != null).
+   */
+  function phanTuDangHien(chon) {
+    var ds = document.querySelectorAll(chon);
+    for (var i = 0; i < ds.length; i++) {
+      if (ds[i].offsetParent !== null) return ds[i];
+    }
+    return null;
+  }
+
   nutTroGiup.addEventListener('click', function () {
     var buoc = layTour().filter(function (b) {
-      return !b.chon || document.querySelector(b.chon);
+      return !b.chon || phanTuDangHien(b.chon);
     });
 
     if (!buoc.length) {
@@ -115,7 +135,7 @@
 
     var dsBuoc = buoc.map(function (b) {
       return b.chon
-        ? { element: b.chon, popover: { title: b.tieuDe, description: b.moTa } }
+        ? { element: phanTuDangHien(b.chon), popover: { title: b.tieuDe, description: b.moTa } }
         : { popover: { title: b.tieuDe, description: b.moTa } };
     });
 
