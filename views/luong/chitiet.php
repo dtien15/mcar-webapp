@@ -1,4 +1,4 @@
-<div class="khong-in mb-3 d-flex gap-2 flex-wrap align-items-center">
+<div class="khong-in mb-3 d-flex gap-2 flex-wrap align-items-center thanh-nut-trang">
   <a href="<?= duongDan('luong/phieu/' . (int)$taiXe['id'] . '/' . (int)$thang . '/' . (int)$nam) ?>" class="btn btn-light btn-sm">
     <?= bieuTuong('arrow-left') ?> Quay lại phiếu lương
   </a>

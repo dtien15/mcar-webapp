@@ -521,34 +521,45 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
 .the-luong-chan .btn { flex: 1; }
 
 /*
- * Thanh Luu/Quay lai ghim day man hinh tren dien thoai - form chuyen xe rat
- * dai (nhieu nhom tien), khong ghim thi phai cuon het xuong moi bam duoc.
+ * Thanh nut "Quay lai / Luu / In / Nhan tin..." ghim day man hinh tren dien
+ * thoai - man dai (form chuyen xe nhieu nhom tien, chi tiet chuyen xe, phieu
+ * luong) khong ghim thi phai cuon len/xuong tan noi co no moi bam lai duoc.
  *
- * Truoc day dung "position: sticky" nhung khong an vi the cha ".the" co
- * "overflow: hidden" (de bo goc tron) - sticky bi chan boi bat ky to tien nao
- * co overflow khac visible, nen no chi nam yen tai cho nhu binh thuong.
- * Doi sang "position: fixed" de khong phu thuoc the cha nua, luon noi dung o
- * day man hinh that su. Phai them padding-bottom cho ".the-than" de dong
- * cuoi cung cua form khong bi thanh nay de len.
+ * .thanh-hanh-dong-form = thanh Luu/Quay lai o CUOI form (chuyen xe).
+ * .thanh-nut-trang      = thanh Quay lai/In/Nhan tin... o DAU cac trang xem
+ *                         chi tiet, phieu in (chi tiet chuyen xe, phieu luong).
+ * Ca hai deu doi sang "position: fixed" ghim day man hinh - dung "sticky" se
+ * KHONG an vi the cha ".the"/khong co the cha nao co "overflow: hidden" (de
+ * bo goc tron), ma sticky bi chan boi bat ky to tien nao co overflow khac
+ * visible, nen no chi nam yen tai cho nhu binh thuong (day la ly do ban dau
+ * nut Quay lai o form chuyen xe khong ghim duoc).
  */
 @media (max-width: 767px) {
   .the-than:has(> .thanh-hanh-dong-form) { padding-bottom: 76px; }
-  .thanh-hanh-dong-form {
+  .noi-dung:has(> .thanh-nut-trang) { padding-bottom: 70px; }
+
+  .thanh-hanh-dong-form,
+  .thanh-nut-trang {
     position: fixed;
     left: 0; right: 0; bottom: 0;
     background: #fff;
     padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
-    margin: 0;
+    margin: 0 !important;
     border-top: 1px solid var(--mau-vien);
     box-shadow: 0 -4px 14px rgba(15, 23, 42, .1);
     z-index: 1035;
+    flex-wrap: nowrap !important;
   }
+  .thanh-nut-trang .btn { flex: 1 1 0; white-space: nowrap; padding-left: 4px; padding-right: 4px; }
+
   .nut-quay-lai-form { flex-shrink: 0; }
   .thanh-hanh-dong-form .nut-quay-lai-form:only-child { flex: 1 1 auto; }
 
   /* Thanh nay ghim day man hinh nen phai day bong chat noi len tren no,
      khong thi 2 cai chong len nhau o goc phai man hinh */
-  body:has(.thanh-hanh-dong-form) #bongChat { bottom: calc(74px + env(safe-area-inset-bottom, 0px)); }
+  body:has(.thanh-hanh-dong-form, .thanh-nut-trang) #bongChat {
+    bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .btn { font-size: 13px; }

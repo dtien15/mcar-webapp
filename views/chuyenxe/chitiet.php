@@ -1,12 +1,15 @@
 <?php $tt = nhanTrangThaiChuyen($chuyen['status'], !empty($chuyen['driver_id'])); ?>
 
-<div class="khong-in mb-3 d-flex gap-2 flex-wrap align-items-center">
+<div class="khong-in mb-2 text-end">
+  <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>" id="huyHieuTrangThai"><?= h($tt['nhan']) ?></span>
+</div>
+
+<div class="khong-in mb-3 d-flex gap-2 flex-wrap align-items-center thanh-nut-trang">
   <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light btn-sm"><?= bieuTuong('arrow-left') ?> Quay lại danh sách</a>
   <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><?= bieuTuong('printer') ?> In</button>
   <a href="<?= duongDan('chuyenxe?mo_chat=' . $chuyen['id']) ?>" class="btn btn-outline-info btn-sm">
     <?= bieuTuong('message-circle') ?> Nhắn tin
   </a>
-  <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?> ms-auto" id="huyHieuTrangThai"><?= h($tt['nhan']) ?></span>
 </div>
 
 <div id="chiTietNoiDung">
@@ -31,7 +34,7 @@
           var hh = document.getElementById('huyHieuTrangThai');
           if (hh && kq.trang_thai) {
             hh.textContent = kq.trang_thai.nhan;
-            hh.className = 'huy-hieu-trang-thai tt-' + kq.trang_thai.mau + ' ms-auto';
+            hh.className = 'huy-hieu-trang-thai tt-' + kq.trang_thai.mau;
           }
         } else if (kq.da_xoa) {
           window.location.href = '<?= duongDan('chuyenxe') ?>';
