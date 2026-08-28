@@ -24,6 +24,7 @@ class Router
         'caidat'    => 'CaiDatController',
         'chat'      => 'ChatController',
         'hethong'   => 'HeThongController',
+        'huongdan'  => 'HuongDanController',
     ];
 
     public function chay()

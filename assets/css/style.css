@@ -1010,3 +1010,70 @@ table.bang tfoot td { font-weight: 700; background: #f8fafc; border-top: 2px sol
   .ds-the-dien-thoai { display: block; }
   .bang-may-tinh { display: none; }
 }
+
+/* =====================================================================
+   Trang Huong dan su dung
+   ===================================================================== */
+.ds-huong-dan {
+  margin-bottom: 0;
+  padding-left: 20px;
+}
+.ds-huong-dan li { margin-bottom: 6px; line-height: 1.55; }
+.ds-huong-dan li:last-child { margin-bottom: 0; }
+.accordion-button:not(.collapsed) {
+  background: #eff6ff;
+  color: var(--mau-chinh-dam);
+  box-shadow: none;
+}
+.accordion-button:focus { box-shadow: none; border-color: var(--mau-vien); }
+.accordion-body { font-size: 14px; line-height: 1.6; }
+.accordion-body p:last-child,
+.accordion-body ol:last-child,
+.accordion-body ul:last-child { margin-bottom: 0; }
+
+/* Nut "Tro giup" (chay tour driver.js) o thanh tren */
+.nut-tro-giup {
+  background: transparent;
+  border: 1px solid var(--mau-vien);
+  color: var(--mau-chu-nhat);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex: none;
+}
+.nut-tro-giup:hover { background: var(--mau-nen); color: var(--mau-chinh); }
+
+/* driver.js: doi mau chu tro giup sang tieng Viet gon, phu hop mau app */
+.driver-popover.mcar-popover {
+  border-radius: 12px;
+  font-family: inherit;
+}
+.driver-popover.mcar-popover .driver-popover-title {
+  font-size: 15.5px;
+  color: var(--mau-chu);
+}
+.driver-popover.mcar-popover .driver-popover-description {
+  font-size: 13.8px;
+  color: var(--mau-chu-nhat);
+  line-height: 1.55;
+}
+.driver-popover.mcar-popover .driver-popover-footer button {
+  border-radius: 7px;
+  font-size: 13px;
+  text-shadow: none;
+}
+.driver-popover.mcar-popover .driver-popover-next-btn,
+.driver-popover.mcar-popover .driver-popover-close-btn {
+  background: var(--mau-chinh);
+  color: #fff;
+  border: none;
+}
+.driver-popover.mcar-popover .driver-popover-prev-btn {
+  background: #fff;
+  color: var(--mau-chu-nhat);
+  border: 1px solid var(--mau-vien);
+}

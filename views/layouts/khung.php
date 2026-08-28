@@ -50,6 +50,8 @@ $menu = [
     ['route' => 'nguoidung', 'nhan' => 'Người dùng',          'icon' => 'users',            'quyen' => ['admin']],
     ['route' => 'caidat',    'nhan' => 'Cài đặt',             'icon' => 'settings',         'quyen' => ['admin']],
     ['route' => 'hethong',   'nhan' => 'Theo dõi hệ thống',   'icon' => 'heartbeat',        'quyen' => ['admin']],
+    ['nhom'  => 'TRỢ GIÚP',  'quyen' => ['admin','ketoan','taixe']],
+    ['route' => 'huongdan',  'nhan' => 'Hướng dẫn sử dụng',   'icon' => 'help-circle',      'quyen' => ['admin','ketoan','taixe']],
 ];
 
 // Cac muc menu co duong dan nhieu doan - de muc cha biet khi nao phai nhuong
@@ -68,6 +70,7 @@ foreach ($menu as $m) {
 <title><?= h($tieuDe ?? 'MCAR') ?> · <?= h($tenHeThong) ?></title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css" rel="stylesheet">
+<link rel="stylesheet" href="<?= duongDan('assets/vendor/driverjs/driver.css') ?>">
 <link rel="stylesheet" href="<?= duongDanTinh('assets/css/style.css') ?>">
 
 <!-- Biểu tượng trang (favicon) -->
@@ -87,6 +90,10 @@ foreach ($menu as $m) {
 // Dinh nghia som (truoc noi dung trang) de cac trang con nhu form sua chuyen
 // xe co the dang ky nghe/gui tin ngay khi trang vua tai, khong can cho toi
 // khoi script cuoi trang. Ket noi WebSocket that su van duoc mo ben duoi.
+// Route va vai tro hien tai - de tro-giup.js biet chay dung tour cho dung trang
+window.mcarTrangHienTai = <?= json_encode($duongDanHienTai) ?>;
+window.mcarVaiTro       = <?= json_encode(vaiTroHienTai()) ?>;
+
 window.mcarRealtime = {
   socket: null,
   _dsXuLy: {},
@@ -152,6 +159,11 @@ window.mcarRealtime = {
     <button class="nut-menu" id="nutMenu" type="button" aria-label="Mở menu"><?= bieuTuong('menu-2') ?></button>
     <h1 class="tieu-de-trang"><?= h($tieuDe ?? 'Tổng quan') ?></h1>
 
+    <!-- Nut Tro giup: chay tour dan duong ngay tren trang dang xem -->
+    <button type="button" class="nut-tro-giup" id="nutTroGiup" title="Hướng dẫn nhanh trang này">
+      <?= bieuTuong('help-circle') ?>
+    </button>
+
     <!-- Chuong thong bao -->
     <div class="dropdown khung-chuong">
       <button class="nut-chuong" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-label="Thông báo">
@@ -215,6 +227,8 @@ window.mcarRealtime = {
 <script src="<?= duongDanTinh('assets/js/dam-lich.js') ?>"></script>
 <script src="<?= duongDanTinh('assets/js/phan-tich-ai.js') ?>"></script>
 <script src="<?= duongDanTinh('assets/js/them-nhanh.js') ?>"></script>
+<script src="<?= duongDan('assets/vendor/driverjs/driver.js') ?>"></script>
+<script src="<?= duongDanTinh('assets/js/tro-giup.js') ?>"></script>
 <script>
 // ---------------------------------------------------------------
 // Mo/dong thanh ben tren dien thoai
