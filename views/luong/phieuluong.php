@@ -6,7 +6,7 @@ $coCanhBaoTyGia = ((float)$bangLuong['total_collected_usd'] > 0 && $tyGiaUsd <= 
     || ((float)$bangLuong['total_refund_usd'] > 0 && $tyGiaUsd <= 0);
 ?>
 <div class="khong-in mb-3 d-flex gap-2 flex-wrap thanh-nut-trang">
-  <a href="<?= duongDan('luong?thang=' . (int)$thang . '&nam=' . (int)$nam) ?>" class="btn btn-light btn-sm"><?= bieuTuong('arrow-left') ?> Quay lại bảng lương</a>
+  <a href="<?= duongDan('luong?thang=' . (int)$thang . '&nam=' . (int)$nam) ?>" class="btn btn-light btn-sm"><?= bieuTuong('arrow-left') ?> Quay lại</a>
   <button onclick="window.print()" class="btn btn-primary btn-sm"><?= bieuTuong('printer') ?> In phiếu lương</button>
   <a href="<?= duongDan('luong/chitiet/' . (int)$bangLuong['driver_id'] . '/' . (int)$thang . '/' . (int)$nam) ?>" class="btn btn-outline-secondary btn-sm">
     <?= bieuTuong('list-details') ?> Bảng lương chi tiết
