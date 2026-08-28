@@ -19,6 +19,14 @@
 
 * { box-sizing: border-box; }
 
+/* ---------- Thanh cuon ---------- */
+* { scrollbar-width: thin; scrollbar-color: #bfdbfe var(--mau-nen); } /* Firefox */
+
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: var(--mau-nen); border-radius: 10px; }
+::-webkit-scrollbar-thumb { border-radius: 10px; background: #bfdbfe; }
+::-webkit-scrollbar-thumb:hover { background: #93c5fd; }
+
 body {
   margin: 0;
   background: var(--mau-nen);
