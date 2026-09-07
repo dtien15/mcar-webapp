@@ -23,7 +23,7 @@
   var idChuyen = <?= (int)$chuyen['id'] ?>;
   if (!window.mcarRealtime) return;
 
-  window.mcarRealtime.dangKy('nudge', function () {
+  function taiLaiChiTiet() {
     fetch('<?= duongDan('chuyenxe/chitietmoi') ?>/' + idChuyen, { credentials: 'same-origin' })
       .then(function (r) { return r.json(); })
       .then(function (kq) {
@@ -40,7 +40,25 @@
           window.location.href = '<?= duongDan('chuyenxe') ?>';
         }
       })
-      .catch(function () {});
+      .catch(function () { /* mat mang thi bo qua, doi phong dinh ky ben duoi se thu lai */ });
+  }
+
+  window.mcarRealtime.dangKy('nudge', taiLaiChiTiet);
+  // Vua ket noi (lan dau hoac vua ket noi lai sau khi rot mang) -> kiem tra
+  // ngay, phong khi co thay doi xay ra dung luc dang mat ket noi WebSocket.
+  window.mcarRealtime.dangKy('auth_ok', taiLaiChiTiet);
+
+  // Doi phong dinh ky - chi khi tab dang duoc xem. Trang chi tiet chi co 1
+  // chuyen duy nhat nen tai lai khong ton kem, dam bao du WebSocket co truc
+  // trac gi thi so lieu tren man hinh van dung trong vong toi da 15 giay.
+  // Quay lai tab thi kiem tra ngay, khong doi dinh ky (dien thoai khoa man
+  // hinh hay ngat WebSocket ngam ma khong bao "dong" ngay).
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) taiLaiChiTiet();
   });
+  setInterval(function () {
+    if (document.hidden) return;
+    taiLaiChiTiet();
+  }, 15000);
 })();
 </script>

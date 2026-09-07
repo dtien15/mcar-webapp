@@ -330,13 +330,29 @@ $dsTab = [
   // ---------------------------------------------------------------
   // Realtime: co ai vua tao/sua/xac nhan/chot chuyen xe -> tai lai dung
   // so dong dang hien de thay ngay trang thai moi, khong can bam F5.
+  //
+  // 3 lop de du lieu LUON dung, khong phu thuoc hoan toan vao 1 tin nhac
+  // WebSocket duy nhat (tin co the bi bo lo: dang mo modal, WebSocket vua
+  // mat ket noi lai, dien thoai chuyen tab lam trinh duyet tam dung
+  // WebSocket...):
+  //   1. Nhac qua WebSocket - nhanh nhat, chay ngay khi co thay doi.
+  //   2. Dang mo modal thi hoan lai, tu chay lai NGAY LUC DONG MODAL ra -
+  //      khong con phai cho "may man" co tin nhac khac toi thi moi cap nhat.
+  //   3. Doi phong khi tat ca deu bo lo (VD WebSocket vua rot): tu kiem
+  //      tra lai dinh ky trong luc dang mo trang, khong can bam F5.
   // ---------------------------------------------------------------
+  var coCapNhatBiHoanLai = false;
+
   function taiLaiTheoRealtime() {
     if (dangTai) return;
-    // Dang mo bat ky modal nao (Xac nhan/Nop lai/Sua phu phi/Nho tai khac) thi
-    // KHONG thay the DOM luc nay - se lam mat modal + du lieu dang go dang lung.
-    // Lan nudge sau se tu cap nhat khi nguoi dung dong modal ra.
-    if (document.querySelector('.modal.show')) return;
+    // Dang mo bat ky modal nao (Xac nhan/Nop lai/Sua phu phi/Nho tai khac) hoac
+    // dang mo menu "..." cua 1 dong thi KHONG thay the DOM luc nay - se lam mat
+    // modal/menu + du lieu dang go dang lung. Danh dau lai de tu chay ngay khi
+    // dong lai (xem duoi).
+    if (document.querySelector('.modal.show, .dropdown-menu.show')) {
+      coCapNhatBiHoanLai = true;
+      return;
+    }
 
     var thamSo = new URLSearchParams(window.location.search);
     thamSo.set('bo_qua', 0);
@@ -361,12 +377,38 @@ $dsTab = [
           document.getElementById('khoiXemThem').setAttribute('hidden', '');
         }
       })
-      .catch(function () { /* mat mang thi bo qua, lan realtime sau thu lai */ });
+      .catch(function () { /* mat mang thi bo qua, lop doi phong ben duoi se thu lai */ });
   }
+
+  // Lop 2: dong modal/menu nao ra cung kiem tra xem co ban cap nhat dang hoan lai khong
+  ['hidden.bs.modal', 'hidden.bs.dropdown'].forEach(function (suKien) {
+    document.addEventListener(suKien, function () {
+      if (!coCapNhatBiHoanLai) return;
+      if (document.querySelector('.modal.show, .dropdown-menu.show')) return; // van con cai khac dang mo
+      coCapNhatBiHoanLai = false;
+      taiLaiTheoRealtime();
+    });
+  });
 
   if (window.mcarRealtime) {
     window.mcarRealtime.dangKy('nudge', taiLaiTheoRealtime);
+    // Vua ket noi (lan dau hoac vua ket noi lai sau khi rot mang) -> kiem
+    // tra ngay, phong khi co thay doi xay ra dung luc dang mat ket noi.
+    window.mcarRealtime.dangKy('auth_ok', taiLaiTheoRealtime);
   }
+
+  // Lop 3: doi phong dinh ky - chi khi tab dang duoc xem, tranh ton tai
+  // nguyen khi trang bi thu nho/chuyen tab khac trong thoi gian dai. Quay
+  // lai tab thi kiem tra ngay luon, khong doi den luot dinh ky tiep theo -
+  // dien thoai khoa man hinh/chuyen app rat hay lam WebSocket bi ngat ngam
+  // ma trinh duyet khong bao "dong" ngay, nen day la luc de bi lo cap nhat nhat.
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) taiLaiTheoRealtime();
+  });
+  setInterval(function () {
+    if (document.hidden) return;
+    taiLaiTheoRealtime();
+  }, 15000);
 
 })();
 </script>
