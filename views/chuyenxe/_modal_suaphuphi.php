@@ -26,11 +26,21 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
           bạn đã xác nhận chuyến này, đang chờ công ty chốt. Nếu thực tế phụ phí khác với lúc xác nhận
           (VD khách đổi ý muốn lưu đêm giữa chừng), sửa lại tại đây.
         </div>
+        <?php
+          $loaiPhuPhiModal = '0';
+          if ((float)$chuyen['overnight_fee'] == 200000) { $loaiPhuPhiModal = '200000'; }
+          elseif ((float)$chuyen['overnight_fee'] == 100000) { $loaiPhuPhiModal = '100000'; }
+        ?>
         <div class="row g-2">
           <div class="col-6">
             <label class="form-label">Phụ phí (lưu đêm / chạy khuya)</label>
-            <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0"
-                   name="luu_dem" value="<?= h(giaTriTienForm($chuyen, 'overnight_fee')) ?>">
+            <input type="text" name="luu_dem" class="form-control form-control-sm o-nhap-tien o-phu-phi" placeholder="0"
+                   value="<?= h(giaTriTienForm($chuyen, 'overnight_fee')) ?>">
+            <div class="btn-group btn-group-sm mt-1 o-phu-phi-nhanh" role="group">
+              <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhiModal === '0' ? 'active' : '' ?>" data-tien="0">Không có</button>
+              <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhiModal === '200000' ? 'active' : '' ?>" data-tien="200000">Lưu đêm</button>
+              <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhiModal === '100000' ? 'active' : '' ?>" data-tien="100000">Chạy khuya</button>
+            </div>
           </div>
           <div class="col-6">
             <label class="form-label">Phụ phí khác</label>
