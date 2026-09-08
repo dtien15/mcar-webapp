@@ -381,14 +381,30 @@ class ChuyenXeController extends Controller
     /**
      * Tao NHIEU chuyen cung luc tu bang xem truoc cua "Them nhanh".
      *
-     * Cac chuyen tao ra CHUA gan tai xe - dung luong lam viec that: nguoi
-     * dieu phoi nhan mot anh lich trinh nhieu chang, tao het cac chang do
-     * truoc da, roi moi lan luot chon tai xe cho tung chuyen.
+     * Quan ly: cac chuyen tao ra CHUA gan tai xe - dung luong lam viec that:
+     * nguoi dieu phoi nhan mot anh lich trinh nhieu chang, tao het cac chang
+     * do truoc da, roi moi lan luot chon tai xe cho tung chuyen.
+     *
+     * Tai xe: cung 1 modal, nhung tao ra GAN SAN cho chinh minh + xe mac
+     * dinh cua minh (giong luu() khi tai xe tu tao 1 chuyen) - ho thuong
+     * nhan anh lich trinh nhieu chang cho chinh chuyen cua ho, khong phai
+     * de giao cho ai khac. Van de trang thai "moi" (chua xac nhan) thay vi
+     * nhay thang sang "da xac nhan" nhu luu() 1 chuyen - vi bang xem truoc
+     * o day khong co o nhap doanh thu/tien cuoc, tai xe can qua man "Xac
+     * nhan" quen thuoc de nhap so lieu thuc te cho tung chuyen.
      */
     public function taoNhanh()
     {
-        $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->yeuCauQuyen(['admin', 'ketoan', 'taixe']);
         $this->yeuCauPostAjaxChuyen();
+
+        $xeMacDinh = null;
+        if (laTaiXe()) {
+            $xeMacDinh = $this->layXeMacDinhCuaToi();
+            if (!$xeMacDinh) {
+                $this->traJsonChuyen(['ok' => false, 'loi' => 'Bạn chưa được gán xe mặc định. Liên hệ quản trị viên.']);
+            }
+        }
 
         $dsGui = $_POST['chuyen'] ?? [];
         if (!is_array($dsGui) || !$dsGui) {
@@ -417,8 +433,10 @@ class ChuyenXeController extends Controller
                 'revenue_vnd'     => (float)preg_replace('/[^\d]/', '', (string)($c['thu_vnd'] ?? 0)),
                 'customer_note'   => mb_substr(trim($c['ghi_chu_khach'] ?? ''), 0, 255, 'UTF-8'),
                 'contract_type_id' => !empty($c['id_loai_keo']) ? (int)$c['id_loai_keo'] : null,
-                'driver_id'       => null,   // chua giao - chon tai xe o danh sach
-                'car_id'          => null,
+                // Tai xe tu tao: gan san chinh minh + xe mac dinh, khong de trong
+                // cho ai giao (ho khong the tu giao chuyen cho nguoi khac o day).
+                'driver_id'       => $xeMacDinh ? (int)taiKhoanHienTai()['id_tai_xe'] : null,
+                'car_id'          => $xeMacDinh ? (int)$xeMacDinh['id'] : null,
                 'status'          => 'moi',
             ];
         }
@@ -429,9 +447,13 @@ class ChuyenXeController extends Controller
 
         $dsId = $this->model('ChuyenXeModel')->themNhieu($dsLuu);
 
-        datThongBao('Đã tạo ' . count($dsId) . ' chuyến, chưa giao cho tài xế nào. '
-                  . 'Chọn tài xế ngay trên danh sách để giao.');
-        baoThucRealtimeQuanLy();
+        if (laTaiXe()) {
+            datThongBao('Đã tạo ' . count($dsId) . ' chuyến cho chính bạn. Vào từng chuyến bấm "Xác nhận" để nhập số liệu thực tế.');
+        } else {
+            datThongBao('Đã tạo ' . count($dsId) . ' chuyến, chưa giao cho tài xế nào. '
+                      . 'Chọn tài xế ngay trên danh sách để giao.');
+        }
+        baoThucRealtimeChuyenXe(laTaiXe() ? (int)taiKhoanHienTai()['id_tai_xe'] : null);
 
         // Tra ve khoang ngay cua cac chuyen vua tao de danh sach nhay thang
         // toi do. Khong co no thi tao chuyen thang sau xong nhin vao danh

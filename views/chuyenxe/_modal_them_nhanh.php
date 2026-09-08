@@ -95,8 +95,14 @@
 
           <div class="alert alert-secondary mt-2 mb-0" style="font-size:12.8px">
             <?= bieuTuong('info-circle') ?>
-            Các chuyến này tạo ra ở trạng thái <strong>Chưa giao</strong> — chưa gắn tài xế nào.
-            Ra danh sách chọn tài xế ở từng dòng rồi bấm Giao, lúc đó tài xế mới nhận được thông báo.
+            <?php if (laTaiXe()): ?>
+              Các chuyến này tạo ra cho <strong>chính bạn</strong> + xe mặc định của bạn, ở trạng thái
+              <strong>Mới giao</strong>. Vào từng chuyến bấm "Xác nhận" để nhập số liệu thực tế (doanh thu,
+              tiền cuốc...) như khi tạo tay 1 chuyến.
+            <?php else: ?>
+              Các chuyến này tạo ra ở trạng thái <strong>Chưa giao</strong> — chưa gắn tài xế nào.
+              Ra danh sách chọn tài xế ở từng dòng rồi bấm Giao, lúc đó tài xế mới nhận được thông báo.
+            <?php endif; ?>
           </div>
         </div>
       </div>

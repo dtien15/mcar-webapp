@@ -23,7 +23,12 @@ $dsTab = [
     <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#khoiBoLocTaiXe">
       <?= bieuTuong('filter') ?> Lọc / Tìm kiếm
     </button>
-    <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm"><?= bieuTuong('plus') ?> Tạo chuyến xe</a>
+    <div class="d-flex gap-2 ms-auto">
+      <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#themNhanh">
+        <?= bieuTuong('sparkles') ?> Thêm nhanh từ ảnh
+      </button>
+      <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm"><?= bieuTuong('plus') ?> Tạo chuyến xe</a>
+    </div>
   </div>
   <div class="collapse" id="khoiBoLocTaiXe">
     <div class="the-than pt-0">
@@ -259,9 +264,7 @@ $dsTab = [
   <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_nhotaikhac.php'; endforeach; ?>
 </div>
 
-<?php if (laQuanLy()): ?>
-  <?php include DUONG_DAN_GOC . '/views/chuyenxe/_modal_them_nhanh.php'; ?>
-<?php endif; ?>
+<?php include DUONG_DAN_GOC . '/views/chuyenxe/_modal_them_nhanh.php'; ?>
 
 <!-- Hop thoai huy chuyen (quan ly) va bao khach huy (tai xe) -->
 <div id="khoiModalHuy">
