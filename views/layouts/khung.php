@@ -388,6 +388,20 @@ window.mcarRealtime = {
     });
   }
 
+  // Huy hieu so tren icon ung dung o man hinh dien thoai (Android/PWA da
+  // "Them vao man hinh chinh"). Truoc day chi co sw.js dat huy hieu nay,
+  // nhung sw.js CHI chay khi co 1 tin PUSH THAT gui toi - luc dang mo app
+  // xem/doc het thong bao thi khong co push nao ca, nen huy hieu bi ket lai
+  // so cu cho toi khi may co push tiep theo. Dat lai ngay tu day (trang
+  // dang mo, chay moi lan kiemTra) de huy hieu luon dung voi so thuc te.
+  function capNhatHuyHieuUngDung(soChuaDoc) {
+    if (!(navigator && 'setAppBadge' in navigator)) return;
+    try {
+      if (soChuaDoc > 0) navigator.setAppBadge(soChuaDoc).catch(function () {});
+      else navigator.clearAppBadge().catch(function () {});
+    } catch (e) {}
+  }
+
   // --- Goi may chu kiem tra thong bao moi ---
   function kiemTra() {
     fetch(URL_KIEM_TRA, { credentials: 'same-origin' })
@@ -396,6 +410,7 @@ window.mcarRealtime = {
         if (!kq.dangNhap) return;
 
         if (cham) cham.hidden = !(kq.chuaDoc > 0);
+        capNhatHuyHieuUngDung(kq.chuaDoc);
 
         var chuong = document.querySelector('.nut-chuong');
         if (chuong) chuong.setAttribute('aria-label', 'Thông báo (' + kq.chuaDoc + ' chưa đọc)');
@@ -416,6 +431,12 @@ window.mcarRealtime = {
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden) kiemTra();
   });
+
+  // Vua ket noi WebSocket xong (lan dau hoac vua ket noi lai sau khi rot
+  // mang) -> kiem tra ngay, phong khi co thong bao moi den dung luc dang
+  // mat ket noi (window.mcarRealtime da dinh nghia o dau trang nen goi
+  // duoc ngay tu day, du ket noi that su chi mo sau o cuoi trang).
+  window.mcarRealtime.dangKy('auth_ok', kiemTra);
 
   // ---------------------------------------------------------------
   // Realtime: mo 1 ket noi WebSocket toi ws-server/ (neu da cau hinh).

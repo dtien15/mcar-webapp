@@ -396,6 +396,15 @@ $laQuanLyChat = laQuanLy();
   };
 
   // ---------- Realtime ----------
+  //
+  // So chua doc tren bong chat truoc day CHI cap nhat qua 1 tin nhac
+  // WebSocket duy nhat - dung khi mo khung chat len (co vong hoi lai moi 4
+  // giay rieng, xem moKhung()), nhung luc khung chat DANG DONG (chi con cai
+  // bong tron voi so do) thi khong co gi du phong ca: WebSocket rot ket noi
+  // (mat mang, dien thoai khoa man hinh...) la so bi ket lai, phai F5 hoac
+  // mo tab moi moi thay dung. Them 3 lop nhu da lam cho trang chuyen xe:
+  // doi phong dinh ky, kiem tra ngay luc quay lai tab, va luc WebSocket vua
+  // ket noi/ket noi lai xong.
   if (window.mcarRealtime) {
     window.mcarRealtime.dangKy('nudge', function () {
       capNhatSoChuaDoc();
@@ -403,9 +412,17 @@ $laQuanLyChat = laQuanLy();
       if (idTaiXeDangMo || !LA_QUAN_LY) taiTinNhan(true);
       if (LA_QUAN_LY) taiDanhSachHoiThoai();
     });
+    window.mcarRealtime.dangKy('auth_ok', capNhatSoChuaDoc);
   }
 
   capNhatSoChuaDoc();
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) capNhatSoChuaDoc();
+  });
+  setInterval(function () {
+    if (!document.hidden) capNhatSoChuaDoc();
+  }, 20000);
 
   // Tu mo chat neu den tu link thong bao (?mo_chat=ID_TAI_XE, hoac =1 voi tai xe)
   var thamSoMoChat = new URLSearchParams(window.location.search).get('mo_chat');
