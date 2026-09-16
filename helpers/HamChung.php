@@ -445,6 +445,29 @@ function phutTuGioDon($gio)
 const GIO_COI_LA_TRUNG = 4;
 
 /**
+ * Rut gon so tien cho de doc luot ("1,25 tỷ" thay vi "1.250.000.000").
+ * Chi dung cho cac con so TO o bao cao - cho nao can doi chieu chinh xac
+ * thi van phai hien du so bang dinhDangTien().
+ */
+function tienRutGon($so)
+{
+    $so  = (float)$so;
+    $am  = $so < 0;
+    $so  = abs($so);
+
+    if ($so >= 1000000000) {
+        $chu = rtrim(rtrim(number_format($so / 1000000000, 2, ',', '.'), '0'), ',') . ' tỷ';
+    } elseif ($so >= 1000000) {
+        $chu = rtrim(rtrim(number_format($so / 1000000, 1, ',', '.'), '0'), ',') . ' tr';
+    } elseif ($so >= 1000) {
+        $chu = rtrim(rtrim(number_format($so / 1000, 0, ',', '.'), '0'), ',') . ' ng';
+    } else {
+        $chu = number_format($so, 0, ',', '.');
+    }
+    return ($am ? '−' : '') . $chu;
+}
+
+/**
  * Ten muc trong danh muc "Nhan keo" danh cho keo minh giao cho nha xe ngoai
  * chay. Nut "Kèo giao ngoài" chon san muc nay - de o day mot cho de sau nay
  * doi ten thi chi sua 1 dong.

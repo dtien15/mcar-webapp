@@ -1147,51 +1147,10 @@ class ChuyenXeController extends Controller
     }
 
     /** Xuat danh sach chuyen xe ra file CSV (mo duoc bang Excel) */
-    public function xuatCsv()
-    {
-        $this->yeuCauQuyen(['admin', 'ketoan']);
-
-        $loc      = $this->layBoLoc();
-        $danhSach = $this->model('ChuyenXeModel')->locDanhSach($loc, 5000);
-
-        $tenFile = 'chuyen-xe-' . date('Ymd-His') . '.csv';
-        header('Content-Type: text/csv; charset=UTF-8');
-        header('Content-Disposition: attachment; filename="' . $tenFile . '"');
-
-        $xuat = fopen('php://output', 'w');
-        fprintf($xuat, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM de Excel doc dung tieng Viet
-
-        fputcsv($xuat, ['Ngày chạy', 'Giờ đón', 'Điểm đón - trả', 'Hành trình', 'Xe', 'Tài xế',
-            'Nhận kèo', 'Thu VNĐ', 'Thu USD', 'Tiền cuốc xe', 'Lưu đêm', 'Phí sân bay',
-            'Phát sinh', 'Xăng dầu', 'VETC', 'Bảo dưỡng', 'Phạt', 'Tạm ứng', 'Trạng thái', 'Ghi chú']);
-
-        foreach ($danhSach as $dong) {
-            fputcsv($xuat, [
-                dinhDangNgay($dong['trip_date']),
-                $dong['pickup_time'],
-                $dong['pickup_dropoff'],
-                $dong['route'],
-                trim($dong['ten_xe'] . ' ' . $dong['bien_so']),
-                $dong['ten_tai_xe'],
-                $dong['ten_loai_keo'],
-                $dong['revenue_vnd'],
-                $dong['revenue_usd'],
-                $dong['trip_fee'],
-                $dong['overnight_fee'],
-                $dong['airport_fee'],
-                $dong['other_fee'],
-                $dong['fuel_cost'],
-                $dong['vetc'],
-                $dong['maintenance'],
-                $dong['fine'],
-                $dong['cash_advance'],
-                nhanTrangThaiChuyen($dong['status'], !empty($dong['driver_id']))['nhan'],
-                $dong['note'],
-            ]);
-        }
-        fclose($xuat);
-        exit;
-    }
+    // Ghi chu: truoc day o day co xuatCsv() - xuat danh sach chuyen xe ra
+    // file. Da chuyen han sang trang rieng "Xuat Excel" (XuatExcelController):
+    // o do xem truoc duoc danh sach + loc theo trang thai truoc khi xuat, va
+    // file xuat ra co DU moi truong chu khong chi 20 cot nhu ban cu.
 
     // -----------------------------------------------------------------
     // Cac ham gui thong bao

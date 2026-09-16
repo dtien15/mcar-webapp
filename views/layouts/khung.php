@@ -41,6 +41,7 @@ $menu = [
     ['route' => 'thanhtoan', 'nhan' => 'Thanh toán & công nợ','icon' => 'receipt',          'quyen' => ['admin','ketoan']],
     ['route' => 'baocao',    'nhan' => 'Báo cáo doanh thu',   'icon' => 'chart-bar',        'quyen' => ['admin','ketoan']],
     ['route' => 'baocao/lailo', 'nhan' => 'Báo cáo lãi lỗ',   'icon' => 'report-analytics', 'quyen' => ['admin','ketoan']],
+    ['route' => 'xuatexcel', 'nhan' => 'Xuất Excel',          'icon' => 'file-spreadsheet', 'quyen' => ['admin','ketoan']],
     ['nhom'  => 'DANH MỤC',  'quyen' => ['admin','ketoan']],
     ['route' => 'xe',        'nhan' => 'Xe',                  'icon' => 'car',              'quyen' => ['admin','ketoan']],
     ['route' => 'taixe',     'nhan' => 'Tài xế',              'icon' => 'steering-wheel',   'quyen' => ['admin','ketoan']],

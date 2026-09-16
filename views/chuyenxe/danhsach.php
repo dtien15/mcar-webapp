@@ -125,7 +125,6 @@ $dsTab = [
            title="Kèo của mình nhưng giao cho nhà xe ngoài chạy">
           <?= bieuTuong('arrow-forward-up') ?> Kèo giao ngoài
         </a>
-        <a href="<?= duongDan('chuyenxe/xuatcsv?' . http_build_query($loc)) ?>" class="btn btn-light btn-sm d-none d-md-inline-flex"><?= bieuTuong('download') ?> Xuất Excel</a>
 
         <div class="dropdown d-md-none nut-khac-loc">
           <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false" title="Việc khác">
@@ -140,11 +139,6 @@ $dsTab = [
             <li>
               <a class="dropdown-item" href="<?= duongDan('chuyenxe/keongoai') ?>">
                 <?= bieuTuong('arrow-forward-up') ?> Kèo giao ngoài
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="<?= duongDan('chuyenxe/xuatcsv?' . http_build_query($loc)) ?>">
-                <?= bieuTuong('download') ?> Xuất Excel
               </a>
             </li>
           </ul>

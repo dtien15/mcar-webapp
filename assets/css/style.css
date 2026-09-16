@@ -1168,3 +1168,206 @@ textarea.tu-dong-gian {
   color: var(--mau-chu-nhat);
   border: 1px solid var(--mau-vien);
 }
+
+/* =====================================================================
+   BAO CAO - lam sao nhin 3 giay la ra van de
+   Truoc day 2 trang bao cao chi toan bang so dai, muon biet "ky nay lai
+   hay lo", "tien chay di dau", "cho nao dang lo" deu phai tu doc tung
+   dong ma so sanh. Gio: con so ket qua to nhat trang, khoan chi ve thanh
+   ty le (dai nhat = ngon nhat), cho nao lo thi day len tren cung mau do.
+   ===================================================================== */
+
+/* ---- Khoi ket qua lai/lo ---- */
+.khoi-ket-qua {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.1fr) 2fr;
+  gap: 18px;
+  background: #fff;
+  border: 1px solid var(--mau-vien);
+  border-radius: var(--bo-goc);
+  box-shadow: var(--bong);
+  padding: 20px 22px;
+  margin-bottom: 16px;
+}
+.khoi-ket-qua.dang-lai { border-left: 5px solid #059669; }
+.khoi-ket-qua.dang-lo  { border-left: 5px solid #dc2626; }
+
+.khoi-ket-qua .nhan-ket-qua {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--mau-chu-nhat);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.khoi-ket-qua .so-ket-qua {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -.5px;
+  font-variant-numeric: tabular-nums;
+}
+.khoi-ket-qua.dang-lai .so-ket-qua { color: #047857; }
+.khoi-ket-qua.dang-lo  .so-ket-qua { color: #b91c1c; }
+.khoi-ket-qua .phu-ket-qua {
+  font-size: 12.5px;
+  color: var(--mau-chu-nhat);
+  margin-top: 6px;
+}
+
+.ket-qua-phu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  align-content: center;
+}
+.o-ket-qua-phu {
+  background: var(--mau-nen);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.o-ket-qua-phu .nhan { font-size: 11.5px; color: var(--mau-chu-nhat); }
+.o-ket-qua-phu .gt {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.o-ket-qua-phu .chi-tiet { font-size: 11px; color: var(--mau-chu-nhat); }
+
+/* ---- Canh bao cho nao dang lo ---- */
+.the-canh-bao-lo {
+  border-left: 5px solid #dc2626;
+  margin-bottom: 16px;
+}
+.the-canh-bao-lo .tieu-de-canh-bao {
+  font-weight: 700;
+  color: #b91c1c;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+.ds-canh-bao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.muc-lo {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 7px 11px;
+}
+.muc-lo .ten { font-weight: 600; font-size: 13px; }
+.muc-lo .so {
+  font-weight: 800;
+  color: #b91c1c;
+  font-variant-numeric: tabular-nums;
+}
+.muc-lo .phu { font-size: 11.5px; color: var(--mau-chu-nhat); }
+
+/* ---- Tien di dau: thanh ty le ---- */
+.ds-khoan-chi { display: flex; flex-direction: column; gap: 11px; }
+.khoan-chi .dong-tren {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+}
+.khoan-chi .dong-tren .ten { font-weight: 600; }
+.khoan-chi .dong-tren .so {
+  font-weight: 700;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.khoan-chi .thanh {
+  height: 8px;
+  background: var(--mau-nen);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.khoan-chi .thanh span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: #ea580c;
+}
+.khoan-chi .dong-duoi {
+  font-size: 11px;
+  color: var(--mau-chu-nhat);
+  margin-top: 2px;
+}
+
+/* ---- Keo giao ngoai ---- */
+.luoi-keo-ngoai {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+.o-keo-ngoai {
+  background: var(--mau-nen);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.o-keo-ngoai.lai { background: #ecfdf5; }
+.o-keo-ngoai.lo  { background: #fef2f2; }
+.o-keo-ngoai .nhan { font-size: 11.5px; color: var(--mau-chu-nhat); }
+.o-keo-ngoai .gt {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+.o-keo-ngoai.lai .gt { color: #047857; }
+.o-keo-ngoai.lo  .gt { color: #b91c1c; }
+.o-keo-ngoai .don-vi { font-size: 12px; font-weight: 500; color: var(--mau-chu-nhat); margin-left: 2px; }
+.o-keo-ngoai .phu { font-size: 11px; color: var(--mau-chu-nhat); margin-top: 2px; }
+
+/* ---- Mau so lai / lo dung chung moi bang bao cao ---- */
+.so-lai { color: #047857; }
+.so-lo  { color: #b91c1c; }
+
+@media (max-width: 767.98px) {
+  .khoi-ket-qua {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+  .khoi-ket-qua .so-ket-qua { font-size: 32px; }
+}
+
+/* ---- Bang xep hang dang thanh (bao cao doanh thu) ---- */
+.ds-xep-hang { display: flex; flex-direction: column; gap: 11px; }
+.muc-xep-hang .dong-tren {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+}
+.muc-xep-hang .dong-tren .ten {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.muc-xep-hang .dong-tren .so {
+  font-weight: 700;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.muc-xep-hang .thanh {
+  height: 8px;
+  background: var(--mau-nen);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.muc-xep-hang .thanh span { display: block; height: 100%; border-radius: 999px; }
+.muc-xep-hang .dong-duoi { font-size: 11px; color: var(--mau-chu-nhat); margin-top: 2px; }

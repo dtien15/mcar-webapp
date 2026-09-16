@@ -137,6 +137,17 @@ class BaoCaoController extends Controller
         }
         unset($d);
 
+        // Mang keo giao ngoai: tach rieng vi no khong dung xe/tai xe nha, lai
+        // cua no = khach tra - tien tra nha xe, nhin vao moi biet mang nay dang
+        // lam ra tien hay chi chay khong cong.
+        $keoNgoai = $chuyenXeModel->thongKeKeoGiaoNgoai($tuNgay, $denNgay);
+        $keoNgoaiThu = ChuyenXeModel::quyDoiTien(
+            $keoNgoai['thu_vnd'], $keoNgoai['thu_usd'], $keoNgoai['thu_eur'], $tyGiaUsd, $tyGiaEur
+        );
+        $keoNgoai['doanh_thu'] = $keoNgoaiThu;
+        $keoNgoai['lai']       = $keoNgoaiThu - (float)$keoNgoai['tra_nha_xe'];
+        $keoNgoai['ty_le']     = $keoNgoaiThu > 0 ? $keoNgoai['lai'] / $keoNgoaiThu * 100 : 0;
+
         return [
             'nam' => $nam, 'tuNgay' => $tuNgay, 'denNgay' => $denNgay,
             'tong' => $tong,
@@ -146,6 +157,8 @@ class BaoCaoController extends Controller
             'lai' => $lai,
             'tyLe' => $doanhThu > 0 ? $lai / $doanhThu * 100 : 0,
             'theoXe' => $theoXe, 'theoLoaiKeo' => $theoLoaiKeo, 'theoThang' => $theoThang,
+            'keoNgoai' => $keoNgoai,
+            'dsKeoNgoai' => $chuyenXeModel->dsKeoGiaoNgoai($tuNgay, $denNgay, 100),
             'tyGiaUsd' => $tyGiaUsd, 'tyGiaEur' => $tyGiaEur,
             'thieuTyGia' => (($tong['thu_usd'] > 0 && $tyGiaUsd <= 0) || ($tong['thu_eur'] > 0 && $tyGiaEur <= 0)),
         ];

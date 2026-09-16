@@ -615,6 +615,51 @@ class ChuyenXeModel extends Model
         );
     }
 
+    /**
+     * Rieng phan KEO GIAO NGOAI trong khoang: keo cua minh nhung giao cho nha
+     * xe ngoai chay. Lai cua mang nay = khach tra - tien tra nha xe ngoai,
+     * khong dinh gi toi xe/tai xe nha nen phai tach ra xem rieng moi biet
+     * mang nay co dang lam hay khong.
+     *
+     * Nhan dien bang outsource_driver_name (ten tai xe nha xe ngoai go tay) -
+     * chac chan hon la dua vao loai keo, vi loai keo nguoi dung doi ten duoc.
+     */
+    public function thongKeKeoGiaoNgoai($tuNgay, $denNgay)
+    {
+        return $this->motDong(
+            "SELECT
+                COUNT(CASE WHEN status = 'hoan_thanh' THEN 1 END) AS so_chuyen,
+                COALESCE(SUM(revenue_vnd),0)    AS thu_vnd,
+                COALESCE(SUM(revenue_usd),0)    AS thu_usd,
+                COALESCE(SUM(revenue_eur),0)    AS thu_eur,
+                COALESCE(SUM(outsource_cost),0) AS tra_nha_xe
+             FROM trips
+             WHERE trip_date BETWEEN ? AND ?
+               AND deleted_at IS NULL
+               AND status IN ('hoan_thanh','da_huy')
+               AND outsource_driver_name IS NOT NULL AND outsource_driver_name <> ''",
+            [$tuNgay, $denNgay]
+        );
+    }
+
+    /** Tung chuyen keo giao ngoai trong khoang - de xem nha xe nao dang lam nhieu */
+    public function dsKeoGiaoNgoai($tuNgay, $denNgay, $gioiHan = 200)
+    {
+        return $this->truyVan(
+            "SELECT trip_date, route, outsource_car_name, outsource_driver_name,
+                    revenue_vnd, revenue_usd, revenue_eur, outsource_cost, status,
+                    (revenue_vnd - outsource_cost) AS lai_vnd
+             FROM trips
+             WHERE trip_date BETWEEN ? AND ?
+               AND deleted_at IS NULL
+               AND status IN ('hoan_thanh','da_huy')
+               AND outsource_driver_name IS NOT NULL AND outsource_driver_name <> ''
+             ORDER BY trip_date DESC
+             LIMIT " . (int)$gioiHan,
+            [$tuNgay, $denNgay]
+        );
+    }
+
     /** Lai/lo cua tung XE trong khoang - de biet xe nao that su co lai */
     public function laiLoTheoXe($tuNgay, $denNgay)
     {
