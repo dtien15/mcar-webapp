@@ -103,29 +103,10 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
         </div>
       <?php endif; ?>
 
-      <?php if (!$khoaSua): ?>
-      <!-- Dan nhanh: luon hien san tren cung, ap dung duoc cho ca 4 nhom ben duoi -->
-      <div class="mb-3">
-        <label class="form-label">
-          <?= bieuTuong('clipboard-text') ?> Dán tin nhắn Zalo <span class="text-muted">(tự động điền các trường bên dưới - nhớ kiểm tra lại)</span>
-        </label>
-        <textarea id="oDanNhanh" class="form-control" rows="3"></textarea>
-        <div class="d-flex flex-wrap gap-2 align-items-center mt-1">
-          <button type="button" id="nutPhanTich" class="btn btn-sm btn-outline-primary">
-            <?= bieuTuong('wand') ?> Phân tích &amp; điền tự động
-          </button>
-          <button type="button" id="nutPhanTichAi" class="btn btn-sm btn-outline-success"
-                  data-url="<?= duongDan('chuyenxe/phantichai') ?>">
-            <?= bieuTuong('sparkles') ?> Phân tích bằng AI
-          </button>
-          <label class="btn btn-sm btn-outline-secondary mb-0" style="cursor:pointer">
-            <?= bieuTuong('paperclip') ?> Đính kèm ảnh
-            <input type="file" id="oAnhPhanTich" accept="image/png,image/jpeg,image/webp" hidden>
-          </label>
-          <span id="tenAnhDaChon" class="text-muted" style="font-size:12px"></span>
-        </div>
-      </div>
-      <?php endif; ?>
+      <?php // Khoi "Dan tin nhan Zalo" da bo khoi day: nut "Them nhanh tu anh"
+            // ngoai danh sach chuyen xe lam dung viec do va lam tot hon (doc
+            // duoc NHIEU chang mot luc, co bang xem truoc sua duoc truoc khi
+            // tao). De ca hai chi lam form nay dai them ma khong them gi. ?>
 
       <!-- 1. Chuyen di & khach - luon mo san, la nhung gi can dien dau tien -->
       <div class="nhom-gap">

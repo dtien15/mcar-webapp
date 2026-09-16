@@ -224,9 +224,11 @@ window.mcarRealtime = {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="<?= duongDanTinh('assets/js/o-tu-dong-gian.js') ?>"></script>
 <script src="<?= duongDanTinh('assets/js/tien.js') ?>"></script>
-<script src="<?= duongDanTinh('assets/js/dan-nhanh.js') ?>"></script>
 <script src="<?= duongDanTinh('assets/js/dam-lich.js') ?>"></script>
-<script src="<?= duongDanTinh('assets/js/phan-tich-ai.js') ?>"></script>
+<?php // dan-nhanh.js / phan-tich-ai.js chi phuc vu khoi "Dan tin nhan Zalo" o
+      // form chuyen xe - khoi do da bo (nut "Them nhanh tu anh" lam thay, doc
+      // duoc nhieu chang mot luc). dan-nhanh.js van con dung o trang cong khai
+      // /guichuyen nhung trang do co layout rieng va tu nap lay file nay. ?>
 <script src="<?= duongDanTinh('assets/js/them-nhanh.js') ?>"></script>
 <script src="<?= duongDan('assets/vendor/driverjs/driver.js') ?>"></script>
 <script src="<?= duongDanTinh('assets/js/tro-giup.js') ?>"></script>

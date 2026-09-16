@@ -31,7 +31,7 @@
   <div class="the-dau"><?= bieuTuong('sparkles') ?> Cài đặt AI (OpenAI)</div>
   <div class="the-than">
     <div class="alert alert-light" style="font-size:13px">
-      <?= bieuTuong('info-circle') ?> Dùng cho tính năng <strong>"Phân tích bằng AI"</strong> ở form Thêm/Sửa chuyến xe
+      <?= bieuTuong('info-circle') ?> Dùng cho tính năng <strong>"Thêm nhanh từ ảnh"</strong> ở trang Chuyến xe
       (đọc ảnh lịch trình hoặc tin nhắn đặt xe rồi tự điền vào form). Cần có API key của OpenAI
       (tạo tại <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a>,
       nhớ nạp sẵn ít tiền vào tài khoản OpenAI để dùng được).
