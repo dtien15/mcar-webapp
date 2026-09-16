@@ -221,10 +221,11 @@ $chiLonNhat = $dongChi ? $dongChi[0]['so'] : 0;
 
     <?php if ($dsKeoNgoai): ?>
       <div class="bang-cuon mt-3">
-        <table class="bang">
+        <table class="bang bang-gon">
           <thead>
             <tr>
-              <th>Ngày</th><th>Hành trình</th><th>Nhà xe ngoài</th>
+              <th>Chuyến</th>
+              <th>Nhà xe ngoài</th>
               <th class="canh-phai">Khách trả</th>
               <th class="canh-phai">Trả nhà xe</th>
               <th class="canh-phai">Chênh lệch</th>
@@ -233,17 +234,18 @@ $chiLonNhat = $dongChi ? $dongChi[0]['so'] : 0;
           <tbody>
             <?php foreach ($dsKeoNgoai as $k): ?>
               <tr>
-                <td><?= dinhDangNgay($k['trip_date']) ?></td>
-                <td><?= h($k['route']) ?></td>
                 <td>
+                  <?= dinhDangNgay($k['trip_date']) ?> · <?= h($k['route']) ?>
+                </td>
+                <td data-nhan="Nhà xe ngoài">
                   <?= h($k['outsource_driver_name']) ?>
                   <?php if (!empty($k['outsource_car_name'])): ?>
-                    <div class="text-muted" style="font-size:11.5px"><?= h($k['outsource_car_name']) ?></div>
+                    <span class="text-muted" style="font-size:11.5px"><?= h($k['outsource_car_name']) ?></span>
                   <?php endif; ?>
                 </td>
-                <td class="canh-phai"><?= dinhDangTien($k['revenue_vnd']) ?></td>
-                <td class="canh-phai text-muted"><?= dinhDangTien($k['outsource_cost']) ?></td>
-                <td class="canh-phai">
+                <td class="canh-phai" data-nhan="Khách trả"><?= dinhDangTien($k['revenue_vnd']) ?></td>
+                <td class="canh-phai text-muted" data-nhan="Trả nhà xe"><?= dinhDangTien($k['outsource_cost']) ?></td>
+                <td class="canh-phai" data-nhan="Chênh lệch">
                   <strong class="<?= $k['lai_vnd'] >= 0 ? 'so-lai' : 'so-lo' ?>">
                     <?= $k['lai_vnd'] < 0 ? '−' : '' ?><?= dinhDangTien(abs($k['lai_vnd'])) ?>
                   </strong>
@@ -259,6 +261,71 @@ $chiLonNhat = $dongChi ? $dongChi[0]['so'] : 0;
 <?php endif; ?>
 
 <!-- ============ 6. CHI TIET: gap lai, ai can moi mo ============ -->
+<?php
+/**
+ * Ve 1 bang chi tiet trong phan gap lai.
+ *
+ * Hai viec quan trong o day:
+ *  - Cac muc KHONG PHAT SINH gi trong ky (0 chuyen, 0 dong) bi gom lai thanh
+ *    1 dong o cuoi thay vi liet ke tung cai - truoc day bang xe co 7 dong thi
+ *    5 dong toan so 0, phai luot qua moi thay dong co so lieu.
+ *  - Cot nao cung co "data-nhan": man hep bang tu doi thanh the, nhan cot
+ *    nay se hien ben trai tung so (xem .bang-gon trong style.css).
+ */
+function veBangChiTiet(array $ds, $tenCotDau, callable $layTen, $hienTyLe = true)
+{
+    $coSo  = [];
+    $rong  = 0;
+    foreach ($ds as $d) {
+        if ((int)$d['so_chuyen'] === 0 && (float)$d['doanh_thu'] == 0 && (float)$d['chi_phi'] == 0) {
+            $rong++;
+        } else {
+            $coSo[] = $d;
+        }
+    }
+    usort($coSo, function ($a, $b) { return $b['lai'] <=> $a['lai']; });
+    ?>
+    <table class="bang bang-gon">
+      <thead>
+        <tr>
+          <th><?= h($tenCotDau) ?></th>
+          <th class="canh-phai">Chuyến</th>
+          <th class="canh-phai">Doanh thu</th>
+          <th class="canh-phai">Chi phí</th>
+          <th class="canh-phai">Lãi / lỗ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($coSo as $d): ?>
+          <tr>
+            <td><?= $layTen($d) ?></td>
+            <td class="canh-phai" data-nhan="Chuyến"><?= (int)$d['so_chuyen'] ?></td>
+            <td class="canh-phai" data-nhan="Doanh thu"><?= dinhDangTien($d['doanh_thu']) ?></td>
+            <td class="canh-phai text-muted" data-nhan="Chi phí"><?= dinhDangTien($d['chi_phi']) ?></td>
+            <td class="canh-phai" data-nhan="Lãi / lỗ">
+              <strong class="<?= $d['lai'] >= 0 ? 'so-lai' : 'so-lo' ?>">
+                <?= $d['lai'] < 0 ? '−' : '' ?><?= dinhDangTien(abs($d['lai'])) ?>
+              </strong>
+              <?php if ($hienTyLe && $d['doanh_thu'] > 0): ?>
+                <span class="text-muted" style="font-size:11px"> · <?= number_format($d['ty_le'], 1, ',', '.') ?>%</span>
+              <?php endif; ?>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+
+        <?php if (!$coSo): ?>
+          <tr><td colspan="5" class="khong-co-du-lieu">Kỳ này chưa có số liệu.</td></tr>
+        <?php elseif ($rong > 0): ?>
+          <tr class="dong-gop-rong">
+            <td colspan="5"><?= (int)$rong ?> mục khác không phát sinh chuyến nào trong kỳ</td>
+          </tr>
+        <?php endif; ?>
+      </tbody>
+    </table>
+    <?php
+}
+?>
+
 <div class="the">
   <div class="the-than the-than-khong-dem">
     <div class="accordion accordion-flush" id="chiTietLaiLo">
@@ -270,36 +337,10 @@ $chiLonNhat = $dongChi ? $dongChi[0]['so'] : 0;
         </h2>
         <div id="ctXe" class="accordion-collapse collapse" data-bs-parent="#chiTietLaiLo">
           <div class="accordion-body bang-cuon">
-            <table class="bang">
-              <thead>
-                <tr>
-                  <th>Xe</th><th class="canh-phai">Chuyến</th>
-                  <th class="canh-phai">Doanh thu</th><th class="canh-phai">Chi phí</th>
-                  <th class="canh-phai">Lãi / lỗ</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php foreach ($theoXe as $x): ?>
-                  <tr>
-                    <td>
-                      <?= h(trim($x['name'] . ' ' . $x['plate_number'])) ?>
-                      <span class="text-muted" style="font-size:11.5px"><?= h($x['seats']) ?></span>
-                    </td>
-                    <td class="canh-phai"><?= dinhDangTien($x['so_chuyen']) ?></td>
-                    <td class="canh-phai"><?= dinhDangTien($x['doanh_thu']) ?></td>
-                    <td class="canh-phai text-muted"><?= dinhDangTien($x['chi_phi']) ?></td>
-                    <td class="canh-phai">
-                      <strong class="<?= $x['lai'] >= 0 ? 'so-lai' : 'so-lo' ?>">
-                        <?= $x['lai'] < 0 ? '−' : '' ?><?= dinhDangTien(abs($x['lai'])) ?>
-                      </strong>
-                      <?php if ($x['doanh_thu'] > 0): ?>
-                        <div class="text-muted" style="font-size:11px"><?= number_format($x['ty_le'], 1, ',', '.') ?>%</div>
-                      <?php endif; ?>
-                    </td>
-                  </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
+            <?php veBangChiTiet($theoXe, 'Xe', function ($d) {
+              return h(trim($d['name'] . ' ' . $d['plate_number']))
+                   . ' <span class="text-muted" style="font-size:11.5px">' . h($d['seats']) . '</span>';
+            }); ?>
           </div>
         </div>
       </div>
@@ -312,33 +353,7 @@ $chiLonNhat = $dongChi ? $dongChi[0]['so'] : 0;
         </h2>
         <div id="ctKeo" class="accordion-collapse collapse" data-bs-parent="#chiTietLaiLo">
           <div class="accordion-body bang-cuon">
-            <table class="bang">
-              <thead>
-                <tr>
-                  <th>Nhận kèo</th><th class="canh-phai">Chuyến</th>
-                  <th class="canh-phai">Doanh thu</th><th class="canh-phai">Chi phí</th>
-                  <th class="canh-phai">Lãi / lỗ</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php foreach ($theoLoaiKeo as $x): ?>
-                  <tr>
-                    <td><?= h($x['name']) ?></td>
-                    <td class="canh-phai"><?= dinhDangTien($x['so_chuyen']) ?></td>
-                    <td class="canh-phai"><?= dinhDangTien($x['doanh_thu']) ?></td>
-                    <td class="canh-phai text-muted"><?= dinhDangTien($x['chi_phi']) ?></td>
-                    <td class="canh-phai">
-                      <strong class="<?= $x['lai'] >= 0 ? 'so-lai' : 'so-lo' ?>">
-                        <?= $x['lai'] < 0 ? '−' : '' ?><?= dinhDangTien(abs($x['lai'])) ?>
-                      </strong>
-                      <?php if ($x['doanh_thu'] > 0): ?>
-                        <div class="text-muted" style="font-size:11px"><?= number_format($x['ty_le'], 1, ',', '.') ?>%</div>
-                      <?php endif; ?>
-                    </td>
-                  </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
+            <?php veBangChiTiet($theoLoaiKeo, 'Nhận kèo', function ($d) { return h($d['name']); }); ?>
           </div>
         </div>
       </div>
@@ -351,7 +366,13 @@ $chiLonNhat = $dongChi ? $dongChi[0]['so'] : 0;
         </h2>
         <div id="ctThang" class="accordion-collapse collapse" data-bs-parent="#chiTietLaiLo">
           <div class="accordion-body bang-cuon">
-            <table class="bang">
+            <?php
+              // Thang thi giu nguyen thu tu 1..12, khong sap theo lai
+              $thangCoSo = array_values(array_filter($theoThang, function ($t) {
+                  return (int)$t['so_chuyen'] > 0 || (float)$t['doanh_thu'] != 0 || (float)$t['chi_phi'] != 0;
+              }));
+            ?>
+            <table class="bang bang-gon">
               <thead>
                 <tr>
                   <th>Tháng</th><th class="canh-phai">Chuyến</th>
@@ -360,20 +381,22 @@ $chiLonNhat = $dongChi ? $dongChi[0]['so'] : 0;
                 </tr>
               </thead>
               <tbody>
-                <?php foreach ($theoThang as $t): ?>
-                  <?php if ($t['so_chuyen'] == 0 && $t['doanh_thu'] == 0 && $t['chi_phi'] == 0) continue; ?>
+                <?php foreach ($thangCoSo as $t): ?>
                   <tr>
-                    <td>Tháng <?= (int)$t['thang'] ?></td>
-                    <td class="canh-phai"><?= dinhDangTien($t['so_chuyen']) ?></td>
-                    <td class="canh-phai"><?= dinhDangTien($t['doanh_thu']) ?></td>
-                    <td class="canh-phai text-muted"><?= dinhDangTien($t['chi_phi']) ?></td>
-                    <td class="canh-phai">
+                    <td>Tháng <?= (int)$t['thang'] ?>/<?= (int)$nam ?></td>
+                    <td class="canh-phai" data-nhan="Chuyến"><?= (int)$t['so_chuyen'] ?></td>
+                    <td class="canh-phai" data-nhan="Doanh thu"><?= dinhDangTien($t['doanh_thu']) ?></td>
+                    <td class="canh-phai text-muted" data-nhan="Chi phí"><?= dinhDangTien($t['chi_phi']) ?></td>
+                    <td class="canh-phai" data-nhan="Lãi / lỗ">
                       <strong class="<?= $t['lai'] >= 0 ? 'so-lai' : 'so-lo' ?>">
                         <?= $t['lai'] < 0 ? '−' : '' ?><?= dinhDangTien(abs($t['lai'])) ?>
                       </strong>
                     </td>
                   </tr>
                 <?php endforeach; ?>
+                <?php if (!$thangCoSo): ?>
+                  <tr><td colspan="5" class="khong-co-du-lieu">Năm <?= (int)$nam ?> chưa có số liệu.</td></tr>
+                <?php endif; ?>
               </tbody>
             </table>
           </div>
@@ -382,6 +405,7 @@ $chiLonNhat = $dongChi ? $dongChi[0]['so'] : 0;
     </div>
   </div>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script>

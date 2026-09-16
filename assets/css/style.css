@@ -1385,3 +1385,63 @@ textarea.tu-dong-gian {
   margin-left: 4px;
   user-select: all;
 }
+
+/* =====================================================================
+   BANG "GON" - man rong la bang, man hep tu doi thanh the
+   Bang bao cao co 5 cot, tren dien thoai phai keo ngang moi doc het (ma
+   cot quan trong nhat - lai/lo - lai nam tan cung ben phai). Duoi 768px
+   moi dong tu bien thanh mot the: ten nam tren cung, cac so xep doc theo
+   dang "nhan - gia tri", khong con phai keo ngang gi nua.
+   ===================================================================== */
+@media (max-width: 767.98px) {
+  .bang-gon thead { display: none; }
+  .bang-gon, .bang-gon tbody, .bang-gon tr, .bang-gon td { display: block; width: 100%; }
+
+  .bang-gon tr {
+    border: 1px solid var(--mau-vien);
+    border-radius: 10px;
+    padding: 9px 12px;
+    margin-bottom: 8px;
+    background: #fff;
+  }
+  .bang-gon td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    border: none;
+    padding: 3px 0;
+    text-align: right;
+  }
+  /* Nhan cot lay tu chinh tieu de bang, khong phai go lai lan nua */
+  .bang-gon td::before {
+    content: attr(data-nhan);
+    color: var(--mau-chu-nhat);
+    font-size: 12px;
+    font-weight: 500;
+    text-align: left;
+    flex-shrink: 0;
+  }
+  /* O dau tien (ten xe / ten keo / thang) lam tieu de cua the */
+  .bang-gon td:first-child {
+    display: block;
+    text-align: left;
+    font-weight: 700;
+    font-size: 14px;
+    border-bottom: 1px solid var(--mau-vien);
+    padding-bottom: 6px;
+    margin-bottom: 5px;
+  }
+  .bang-gon td:first-child::before { content: none; }
+
+  /* Bang da tu xuong the roi thi khong duoc cuon ngang nua */
+  .bang-cuon:has(.bang-gon) { overflow-x: visible; }
+  .accordion-body.bang-cuon { overflow-x: visible; }
+}
+
+/* Dong tom tat "con N muc khong phat sinh" duoi bang */
+.dong-gop-rong td {
+  background: var(--mau-nen);
+  color: var(--mau-chu-nhat);
+  font-size: 12.5px;
+}

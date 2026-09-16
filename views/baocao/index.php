@@ -191,19 +191,74 @@ function veXepHang(array $ds, $khoaTen, $khoaSo, $khoaChuyen, $mau, $gioiHan = 6
 </div>
 
 <!-- ============ 4. SO CHI TIET: gap lai ============ -->
+<?php
+/**
+ * Bang so chi tiet trong phan gap lai.
+ * - Muc khong phat sinh chuyen nao trong ky duoc gom thanh 1 dong o cuoi,
+ *   khong liet ke tung cai cho dai bang.
+ * - Moi o co "data-nhan" de man hep bang tu doi thanh the (xem .bang-gon).
+ */
+function veBangDoanhThu(array $ds, $tenCotDau, callable $layTen)
+{
+    $coSo = [];
+    $rong = 0;
+    foreach ($ds as $d) {
+        if ((int)$d['so_chuyen'] === 0 && (float)$d['doanh_thu_quy_doi'] == 0) { $rong++; }
+        else { $coSo[] = $d; }
+    }
+    usort($coSo, function ($a, $b) {
+        return (float)$b['doanh_thu_quy_doi'] <=> (float)$a['doanh_thu_quy_doi'];
+    });
+    ?>
+    <table class="bang bang-gon">
+      <thead>
+        <tr>
+          <th><?= h($tenCotDau) ?></th>
+          <th class="canh-phai">Chuyến</th>
+          <th class="canh-phai">Doanh thu</th>
+          <th class="canh-phai">Tiền cuốc</th>
+          <th class="canh-phai">Xăng dầu</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($coSo as $d): ?>
+          <tr>
+            <td><?= $layTen($d) ?></td>
+            <td class="canh-phai" data-nhan="Chuyến"><?= (int)$d['so_chuyen'] ?></td>
+            <td class="canh-phai" data-nhan="Doanh thu"><strong><?= dinhDangTien($d['doanh_thu_quy_doi']) ?></strong></td>
+            <td class="canh-phai text-muted" data-nhan="Tiền cuốc"><?= dinhDangTien($d['tien_tai'] ?? 0) ?></td>
+            <td class="canh-phai text-muted" data-nhan="Xăng dầu"><?= dinhDangTien($d['xang_dau'] ?? 0) ?></td>
+          </tr>
+        <?php endforeach; ?>
+
+        <?php if (!$coSo): ?>
+          <tr><td colspan="5" class="khong-co-du-lieu">Kỳ này chưa có số liệu.</td></tr>
+        <?php elseif ($rong > 0): ?>
+          <tr class="dong-gop-rong">
+            <td colspan="5"><?= (int)$rong ?> mục khác không phát sinh chuyến nào trong kỳ</td>
+          </tr>
+        <?php endif; ?>
+      </tbody>
+    </table>
+    <?php
+}
+
+$bangChiTiet = [
+  ['id' => 'ctXe', 'icon' => 'car', 'ten' => 'Chi tiết theo xe', 'ds' => $theoXe, 'cot' => 'Xe',
+   'lay' => function ($d) {
+       return h(trim($d['name'] . ' ' . $d['plate_number']))
+            . ' <span class="text-muted" style="font-size:11.5px">' . h($d['seats'] ?? '') . '</span>';
+   }],
+  ['id' => 'ctTaiXe', 'icon' => 'steering-wheel', 'ten' => 'Chi tiết theo tài xế', 'ds' => $theoTaiXe, 'cot' => 'Tài xế',
+   'lay' => function ($d) { return h($d['full_name']); }],
+  ['id' => 'ctKeo', 'icon' => 'list-details', 'ten' => 'Chi tiết theo nhận kèo', 'ds' => $theoLoaiKeo, 'cot' => 'Nhận kèo',
+   'lay' => function ($d) { return h($d['name']); }],
+];
+?>
+
 <div class="the">
   <div class="the-than the-than-khong-dem">
     <div class="accordion accordion-flush" id="chiTietDoanhThu">
-      <?php
-        $bangChiTiet = [
-          ['id' => 'ctXe', 'icon' => 'car', 'ten' => 'Chi tiết theo xe', 'ds' => $theoXe,
-           'cot' => 'Xe', 'lay' => function ($d) { return trim($d['name'] . ' ' . $d['plate_number']); }],
-          ['id' => 'ctTaiXe', 'icon' => 'steering-wheel', 'ten' => 'Chi tiết theo tài xế', 'ds' => $theoTaiXe,
-           'cot' => 'Tài xế', 'lay' => function ($d) { return $d['full_name']; }],
-          ['id' => 'ctKeo', 'icon' => 'list-details', 'ten' => 'Chi tiết theo nhận kèo', 'ds' => $theoLoaiKeo,
-           'cot' => 'Nhận kèo', 'lay' => function ($d) { return $d['name']; }],
-        ];
-      ?>
       <?php foreach ($bangChiTiet as $b): ?>
         <div class="accordion-item">
           <h2 class="accordion-header">
@@ -213,31 +268,7 @@ function veXepHang(array $ds, $khoaTen, $khoaSo, $khoaChuyen, $mau, $gioiHan = 6
           </h2>
           <div id="<?= $b['id'] ?>" class="accordion-collapse collapse" data-bs-parent="#chiTietDoanhThu">
             <div class="accordion-body bang-cuon">
-              <table class="bang">
-                <thead>
-                  <tr>
-                    <th><?= h($b['cot']) ?></th>
-                    <th class="canh-phai">Chuyến</th>
-                    <th class="canh-phai">Doanh thu quy đổi</th>
-                    <th class="canh-phai">Tiền cuốc</th>
-                    <th class="canh-phai">Xăng dầu</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php foreach ($b['ds'] as $d): ?>
-                    <tr>
-                      <td><?= h($b['lay']($d)) ?></td>
-                      <td class="canh-phai"><?= (int)$d['so_chuyen'] ?></td>
-                      <td class="canh-phai"><strong><?= dinhDangTien($d['doanh_thu_quy_doi']) ?></strong></td>
-                      <td class="canh-phai text-muted"><?= dinhDangTien($d['tien_tai'] ?? 0) ?></td>
-                      <td class="canh-phai text-muted"><?= dinhDangTien($d['xang_dau'] ?? 0) ?></td>
-                    </tr>
-                  <?php endforeach; ?>
-                  <?php if (!$b['ds']): ?>
-                    <tr><td colspan="5" class="text-center text-muted py-3">Kỳ này chưa có số liệu</td></tr>
-                  <?php endif; ?>
-                </tbody>
-              </table>
+              <?php veBangDoanhThu($b['ds'], $b['cot'], $b['lay']); ?>
             </div>
           </div>
         </div>
@@ -245,6 +276,7 @@ function veXepHang(array $ds, $khoaTen, $khoaSo, $khoaChuyen, $mau, $gioiHan = 6
     </div>
   </div>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script>
