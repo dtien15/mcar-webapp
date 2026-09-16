@@ -229,8 +229,15 @@ function thoiGianTuongDoi($thoiDiem)
 }
 
 /** Nhan hien thi cua trang thai chuyen xe */
-function nhanTrangThaiChuyen($trangThai, $coTaiXe = true)
+function nhanTrangThaiChuyen($trangThai, $coTaiXe = true, $laKeoNgoai = false)
 {
+    // Keo giao ngoai: khong co tai xe nha nen KHONG ai bam "Xac nhan" duoc,
+    // quan ly tu chot khi xong. Neu de nhan "Chua giao" thi nguoi dieu phoi
+    // se cu di tim tai xe de giao, trong khi chuyen nay von da giao ra ngoai.
+    if ($laKeoNgoai && $trangThai === 'moi') {
+        return ['nhan' => 'Kèo ngoài', 'mau' => 'info'];
+    }
+
     // Chuyen vua tao hang loat tu anh thi chua gan ai - phai phan biet han
     // voi "Moi giao" (da co tai xe, dang cho ho xac nhan), khong thi nguoi
     // dieu phoi tuong da giao roi va cu the ma cho.
@@ -280,6 +287,46 @@ function danhSachAiThu()
             'y'    => 'Chưa ai cầm tiền, không trừ vào lương tài xế.',
         ],
     ];
+}
+
+/**
+ * "Ai tra tien xang dau" - dung chung cho form them/sua chuyen, modal tai
+ * xe xac nhan va trang chi tiet, de 3 noi luon khop nhau.
+ *
+ * 'hoan' = cong ty co phai hoan lai tien xang cho tai xe khong. Day la thu
+ * quyet dinh cong tien xang vao luong tai xe hay khong, nen phai di lien
+ * voi lua chon chu khong de o mot cho khac.
+ *   - tai_xe   : tai xe bo tien tui ra do xang  -> cong ty hoan lai vao luong
+ *   - cong_ty  : cong ty tra thang               -> khong hoan gi
+ *   - hai_thang: do o cay xang Hai Thang, cong ty ky no voi cay xang do,
+ *                tai xe khong bo dong nao        -> khong hoan gi
+ */
+function danhSachNguoiTraXangDau()
+{
+    return [
+        'tai_xe' => [
+            'nhan'    => 'Tài xế trả (cty hoàn lại)',
+            'nhanTx'  => 'Bạn trả (cty hoàn lại)',
+            'hoan'    => true,
+        ],
+        'cong_ty' => [
+            'nhan'    => 'Công ty trả trực tiếp',
+            'nhanTx'  => 'Công ty trả trực tiếp',
+            'hoan'    => false,
+        ],
+        'hai_thang' => [
+            'nhan'    => 'Xăng dầu Hải Thắng',
+            'nhanTx'  => 'Xăng dầu Hải Thắng',
+            'hoan'    => false,
+        ],
+    ];
+}
+
+/** Ten de doc cua lua chon "ai tra xang dau" (rong neu chua chon) */
+function nhanNguoiTraXangDau($ma)
+{
+    $ds = danhSachNguoiTraXangDau();
+    return $ds[$ma]['nhan'] ?? '';
 }
 
 /** Tai xe co dang giu tien khach khong, theo lua chon "ai thu" */
@@ -396,6 +443,13 @@ function phutTuGioDon($gio)
 
 /** Trong bao nhieu tieng thi coi 2 chuyen la dam nhau */
 const GIO_COI_LA_TRUNG = 4;
+
+/**
+ * Ten muc trong danh muc "Nhan keo" danh cho keo minh giao cho nha xe ngoai
+ * chay. Nut "Kèo giao ngoài" chon san muc nay - de o day mot cho de sau nay
+ * doi ten thi chi sua 1 dong.
+ */
+const TEN_LOAI_KEO_GIAO_NGOAI = 'Giao kèo ngoài';
 
 /**
  * Duong dan toi file tinh (css/js) kem phien ban theo lan sua file gan nhat.

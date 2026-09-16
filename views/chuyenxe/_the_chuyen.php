@@ -3,7 +3,7 @@
  * Partial: 1 the chuyen xe (dien thoai). Nhan vao $chuyen, $idTaiXeHienTai.
  * Dung chung cho lan tai trang dau (danhsach.php) va AJAX "xem them" (taiThem()).
  */
-$tt          = nhanTrangThaiChuyen($chuyen['status'], !empty($chuyen['driver_id']));
+$tt          = nhanTrangThaiChuyen($chuyen["status"], !empty($chuyen["driver_id"]), !empty($chuyen["outsource_driver_name"]));
 $cuaToi      = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
 $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
 ?>
@@ -38,7 +38,9 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
   <?php endif; ?>
 
   <div class="thong-tin-the">
-    <div><span class="nhan">Xe</span><span class="gt"><?= h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?></span></div>
+    <div><span class="nhan">Xe</span><span class="gt"><?= !empty($chuyen['outsource_car_name'])
+      ? h($chuyen['outsource_car_name']) . ' (ngoài)'
+      : h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?></span></div>
     <?php if (!laTaiXe()): ?>
       <div><span class="nhan">Tài xế</span>
         <span class="gt"><?php include __DIR__ . '/_o_giao_tai_xe.php'; ?></span>

@@ -8,11 +8,15 @@ class ChuyenXeModel extends Model
     protected $bang = 'trips';
     protected $sapXepMacDinh = 'trip_date DESC, id DESC';
 
+    /** Gia tri tab "Khach chua TT" - khong phai status that, loc theo tien */
+    const TAB_KHACH_CHUA_TT = 'khach_chua_tt';
+
     /** Cac cot do quan ly nhap khi giao chuyen (tai xe khong sua duoc) */
     public static function cotQuanLy()
     {
         return ['trip_date', 'pickup_time', 'pickup_dropoff', 'pickup_location', 'dropoff_location',
                 'pickup_sign', 'passenger_count', 'route', 'car_id', 'driver_id',
+                'outsource_car_name', 'outsource_driver_name', 'attachment_image',
                 'contract_type_id', 'revenue_usd', 'revenue_eur', 'outsource_cost',
                 'airport_fee', 'other_fee', 'driver_advance',
                 'customer_name', 'customer_phone', 'customer_note', 'company_note'];
@@ -126,8 +130,15 @@ class ChuyenXeModel extends Model
             $thamSo[]   = (int)$loc['id_xe'];
         }
         if (!empty($loc['trang_thai'])) {
-            $dieuKien[] = 't.status = ?';
-            $thamSo[]   = $loc['trang_thai'];
+            // "Khach chua TT" khong phai mot trang thai cua chuyen ma la
+            // tinh trang TIEN: chuyen chay xong roi nhung khach van chua tra
+            // dong nao. Loc rieng o day de van dung chung duoc 1 hang tab.
+            if ($loc['trang_thai'] === self::TAB_KHACH_CHUA_TT) {
+                $dieuKien[] = "t.collector_type = 'chua_thu' AND t.status <> 'da_huy'";
+            } else {
+                $dieuKien[] = 't.status = ?';
+                $thamSo[]   = $loc['trang_thai'];
+            }
         }
         if (!empty($loc['tu_khoa'])) {
             $dieuKien[] = '(t.pickup_location LIKE ? OR t.dropoff_location LIKE ? OR t.route LIKE ? OR t.note LIKE ?)';

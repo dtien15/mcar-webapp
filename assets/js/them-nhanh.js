@@ -216,6 +216,19 @@
     });
 
     tieuDeXT.textContent = 'Đọc được ' + ds.length + ' chuyến';
+
+    // Giu anh goc hien ngay tren bang de vua soat vua doi chieu
+    var khoiAnh = document.getElementById('tnAnhGoc');
+    if (khoiAnh) {
+      if (anhDaChon && xemAnh.src) {
+        document.getElementById('tnAnhGocHinh').src = xemAnh.src;
+        document.getElementById('tnAnhGocLink').href = xemAnh.src;
+        khoiAnh.removeAttribute('hidden');
+      } else {
+        khoiAnh.setAttribute('hidden', '');
+      }
+    }
+
     buoc1.setAttribute('hidden', '');
     buoc2.removeAttribute('hidden');
     nutTao.removeAttribute('hidden');
@@ -272,6 +285,12 @@
 
     var than = new FormData();
     than.append('token', modal.getAttribute('data-token'));
+    // Gui kem chinh tam anh vua phan tich de luu dinh kem vao cac chuyen tao
+    // ra - mo chuyen len la doi chieu duoc voi anh goc, khong phai di tim lai
+    // tin nhan cu khi AI doc thieu/sai mot chi tiet nao do.
+    if (anhDaChon) {
+      than.append('anh', anhDaChon);
+    }
     dong.forEach(function (tr, i) {
       tr.querySelectorAll('[data-khoa]').forEach(function (o) {
         than.append('chuyen[' + i + '][' + o.getAttribute('data-khoa') + ']', o.value);

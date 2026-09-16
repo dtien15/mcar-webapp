@@ -4,6 +4,7 @@ $daChot    = $dangSua && $chuyenXe['status'] === 'hoan_thanh';
 $khoaSua   = $daChot && !laQuanTri();   // Da chot: chi quan tri vien moi sua duoc
 $chiXem    = $khoaSua ? 'readonly' : '';
 $chiXemSel = $khoaSua ? 'disabled' : '';
+$laKeoNgoai = !empty($laKeoNgoai);      // Form rut gon cho keo giao cho nha xe ngoai
 
 /** Lay gia tri cu cua truong */
 function giaTri($chuyenXe, $cot, $macDinh = '')
@@ -56,16 +57,44 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
 <form method="post" action="<?= duongDan('chuyenxe/luu') ?>" enctype="multipart/form-data">
   <?php truongToken(); ?>
   <input type="hidden" name="id" value="<?= h(giaTri($chuyenXe, 'id')) ?>">
+  <?php if ($laKeoNgoai): ?>
+    <input type="hidden" name="la_keo_ngoai" value="1">
+  <?php endif; ?>
 
   <div class="the">
     <div class="the-dau">
-      <span><?= $dangSua ? bieuTuong('pencil') . ' Sửa chuyến xe #' . (int)$chuyenXe['id'] : bieuTuong('plus') . ' Thêm chuyến xe mới' ?></span>
-      <?php if ($dangSua): $tt = nhanTrangThaiChuyen($chuyenXe['status'], !empty($chuyenXe['driver_id'])); ?>
+      <span><?php
+        if ($dangSua) {
+            echo bieuTuong('pencil') . ' Sửa chuyến xe #' . (int)$chuyenXe['id'];
+        } elseif ($laKeoNgoai) {
+            echo bieuTuong('arrow-forward-up') . ' Kèo giao ngoài';
+        } else {
+            echo bieuTuong('plus') . ' Thêm chuyến xe mới';
+        }
+      ?></span>
+      <?php if ($dangSua): $tt = nhanTrangThaiChuyen($chuyenXe['status'], !empty($chuyenXe['driver_id']), $laKeoNgoai); ?>
         <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
       <?php endif; ?>
     </div>
 
     <div class="the-than">
+      <?php if ($laKeoNgoai && !$dangSua): ?>
+        <div class="alert alert-light" style="font-size:13px">
+          <?= bieuTuong('info-circle') ?> Kèo này <strong>giao cho nhà xe ngoài chạy</strong> — xe và tài xế gõ tay,
+          không lấy từ danh mục. Số tiền trả cho nhà xe ngoài nhập ở ô <strong>"Chi phí kèo ngoài"</strong>,
+          chuyến này không tính vào lương tài xế công ty.
+        </div>
+      <?php endif; ?>
+
+      <?php if (!empty($chuyenXe['attachment_image'])): ?>
+        <div class="anh-goc-xem-truoc mb-3">
+          <a href="<?= duongDan($chuyenXe['attachment_image']) ?>" target="_blank" title="Bấm để xem ảnh cỡ lớn">
+            <img src="<?= duongDan($chuyenXe['attachment_image']) ?>" alt="Ảnh lịch trình đính kèm">
+          </a>
+          <span class="text-muted">Ảnh lịch trình gốc của chuyến này.</span>
+        </div>
+      <?php endif; ?>
+
       <?php if (laTaiXe() && !$dangSua): ?>
         <div class="alert alert-light" style="font-size:13px">
           <?= bieuTuong('info-circle') ?> Chuyến xe này sẽ được gán cho <strong>chính bạn</strong> và
@@ -170,12 +199,17 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
           <div class="nhom-gap-than">
             <div class="row g-2">
               <div class="col-6 col-md-4">
-                <label class="form-label">Loại kèo</label>
+                <label class="form-label">Nhận kèo</label>
                 <select name="id_loai_keo" id="oLoaiKeo" class="form-select" <?= $chiXemSel ?>>
                   <option value="">-- Chọn --</option>
                   <?php foreach ($dsLoaiKeo as $lk): ?>
-                    <option value="<?= $lk['id'] ?>" data-ten="<?= h($lk['name']) ?>"
-                      <?= giaTri($chuyenXe, 'contract_type_id') == $lk['id'] ? 'selected' : '' ?>>
+                    <?php
+                      // Keo giao ngoai: chon san dung muc do, khoi phai nho ten
+                      $chonSan = $chuyenXe
+                          ? giaTri($chuyenXe, 'contract_type_id') == $lk['id']
+                          : ($laKeoNgoai && $lk['name'] === TEN_LOAI_KEO_GIAO_NGOAI);
+                    ?>
+                    <option value="<?= $lk['id'] ?>" data-ten="<?= h($lk['name']) ?>" <?= $chonSan ? 'selected' : '' ?>>
                       <?= h($lk['name']) ?>
                     </option>
                   <?php endforeach; ?>
@@ -183,7 +217,12 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               </div>
               <div class="col-6 col-md-4">
                 <label class="form-label">Tài xế</label>
-                <?php if (laTaiXe()): $txCuaToi = $dsTaiXe[0] ?? null; ?>
+                <?php if ($laKeoNgoai): ?>
+                  <!-- Keo giao ngoai: tai xe cua nha xe ngoai, khong co trong danh muc -->
+                  <input name="ten_tai_xe_ngoai" class="form-control" maxlength="150" <?= $chiXem ?>
+                         placeholder="Tên tài xế nhà xe ngoài"
+                         value="<?= h(giaTri($chuyenXe, 'outsource_driver_name')) ?>">
+                <?php elseif (laTaiXe()): $txCuaToi = $dsTaiXe[0] ?? null; ?>
                   <!-- Tai xe tu tao: khoa cung la chinh minh -->
                   <input type="hidden" name="id_tai_xe" value="<?= h($txCuaToi['id'] ?? '') ?>">
                   <input id="oTaiXe" class="form-control" value="<?= h($txCuaToi['full_name'] ?? '') ?>" readonly>
@@ -201,7 +240,11 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               </div>
               <div class="col-6 col-md-4">
                 <label class="form-label">Xe</label>
-                <?php if (laTaiXe()): $xeCuaToi = $dsXe[0] ?? null; ?>
+                <?php if ($laKeoNgoai): ?>
+                  <input name="ten_xe_ngoai" class="form-control" maxlength="150" <?= $chiXem ?>
+                         placeholder="Tên xe / biển số nhà xe ngoài"
+                         value="<?= h(giaTri($chuyenXe, 'outsource_car_name')) ?>">
+                <?php elseif (laTaiXe()): $xeCuaToi = $dsXe[0] ?? null; ?>
                   <!-- Tai xe tu tao: khoa cung xe cua minh, khong chon duoc xe khac -->
                   <input type="hidden" name="id_xe" value="<?= h($xeCuaToi['id'] ?? '') ?>">
                   <select id="oXe" class="form-select" disabled>
@@ -225,9 +268,11 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                 <?php endif; ?>
               </div>
 
+              <?php if (!$laKeoNgoai): ?>
               <!-- Canh bao dam lich: hien ngay khi chon xong ngay + xe/tai xe,
                    truoc khi bam Luu. Chi canh bao chu khong chan - 1 xe chay 2
-                   cuoc trong ngay la binh thuong. -->
+                   cuoc trong ngay la binh thuong.
+                   Keo giao ngoai khong can: xe cua nha xe ngoai, ho tu lo lich. -->
               <div class="col-12">
                 <div id="canhBaoDamLich" data-api="<?= duongDan('chuyenxe/kiemtradamlich') ?>" hidden></div>
               </div>
@@ -242,6 +287,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                 </select>
                 <div id="ghiChuGoiY" class="text-muted mt-1" style="font-size:12px"></div>
               </div>
+              <?php endif; ?>
               <div class="col-12 col-md-6">
                 <label class="form-label">Lưu ý từ công ty <span class="text-muted">(nếu có)</span></label>
                 <textarea name="luu_y_cty" rows="1" class="form-control tu-dong-gian" <?= $chiXem ?>><?= h(giaTri($chuyenXe, 'company_note')) ?></textarea>
@@ -333,17 +379,18 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                       <input name="ck_qua_ai" class="form-control" <?= $chiXem ?>
                              value="<?= h(giaTri($chuyenXe, 'transfer_note')) ?>">
                     </div>
+                    <?php if (!empty($chuyenXe['transfer_proof_image'])): ?>
+                    <!-- Anh CK do TAI XE gui len luc xac nhan chuyen. Quan ly
+                         chi xem lai, khong tu tai len o day nua. -->
                     <div class="col-12 col-md-7">
                       <label class="form-label">Ảnh chụp chuyển khoản của khách</label>
-                      <?php if (!$khoaSua): ?>
-                        <input type="file" name="anh_ck" class="form-control" accept="image/png,image/jpeg,image/webp">
-                      <?php endif; ?>
-                      <?php if (!empty($chuyenXe['transfer_proof_image'])): ?>
-                        <a href="<?= duongDan($chuyenXe['transfer_proof_image']) ?>" target="_blank" class="d-inline-block mt-1">
+                      <div>
+                        <a href="<?= duongDan($chuyenXe['transfer_proof_image']) ?>" target="_blank" class="d-inline-block">
                           <img src="<?= duongDan($chuyenXe['transfer_proof_image']) ?>" alt="Ảnh chuyển khoản" style="max-height:60px;border:1px solid #ddd;border-radius:4px">
                         </a>
-                      <?php endif; ?>
+                      </div>
                     </div>
+                    <?php endif; ?>
                   </div>
                 </div>
               </div>
@@ -366,7 +413,10 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               </div>
             </fieldset>
 
-            <!-- Nhom 4: nhung khoan tra cho tai xe -->
+            <?php if (!$laKeoNgoai): ?>
+            <!-- Nhom 4: nhung khoan tra cho tai xe.
+                 Keo giao ngoai khong co: tien tra cho nha xe ngoai da nam o o
+                 "Chi phi keo ngoai" ben tren, khong lien quan luong tai xe nha. -->
             <fieldset class="nhom-tien">
               <legend><?= bieuTuong('user-dollar') ?> Trả cho tài xế</legend>
               <div class="row g-2">
@@ -426,11 +476,15 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                 </div>
               </div>
             </fieldset>
+            <?php endif; ?>
           </div>
         </div>
       </div>
 
-      <!-- 4. Chi phi thuc te - gap lai, tom tat xang dau/phat ngay tren tieu de -->
+      <?php if (!$laKeoNgoai): ?>
+      <!-- 4. Chi phi thuc te - gap lai, tom tat xang dau/phat ngay tren tieu de.
+           Keo giao ngoai khong co: xang dau, VETC, bao duong... la cua nha xe
+           ngoai, minh chi tra dung so tien da thoa thuan. -->
       <div class="nhom-gap">
         <button type="button" class="nhom-gap-dau" data-bs-toggle="collapse" data-bs-target="#gap4" aria-expanded="false">
           <span class="nhom-gap-ten"><?= bieuTuong('receipt-2') ?> Chi phí thực tế</span>
@@ -454,8 +508,11 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                 <label class="form-label">Người trả xăng dầu</label>
                 <select name="nguoi_tra_xang_dau" class="form-select" <?= $chiXemSel ?>>
                   <option value="">-- Chọn --</option>
-                  <option value="tai_xe" <?= giaTri($chuyenXe, 'fuel_payer') === 'tai_xe' ? 'selected' : '' ?>>Tài xế trả (cty hoàn lại)</option>
-                  <option value="cong_ty" <?= giaTri($chuyenXe, 'fuel_payer') === 'cong_ty' ? 'selected' : '' ?>>Công ty trả trực tiếp</option>
+                  <?php foreach (danhSachNguoiTraXangDau() as $ma => $muc): ?>
+                    <option value="<?= h($ma) ?>" <?= giaTri($chuyenXe, 'fuel_payer') === $ma ? 'selected' : '' ?>>
+                      <?= h($muc['nhan']) ?>
+                    </option>
+                  <?php endforeach; ?>
                 </select>
               </div>
               <?php if (!laTaiXe()): ?>
@@ -504,14 +561,22 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
           </div>
         </div>
       </div>
+      <?php endif; ?>
 
       <div class="d-flex gap-2 thanh-hanh-dong-form">
         <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-outline-secondary nut-quay-lai-form">
           <?= bieuTuong('arrow-left') ?> Quay lại
         </a>
-        <?php if (!$khoaSua): $nhanNut = $dangSua
-              ? (bieuTuong('device-floppy') . ' Cập nhật')
-              : (laTaiXe() ? (bieuTuong('plus') . ' Tạo chuyến xe') : (bieuTuong('plus') . ' Thêm & giao cho tài xế')); ?>
+        <?php if (!$khoaSua):
+              if ($dangSua) {
+                  $nhanNut = bieuTuong('device-floppy') . ' Cập nhật';
+              } elseif ($laKeoNgoai) {
+                  $nhanNut = bieuTuong('plus') . ' Tạo kèo giao ngoài';
+              } elseif (laTaiXe()) {
+                  $nhanNut = bieuTuong('plus') . ' Tạo chuyến xe';
+              } else {
+                  $nhanNut = bieuTuong('plus') . ' Thêm & giao cho tài xế';
+              } ?>
           <button class="btn btn-primary flex-fill"><?= $nhanNut ?></button>
         <?php endif; ?>
       </div>

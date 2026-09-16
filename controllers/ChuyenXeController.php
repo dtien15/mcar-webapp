@@ -131,22 +131,44 @@ class ChuyenXeController extends Controller
     }
 
     /** Hien thi form them/sua */
-    private function hienForm($chuyenXe)
+    /**
+     * Form "Keo giao ngoai": cung form them chuyen xe nhung gon lai - keo nay
+     * minh KHONG chay, giao cho nha xe ngoai chay, nen khong co chi phi xe nha
+     * (xang dau, VETC, bao duong...) cung khong co tien tra cho tai xe nha.
+     * Xe va tai xe go tay vi ho khong nam trong danh muc cua cong ty.
+     */
+    public function keoNgoai()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->hienForm(null, true);
+    }
+
+    private function hienForm($chuyenXe, $laKeoNgoai = false)
     {
         $taiXeModel = $this->model('TaiXeModel');
 
         // Tai xe tu tao chuyen: khoa cung xe + tai xe la chinh minh, khong cho chon nguoi/xe khac
         $xeCuaToi = laTaiXe() ? $this->layXeMacDinhCuaToi() : null;
 
+        // Chuyen da luu co ten xe/tai xe ngoai thi van la keo giao ngoai khi mo
+        // ra sua lai - khong thi bam Sua mot phat la form doi ve dang thuong,
+        // luu lai se mat ten nha xe ngoai da nhap.
+        if ($chuyenXe && !empty($chuyenXe['outsource_driver_name'])) {
+            $laKeoNgoai = true;
+        }
+
         $duLieu = [
             'chuyenXe'   => $chuyenXe,
+            'laKeoNgoai' => $laKeoNgoai,
             'dsXe'       => laTaiXe() ? [$xeCuaToi] : $this->model('XeModel')->layTatCa(),
             'dsTaiXe'    => laTaiXe() ? [$taiXeModel->layTheoId(taiKhoanHienTai()['id_tai_xe'])] : $taiXeModel->layTatCa(),
             'dsLoaiKeo'  => $this->model('LoaiKeoModel')->layTatCa(),
             'dsBangGia'  => $this->model('BangGiaModel')->layTatCa(),
             'giaGoiY'    => $this->model('BangGiaModel')->layDuLieuGoiY(),
         ];
-        $this->view('chuyenxe/form', $duLieu, $chuyenXe ? 'Sửa chuyến xe' : 'Thêm chuyến xe');
+
+        $tieuDe = $chuyenXe ? 'Sửa chuyến xe' : ($laKeoNgoai ? 'Kèo giao ngoài' : 'Thêm chuyến xe');
+        $this->view('chuyenxe/form', $duLieu, $tieuDe);
     }
 
     /** Xe mac dinh cua tai xe dang dang nhap (null neu chua duoc gan) */
@@ -188,6 +210,13 @@ class ChuyenXeController extends Controller
         $diaDiemDon  = $this->chuTuForm('dia_diem_don');
         $diaDiemTra  = $this->chuTuForm('dia_diem_tra');
 
+        // Keo giao ngoai: xe + tai xe la cua nha xe ngoai, go tay chu khong
+        // chon tu danh muc. Giu car_id/driver_id = NULL co chu dich: chuyen
+        // nay khong duoc tinh vao luong tai xe nha, khong dinh lich xe nha.
+        $laKeoNgoai   = !laTaiXe() && $this->chuTuForm('la_keo_ngoai') === '1';
+        $xeNgoai      = $laKeoNgoai ? mb_substr($this->chuTuForm('ten_xe_ngoai'), 0, 150, 'UTF-8') : null;
+        $taiXeNgoai   = $laKeoNgoai ? mb_substr($this->chuTuForm('ten_tai_xe_ngoai'), 0, 150, 'UTF-8') : null;
+
         $duLieu = [
             'trip_date'        => $this->chuTuForm('ngay_chay', date('Y-m-d')),
             'pickup_time'      => $this->chuTuForm('gio_don'),
@@ -197,8 +226,10 @@ class ChuyenXeController extends Controller
             'pickup_sign'      => $this->chuTuForm('bang_don'),
             'passenger_count'  => $this->khoaTuForm('so_luong_khach'),
             'route'            => $this->chuTuForm('hanh_trinh'),
-            'car_id'           => $this->khoaTuForm('id_xe'),
-            'driver_id'        => $this->khoaTuForm('id_tai_xe'),
+            'car_id'           => $laKeoNgoai ? null : $this->khoaTuForm('id_xe'),
+            'driver_id'        => $laKeoNgoai ? null : $this->khoaTuForm('id_tai_xe'),
+            'outsource_car_name'    => $xeNgoai,
+            'outsource_driver_name' => $taiXeNgoai,
             'contract_type_id' => $this->khoaTuForm('id_loai_keo'),
             'customer_name'    => $this->chuTuForm('ten_khach'),
             'customer_phone'   => $this->chuTuForm('sdt_khach'),
@@ -414,6 +445,12 @@ class ChuyenXeController extends Controller
             $this->traJsonChuyen(['ok' => false, 'loi' => 'Mỗi lần chỉ tạo tối đa 50 chuyến.']);
         }
 
+        // Giu lai chinh tam anh lich trinh vua dan de phan tich: AI doc sai
+        // hoac thieu mot chi tiet la chuyen thuong, co anh goc dinh kem thi mo
+        // chuyen ra doi chieu duoc ngay, khong phai di tim lai tin nhan cu.
+        // Luu 1 lan, gan chung cho tat ca chuyen doc ra tu anh do.
+        $anhLichTrinh = $this->xuLyAnhTaiLen('anh', 'lichtrinh', 'Ảnh lịch trình');
+
         $dsLuu = [];
         foreach ($dsGui as $c) {
             $ngay = trim($c['ngay_chay'] ?? '');
@@ -437,6 +474,7 @@ class ChuyenXeController extends Controller
                 // cho ai giao (ho khong the tu giao chuyen cho nguoi khac o day).
                 'driver_id'       => $xeMacDinh ? (int)taiKhoanHienTai()['id_tai_xe'] : null,
                 'car_id'          => $xeMacDinh ? (int)$xeMacDinh['id'] : null,
+                'attachment_image' => $anhLichTrinh,
                 'status'          => 'moi',
             ];
         }
@@ -1124,7 +1162,7 @@ class ChuyenXeController extends Controller
         fprintf($xuat, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM de Excel doc dung tieng Viet
 
         fputcsv($xuat, ['Ngày chạy', 'Giờ đón', 'Điểm đón - trả', 'Hành trình', 'Xe', 'Tài xế',
-            'Loại kèo', 'Thu VNĐ', 'Thu USD', 'Tiền cuốc xe', 'Lưu đêm', 'Phí sân bay',
+            'Nhận kèo', 'Thu VNĐ', 'Thu USD', 'Tiền cuốc xe', 'Lưu đêm', 'Phí sân bay',
             'Phát sinh', 'Xăng dầu', 'VETC', 'Bảo dưỡng', 'Phạt', 'Tạm ứng', 'Trạng thái', 'Ghi chú']);
 
         foreach ($danhSach as $dong) {
@@ -1324,10 +1362,15 @@ class ChuyenXeController extends Controller
         return $this->layTuHaiLuaChon('nguoi_tra_phu_phi_khac');
     }
 
-    /** Doc "ai tra xang dau" tu form (tai_xe hoac cong_ty) - dung de biet co hoan lai vao luong khong */
+    /**
+     * Doc "ai tra xang dau" tu form - dung de biet co hoan tien xang lai cho
+     * tai xe vao luong hay khong. Danh sach lua chon hop le lay tu
+     * danhSachNguoiTraXangDau() de form / modal xac nhan / cho nay luon khop.
+     */
     private function layNguoiTraXangDau()
     {
-        return $this->layTuHaiLuaChon('nguoi_tra_xang_dau');
+        $gt = $this->chuTuForm('nguoi_tra_xang_dau');
+        return isset(danhSachNguoiTraXangDau()[$gt]) ? $gt : null;
     }
 
     /** Doc 1 truong dang chon "tai_xe"/"cong_ty" tu form, chi nhan 2 gia tri hop le */
@@ -1344,27 +1387,36 @@ class ChuyenXeController extends Controller
      */
     private function xuLyAnhCK($tenTruong)
     {
+        return $this->xuLyAnhTaiLen($tenTruong, 'ck', 'Ảnh chuyển khoản');
+    }
+
+    /**
+     * Luu 1 anh nguoi dung tai len vao assets/uploads/<$thuMucCon>/.
+     * Tra ve duong dan tuong doi da luu, null neu khong co file / file hong.
+     */
+    private function xuLyAnhTaiLen($tenTruong, $thuMucCon, $moTa)
+    {
         if (empty($_FILES[$tenTruong]) || $_FILES[$tenTruong]['error'] === UPLOAD_ERR_NO_FILE) {
             return null;
         }
         $tapTin = $_FILES[$tenTruong];
         if ($tapTin['error'] !== UPLOAD_ERR_OK) {
-            datThongBao('Lỗi khi tải ảnh chuyển khoản lên, vui lòng thử lại.', 'danger');
+            datThongBao($moTa . ': lỗi khi tải lên, vui lòng thử lại.', 'danger');
             return null;
         }
         if ($tapTin['size'] > 5 * 1024 * 1024) {
-            datThongBao('Ảnh chuyển khoản quá lớn (tối đa 5MB).', 'danger');
+            datThongBao($moTa . ' quá lớn (tối đa 5MB).', 'danger');
             return null;
         }
 
         $thongTinAnh = @getimagesize($tapTin['tmp_name']);
         $dsMimeChoPhep = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
         if (!$thongTinAnh || !isset($dsMimeChoPhep[$thongTinAnh['mime']])) {
-            datThongBao('Ảnh chuyển khoản phải là file ảnh (JPG/PNG/WEBP).', 'danger');
+            datThongBao($moTa . ' phải là file ảnh (JPG/PNG/WEBP).', 'danger');
             return null;
         }
 
-        $thuMuc = DUONG_DAN_GOC . '/assets/uploads/ck';
+        $thuMuc = DUONG_DAN_GOC . '/assets/uploads/' . $thuMucCon;
         if (!is_dir($thuMuc)) {
             mkdir($thuMuc, 0755, true);
             // Chan thuc thi script trong thu muc upload, phong khi co file la mao
@@ -1373,11 +1425,11 @@ class ChuyenXeController extends Controller
 
         $tenFile = bin2hex(random_bytes(16)) . '.' . $dsMimeChoPhep[$thongTinAnh['mime']];
         if (!move_uploaded_file($tapTin['tmp_name'], $thuMuc . '/' . $tenFile)) {
-            datThongBao('Không lưu được ảnh chuyển khoản, vui lòng thử lại.', 'danger');
+            datThongBao('Không lưu được ' . mb_strtolower($moTa) . ', vui lòng thử lại.', 'danger');
             return null;
         }
 
-        return 'assets/uploads/ck/' . $tenFile;
+        return 'assets/uploads/' . $thuMucCon . '/' . $tenFile;
     }
 
     /** Doc bo loc tu query string, tai xe chi thay du lieu cua minh */

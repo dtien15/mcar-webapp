@@ -13,7 +13,7 @@ class LoaiKeoController extends Controller
         $this->view('loaikeo/danhsach', [
             'danhSach' => $loaiKeoModel->layTatCa(),
             'dangSua'  => $idSua ? $loaiKeoModel->layTheoId($idSua) : null,
-        ], 'Danh mục Loại kèo');
+        ], 'Danh mục Nhận kèo');
     }
 
     public function sua($id = 0)

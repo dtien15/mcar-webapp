@@ -72,6 +72,16 @@
             </button>
           </div>
 
+          <!-- Anh goc van nam day trong luc soat lai bang: AI doc thieu/sai 1
+               chi tiet la chuyen thuong, co anh ngay canh thi doi chieu duoc
+               luon chu khong phai bam quay lai buoc truoc. -->
+          <div id="tnAnhGoc" class="anh-goc-xem-truoc mb-2" hidden>
+            <a id="tnAnhGocLink" href="#" target="_blank" title="Bấm để xem ảnh cỡ lớn">
+              <img id="tnAnhGocHinh" alt="Ảnh lịch trình đã phân tích">
+            </a>
+            <span class="text-muted">Ảnh này sẽ được lưu kèm các chuyến tạo ra.</span>
+          </div>
+
           <div class="bang-cuon">
             <table class="bang bang-xem-truoc">
               <thead>
@@ -86,7 +96,7 @@
                   <th style="width:120px">Điện thoại</th>
                   <th style="width:70px">Số khách</th>
                   <th style="width:130px">Khách trả</th>
-                  <th style="width:130px">Loại kèo</th>
+                  <th style="width:130px">Nhận kèo</th>
                 </tr>
               </thead>
               <tbody id="tnBangXemTruoc"></tbody>

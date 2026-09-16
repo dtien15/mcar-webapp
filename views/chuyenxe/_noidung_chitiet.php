@@ -30,17 +30,21 @@
           <textarea rows="1" class="form-control form-control-sm tu-dong-gian" readonly><?= h($chuyen['route']) ?></textarea>
         </div>
         <div class="col-6 col-md-3">
-          <label class="form-label">Xe</label>
-          <input class="form-control form-control-sm" value="<?= h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?>" readonly>
+          <label class="form-label">Xe<?= !empty($chuyen['outsource_car_name']) ? ' (nhà xe ngoài)' : '' ?></label>
+          <input class="form-control form-control-sm" readonly value="<?= !empty($chuyen['outsource_car_name'])
+            ? h($chuyen['outsource_car_name'])
+            : h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?>">
         </div>
         <?php if (laQuanLy()): ?>
         <div class="col-6 col-md-3">
-          <label class="form-label">Tài xế</label>
-          <input class="form-control form-control-sm" value="<?= h($chuyen['ten_tai_xe']) ?>" readonly>
+          <label class="form-label">Tài xế<?= !empty($chuyen['outsource_driver_name']) ? ' (nhà xe ngoài)' : '' ?></label>
+          <input class="form-control form-control-sm" readonly value="<?= !empty($chuyen['outsource_driver_name'])
+            ? h($chuyen['outsource_driver_name'])
+            : h($chuyen['ten_tai_xe']) ?>">
         </div>
         <?php endif; ?>
         <div class="col-6 col-md-3">
-          <label class="form-label">Loại kèo</label>
+          <label class="form-label">Nhận kèo</label>
           <input class="form-control form-control-sm" value="<?= h($chuyen['ten_loai_keo']) ?>" readonly>
         </div>
         <?php if ($chuyen['passenger_count'] !== null): ?>
@@ -83,6 +87,17 @@
         <div class="col-12">
           <label class="form-label">Lưu ý từ công ty</label>
           <textarea rows="1" class="form-control form-control-sm tu-dong-gian text-danger" readonly><?= h($chuyen['company_note']) ?></textarea>
+        </div>
+        <?php endif; ?>
+        <?php if (!empty($chuyen['attachment_image'])): ?>
+        <div class="col-12">
+          <label class="form-label">Ảnh lịch trình gốc</label>
+          <div>
+            <a href="<?= duongDan($chuyen['attachment_image']) ?>" target="_blank" title="Bấm để xem cỡ lớn">
+              <img src="<?= duongDan($chuyen['attachment_image']) ?>" alt="Ảnh lịch trình"
+                   style="max-height:120px;border:1px solid #ddd;border-radius:6px">
+            </a>
+          </div>
         </div>
         <?php endif; ?>
       </div>
@@ -207,7 +222,8 @@
         <?php endif; ?>
         <div class="col-6 col-md-3">
           <label class="form-label">Người trả xăng dầu</label>
-          <input class="form-control form-control-sm" value="<?= h($chuyen['fuel_payer']) ?>" readonly>
+          <input class="form-control form-control-sm" readonly
+                 value="<?= h(nhanNguoiTraXangDau($chuyen['fuel_payer']) ?: $chuyen['fuel_payer']) ?>">
         </div>
         <?php if ($chuyen['maintenance'] > 0): ?>
         <div class="col-6 col-md-3">

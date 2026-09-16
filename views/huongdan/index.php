@@ -149,12 +149,12 @@
             <p class="mb-0">Vào mục <strong>Báo cáo lãi lỗ</strong>, xem phần "Xe nào có lãi" để biết xe/kèo nào đang thực sự có lời, xe/kèo nào đang lỗ.</p>'
           ],
           [
-            'qlDanhMuc', '📁 Quản lý Xe / Tài xế / Loại kèo / Bảng giá',
+            'qlDanhMuc', '📁 Quản lý Xe / Tài xế / Nhận kèo / Bảng giá',
             '<p>Các mục này ở nhóm <strong>DANH MỤC</strong> trên menu — dùng để khai báo trước những thứ sẽ chọn khi tạo chuyến xe:</p>
             <ul class="ds-huong-dan">
               <li><strong>Xe</strong>: danh sách xe của công ty (tên, biển số, số chỗ).</li>
               <li><strong>Tài xế</strong>: thông tin tài xế, lương cơ bản, bảo hiểm, xe mặc định.</li>
-              <li><strong>Loại kèo</strong>: các kiểu hợp đồng/loại chuyến (kèo công ty, kèo ngoài…).</li>
+              <li><strong>Nhận kèo</strong>: các kiểu hợp đồng/loại chuyến (kèo công ty, kèo ngoài…).</li>
               <li><strong>Bảng giá</strong>: giá tham khảo cho từng tuyến.</li>
             </ul>
             <p class="mb-0">Mỗi mục đều có nút <strong>+ Thêm mới</strong> ở góc trên, và nút Sửa/Xóa trên từng dòng.</p>'

@@ -12,6 +12,9 @@ $dsTab = [
     'moi'             => 'Mới giao',
     'tai_xe_xac_nhan' => 'Tài xế đã xác nhận',
     'hoan_thanh'      => 'Hoàn thành',
+    // Khong phai trang thai chuyen ma la tinh trang TIEN: chay xong roi nhung
+    // khach van chua tra. Rat hay gap nen tach han ra mot tab de doi tien.
+    ChuyenXeModel::TAB_KHACH_CHUA_TT => 'Khách chưa TT',
     'da_huy'          => 'Đã hủy',
 ];
 ?>
@@ -118,6 +121,10 @@ $dsTab = [
           <?= bieuTuong('sparkles') ?> Thêm nhanh từ ảnh
         </button>
         <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm nut-them-chuyen"><?= bieuTuong('plus') ?> Thêm chuyến xe</a>
+        <a href="<?= duongDan('chuyenxe/keongoai') ?>" class="btn btn-outline-primary btn-sm d-none d-md-inline-flex"
+           title="Kèo của mình nhưng giao cho nhà xe ngoài chạy">
+          <?= bieuTuong('arrow-forward-up') ?> Kèo giao ngoài
+        </a>
         <a href="<?= duongDan('chuyenxe/xuatcsv?' . http_build_query($loc)) ?>" class="btn btn-light btn-sm d-none d-md-inline-flex"><?= bieuTuong('download') ?> Xuất Excel</a>
 
         <div class="dropdown d-md-none nut-khac-loc">
@@ -129,6 +136,11 @@ $dsTab = [
               <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#themNhanh">
                 <?= bieuTuong('sparkles') ?> Thêm nhanh từ ảnh
               </button>
+            </li>
+            <li>
+              <a class="dropdown-item" href="<?= duongDan('chuyenxe/keongoai') ?>">
+                <?= bieuTuong('arrow-forward-up') ?> Kèo giao ngoài
+              </a>
             </li>
             <li>
               <a class="dropdown-item" href="<?= duongDan('chuyenxe/xuatcsv?' . http_build_query($loc)) ?>">

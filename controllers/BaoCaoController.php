@@ -252,7 +252,7 @@ class BaoCaoController extends Controller
 
         fputcsv($xuat, []);
         fputcsv($xuat, ['THEO LOẠI KÈO']);
-        fputcsv($xuat, ['Loại kèo', 'Số cuốc', 'Doanh thu VNĐ', 'Doanh thu USD', 'Doanh thu EUR', 'Doanh thu quy đổi VNĐ']);
+        fputcsv($xuat, ['Nhận kèo', 'Số cuốc', 'Doanh thu VNĐ', 'Doanh thu USD', 'Doanh thu EUR', 'Doanh thu quy đổi VNĐ']);
         foreach ($chuyenXeModel->thongKeTheoLoaiKeo($tuNgay, $denNgay) as $dong) {
             fputcsv($xuat, [$dong['name'], $dong['so_chuyen'], $dong['doanh_thu'],
                 $dong['doanh_thu_usd'], $dong['doanh_thu_eur'],

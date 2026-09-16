@@ -16,7 +16,7 @@
       <table class="table table-sm table-bordered" style="font-size:12px">
         <thead style="background:#f1f5f9">
           <tr>
-            <th>Ngày</th><th>Giờ đón</th><th>Điểm đón - trả</th><th>Hành trình</th><th>Xe</th><th>Loại kèo</th>
+            <th>Ngày</th><th>Giờ đón</th><th>Điểm đón - trả</th><th>Hành trình</th><th>Xe</th><th>Nhận kèo</th>
             <th class="text-end">Tiền cuốc</th><th class="text-end">Lưu đêm</th>
             <th class="text-end">Phí sân bay</th><th class="text-end">Phụ phí khác</th>
             <th class="text-end">Thu khách</th><th>Ai thu</th><th>Trạng thái tiền thu</th>

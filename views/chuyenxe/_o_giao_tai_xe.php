@@ -10,6 +10,13 @@ if (!empty($chuyen['driver_id'])) {
     echo h($chuyen['ten_tai_xe']);
     return;
 }
+// Keo giao ngoai: tai xe cua nha xe ngoai, khong co trong danh muc nen khong
+// giao cho ai duoc - hien thang ten da go tay.
+if (!empty($chuyen['outsource_driver_name'])) {
+    echo h($chuyen['outsource_driver_name'])
+       . ' <span class="text-muted" style="font-size:11px">(kèo ngoài)</span>';
+    return;
+}
 if (!laQuanLy()) {
     echo '<span class="text-muted">—</span>';
     return;

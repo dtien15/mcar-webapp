@@ -186,7 +186,7 @@ foreach ($theoThang as $t => $d) { $tenThang[] = 'Th ' . $t; }
       <div class="the-than the-than-khong-dem bang-cuon">
         <table class="bang">
           <thead>
-            <tr><th>Loại kèo</th><th class="canh-phai">Cuốc</th><th class="canh-phai">Doanh thu quy đổi</th><th class="canh-phai">Tỷ trọng</th></tr>
+            <tr><th>Nhận kèo</th><th class="canh-phai">Cuốc</th><th class="canh-phai">Doanh thu quy đổi</th><th class="canh-phai">Tỷ trọng</th></tr>
           </thead>
           <tbody>
           <?php

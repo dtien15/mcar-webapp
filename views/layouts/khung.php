@@ -44,7 +44,7 @@ $menu = [
     ['nhom'  => 'DANH MỤC',  'quyen' => ['admin','ketoan']],
     ['route' => 'xe',        'nhan' => 'Xe',                  'icon' => 'car',              'quyen' => ['admin','ketoan']],
     ['route' => 'taixe',     'nhan' => 'Tài xế',              'icon' => 'steering-wheel',   'quyen' => ['admin','ketoan']],
-    ['route' => 'loaikeo',   'nhan' => 'Loại kèo',            'icon' => 'list-details',     'quyen' => ['admin','ketoan']],
+    ['route' => 'loaikeo',   'nhan' => 'Nhận kèo',            'icon' => 'list-details',     'quyen' => ['admin','ketoan']],
     ['route' => 'banggia',   'nhan' => 'Bảng giá',            'icon' => 'tag',              'quyen' => ['admin','ketoan']],
     ['nhom'  => 'HỆ THỐNG',  'quyen' => ['admin']],
     ['route' => 'nguoidung', 'nhan' => 'Người dùng',          'icon' => 'users',            'quyen' => ['admin']],

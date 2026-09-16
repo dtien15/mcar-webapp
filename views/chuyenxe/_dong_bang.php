@@ -3,7 +3,7 @@
  * Partial: 1 dong bang chuyen xe (may tinh). Nhan vao $chuyen, $idTaiXeHienTai.
  * Dung chung cho lan tai trang dau (danhsach.php) va AJAX "xem them" (taiThem()).
  */
-$tt          = nhanTrangThaiChuyen($chuyen['status'], !empty($chuyen['driver_id']));
+$tt          = nhanTrangThaiChuyen($chuyen["status"], !empty($chuyen["driver_id"]), !empty($chuyen["outsource_driver_name"]));
 $cuaToi      = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
 $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
 ?>
@@ -19,11 +19,16 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
     <?php endif; ?>
   </td>
   <td class="o-xe">
-    <?php if (!empty($chuyen['bien_so'])): ?>
-      <div class="bien-so"><?= h($chuyen['bien_so']) ?></div>
-    <?php endif; ?>
-    <?php if (!empty($chuyen['ten_xe'])): ?>
-      <div class="dong-phu"><?= h($chuyen['ten_xe']) ?></div>
+    <?php if (!empty($chuyen['outsource_car_name'])): ?>
+      <div class="bien-so"><?= h($chuyen['outsource_car_name']) ?></div>
+      <div class="dong-phu">Xe ngoài</div>
+    <?php else: ?>
+      <?php if (!empty($chuyen['bien_so'])): ?>
+        <div class="bien-so"><?= h($chuyen['bien_so']) ?></div>
+      <?php endif; ?>
+      <?php if (!empty($chuyen['ten_xe'])): ?>
+        <div class="dong-phu"><?= h($chuyen['ten_xe']) ?></div>
+      <?php endif; ?>
     <?php endif; ?>
   </td>
   <?php if (laQuanLy()): ?>

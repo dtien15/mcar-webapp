@@ -192,11 +192,11 @@ $laLai = $lai >= 0;
   <!-- ====== Tung loai keo ====== -->
   <div class="col-lg-5">
     <div class="the h-100">
-      <div class="the-dau"><?= bieuTuong('list-details') ?> Loại kèo nào có lãi</div>
+      <div class="the-dau"><?= bieuTuong('list-details') ?> Nhận kèo nào có lãi</div>
       <div class="the-than the-than-khong-dem bang-cuon">
         <table class="bang">
           <thead>
-            <tr><th>Loại kèo</th><th class="canh-phai">Chuyến</th><th class="canh-phai">Lãi / lỗ</th></tr>
+            <tr><th>Nhận kèo</th><th class="canh-phai">Chuyến</th><th class="canh-phai">Lãi / lỗ</th></tr>
           </thead>
           <tbody>
             <?php foreach ($theoLoaiKeo as $x): ?>
