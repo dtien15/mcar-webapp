@@ -1371,3 +1371,17 @@ textarea.tu-dong-gian {
 }
 .muc-xep-hang .thanh span { display: block; height: 100%; border-radius: 999px; }
 .muc-xep-hang .dong-duoi { font-size: 11px; color: var(--mau-chu-nhat); margin-top: 2px; }
+
+/* Ma chuyen xe (MCAR-20260916-0047) - kieu nhu ma van don, de nhin ra ngay
+   va copy gui cho nhau duoc */
+.ma-chuyen-xe {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--mau-nen);
+  border: 1px solid var(--mau-vien);
+  border-radius: 6px;
+  padding: 2px 8px;
+  margin-left: 4px;
+  user-select: all;
+}

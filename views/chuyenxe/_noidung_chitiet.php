@@ -9,7 +9,10 @@
 ?>
 <div class="the">
   <div class="the-dau">
-    <span><?= bieuTuong('file-invoice') ?> Chi tiết chuyến xe #<?= (int)$chuyen['id'] ?></span>
+    <span>
+      <?= bieuTuong('file-invoice') ?> Chi tiết chuyến xe
+      <span class="ma-chuyen-xe" title="Mã chuyến — dùng khi nhắn tin / đối chiếu giấy tờ"><?= h(maChuyenXe($chuyen['id'], $chuyen['trip_date'])) ?></span>
+    </span>
     <span class="text-muted" style="font-size:12px"><?= dinhDangNgay($chuyen['trip_date']) ?></span>
   </div>
   <div class="the-than">

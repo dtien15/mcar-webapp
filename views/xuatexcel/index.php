@@ -19,7 +19,7 @@ $dsTrangThai = [
 <div class="the">
   <div class="the-dau">
     <span><?= bieuTuong('file-spreadsheet') ?> Xuất dữ liệu chuyến xe ra Excel</span>
-    <span class="text-muted" style="font-size:12px">File xuất ra có đủ <?= (int)$soCot ?> cột, trường nào trống vẫn có cột</span>
+    <span class="text-muted" style="font-size:12px">File .xlsx có sẵn định dạng · <?= (int)$soCot ?> cột, trường nào trống vẫn có cột</span>
   </div>
 
   <div class="the-than">
@@ -106,7 +106,7 @@ $dsTrangThai = [
     <div class="o-ket-qua-phu">
       <div class="nhan">Số cột trong file</div>
       <div class="gt"><?= (int)$soCot ?></div>
-      <div class="chi-tiet">đầy đủ mọi trường</div>
+      <div class="chi-tiet">đã format sẵn</div>
     </div>
   </div>
 </div>

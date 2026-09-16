@@ -445,6 +445,21 @@ function phutTuGioDon($gio)
 const GIO_COI_LA_TRUNG = 4;
 
 /**
+ * Ma chuyen xe de doc va KHONG BAO GIO TRUNG: MCAR-<ngay chay>-<so thu tu>.
+ * Vi du: MCAR-20260916-0047
+ *
+ * Phan duoi cung lay tu id trong CSDL nen chac chan duy nhat; ngay chay ghep
+ * vao de nhin ma la biet chuyen ngay nao, khoi phai mo ra xem. Dung chung
+ * cho ca file Excel xuat ra va man hinh chi tiet, de doi chieu giay to /
+ * nhan tin voi nhau deu noi cung mot ma.
+ */
+function maChuyenXe($id, $ngayChay = null)
+{
+    $ngay = $ngayChay ? date('Ymd', strtotime($ngayChay)) : '00000000';
+    return 'MCAR-' . $ngay . '-' . str_pad((int)$id, 4, '0', STR_PAD_LEFT);
+}
+
+/**
  * Rut gon so tien cho de doc luot ("1,25 tỷ" thay vi "1.250.000.000").
  * Chi dung cho cac con so TO o bao cao - cho nao can doi chieu chinh xac
  * thi van phai hien du so bang dinhDangTien().
