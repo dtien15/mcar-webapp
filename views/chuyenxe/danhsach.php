@@ -66,9 +66,36 @@ $dsTab = [
   </div>
 </div>
 <?php else: ?>
-<!-- Bo loc (quan ly) -->
+<!-- Bo loc (quan ly).
+     Man hep: gap lai, chi chua mot thanh gon co nut mo bo loc + 2 nut hay
+     dung nhat - truoc day 6 o loc chiem gan het man hinh dau tien, phai cuon
+     mot doan dai moi thay chuyen xe nao. Man rong van bay het nhu cu. -->
 <div class="the">
-  <div class="the-than">
+  <div class="the-than thanh-loc-gon d-md-none">
+    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#khoiBoLocQuanLy">
+      <?php // Ngay rut gon d/m cho vua mot hang tren dien thoai ?>
+      <?= bieuTuong('filter') ?>
+      <?= h($loc['tu_ngay'] ? date('d/m', strtotime($loc['tu_ngay'])) : '…') ?> – <?= h($loc['den_ngay'] ? date('d/m', strtotime($loc['den_ngay'])) : '…') ?>
+    </button>
+    <div class="d-flex gap-2 ms-auto">
+      <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#themNhanh"
+              title="Thêm nhanh từ ảnh"><?= bieuTuong('sparkles') ?></button>
+      <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm"><?= bieuTuong('plus') ?> Thêm</a>
+      <div class="dropdown">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" title="Việc khác">
+          <?= bieuTuong('dots') ?>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="<?= duongDan('chuyenxe/keongoai') ?>">
+            <?= bieuTuong('arrow-forward-up') ?> Kèo giao ngoài</a></li>
+          <li><a class="dropdown-item" href="<?= duongDan('xuatexcel?' . http_build_query(['tu_ngay' => $loc['tu_ngay'], 'den_ngay' => $loc['den_ngay']])) ?>">
+            <?= bieuTuong('file-spreadsheet') ?> Xuất Excel</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="the-than collapse d-md-block" id="khoiBoLocQuanLy">
     <form class="row g-2 align-items-end" method="get" action="<?= duongDan('chuyenxe') ?>">
       <input type="hidden" name="trang_thai" value="<?= h($loc['trang_thai']) ?>">
       <div class="col-6 col-md-2">
@@ -120,29 +147,12 @@ $dsTab = [
                 data-bs-toggle="modal" data-bs-target="#themNhanh">
           <?= bieuTuong('sparkles') ?> Thêm nhanh từ ảnh
         </button>
-        <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm nut-them-chuyen"><?= bieuTuong('plus') ?> Thêm chuyến xe</a>
+        <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm nut-them-chuyen d-none d-md-inline-flex"><?= bieuTuong('plus') ?> Thêm chuyến xe</a>
         <a href="<?= duongDan('chuyenxe/keongoai') ?>" class="btn btn-outline-primary btn-sm d-none d-md-inline-flex"
            title="Kèo của mình nhưng giao cho nhà xe ngoài chạy">
           <?= bieuTuong('arrow-forward-up') ?> Kèo giao ngoài
         </a>
 
-        <div class="dropdown d-md-none nut-khac-loc">
-          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false" title="Việc khác">
-            <?= bieuTuong('dots') ?>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li>
-              <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#themNhanh">
-                <?= bieuTuong('sparkles') ?> Thêm nhanh từ ảnh
-              </button>
-            </li>
-            <li>
-              <a class="dropdown-item" href="<?= duongDan('chuyenxe/keongoai') ?>">
-                <?= bieuTuong('arrow-forward-up') ?> Kèo giao ngoài
-              </a>
-            </li>
-          </ul>
-        </div>
       </div>
     </form>
   </div>
@@ -159,25 +169,18 @@ $dsTab = [
   <?php endforeach; ?>
 </ul>
 
-<!-- Tong hop nhanh: chi hien cho quan ly, tai xe dung giao dien gon khong xem so lieu tong hop -->
+<!-- Tom tat gon mot dong thay cho 4 o thong ke to truoc day: so lieu day du
+     da co trang Bao cao doanh thu, o day chi can biet dang loc ra bao nhieu
+     chuyen va bang nhieu tien - de lien danh sach chuyen len cao, mo trang
+     ra la thay cuoc ngay, khong phai cuon. -->
 <?php if (!laTaiXe()): ?>
-<div class="luoi-thong-ke">
-  <div class="o-thong-ke">
-    <div class="bieu-tuong nen-xanh"><?= bieuTuong('route') ?></div>
-    <div><div class="nhan">Số cuốc</div><div class="gia-tri"><?= (int)$tongHop['so_chuyen'] ?></div></div>
-  </div>
-  <div class="o-thong-ke">
-    <div class="bieu-tuong nen-luc"><?= bieuTuong('tag') ?></div>
-    <div><div class="nhan">Tổng thu</div><div class="gia-tri"><?= dinhDangTien($tongHop['thu_vnd']) ?> <span class="don-vi">₫</span></div></div>
-  </div>
-  <div class="o-thong-ke">
-    <div class="bieu-tuong nen-tim"><?= bieuTuong('steering-wheel') ?></div>
-    <div><div class="nhan">Tiền cuốc xe</div><div class="gia-tri"><?= dinhDangTien($tongHop['tien_tai']) ?> <span class="don-vi">₫</span></div></div>
-  </div>
-  <div class="o-thong-ke">
-    <div class="bieu-tuong nen-cam"><?= bieuTuong('gas-station') ?></div>
-    <div><div class="nhan">Xăng dầu</div><div class="gia-tri"><?= dinhDangTien($tongHop['xang_dau']) ?> <span class="don-vi">₫</span></div></div>
-  </div>
+<div class="tom-tat-loc">
+  <span class="muc"><strong><?= (int)$tongHop['so_chuyen'] ?></strong> chuyến</span>
+  <span class="muc">Thu <strong><?= dinhDangTien($tongHop['thu_vnd']) ?>đ</strong></span>
+  <span class="muc">Tiền cuốc <strong><?= dinhDangTien($tongHop['tien_tai']) ?>đ</strong></span>
+  <a class="muc-lien-ket" href="<?= duongDan('baocao?' . http_build_query(['tu_ngay' => $loc['tu_ngay'], 'den_ngay' => $loc['den_ngay']])) ?>">
+    Xem báo cáo <?= bieuTuong('arrow-right') ?>
+  </a>
 </div>
 <?php endif; ?>
 

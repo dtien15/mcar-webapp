@@ -1445,3 +1445,76 @@ textarea.tu-dong-gian {
   color: var(--mau-chu-nhat);
   font-size: 12.5px;
 }
+
+/* =====================================================================
+   TRANG CHUYEN XE - dua danh sach chuyen len cao
+   Truoc day mo trang ra la: 6 o loc + 4 o thong ke to, phai cuon mot doan
+   dai moi thay chuyen xe dau tien - nhat la tren dien thoai. Gio man hep
+   chi con mot thanh loc gon + mot dong tom tat, cuon it hon han.
+   ===================================================================== */
+
+/* Thanh loc gon (chi hien tren man hep) */
+.thanh-loc-gon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Mot dong tom tat thay cho 4 o thong ke */
+.tom-tat-loc {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  background: #fff;
+  border: 1px solid var(--mau-vien);
+  border-radius: var(--bo-goc);
+  box-shadow: var(--bong);
+  padding: 10px 16px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: var(--mau-chu-nhat);
+}
+.tom-tat-loc .muc strong {
+  color: var(--mau-chu);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.tom-tat-loc .muc-lien-ket {
+  margin-left: auto;
+  font-size: 12.5px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* Tab trang thai: man hep cuon ngang mot hang thay vi xuong 2-3 hang */
+@media (max-width: 767.98px) {
+  .nhan-tab-trang-thai {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nhan-tab-trang-thai::-webkit-scrollbar { display: none; }
+  .nhan-tab-trang-thai .nav-link { white-space: nowrap; }
+
+  .tom-tat-loc { padding: 8px 12px; gap: 2px 10px; font-size: 12.5px; margin-bottom: 10px; }
+  .tom-tat-loc .muc strong { font-size: 14px; }
+  .tom-tat-loc .muc-lien-ket { margin-left: 0; }
+
+  /* Thanh loc gon: ep gon ve dung mot hang - nut ngay dai bao nhieu cung
+     duoc cat bot, 3 nut hanh dong luon nam canh phai */
+  .thanh-loc-gon { flex-wrap: nowrap; gap: 6px; padding: 9px 10px; }
+  .thanh-loc-gon > .btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .thanh-loc-gon .ms-auto { flex: 0 0 auto; gap: 6px !important; }
+
+  /* The bo loc va tab sat nhau hon de danh cho ho cho danh sach chuyen */
+  .the:has(> .thanh-loc-gon) { margin-bottom: 10px; }
+  .nhan-tab-trang-thai { margin-bottom: 10px; }
+}
