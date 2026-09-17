@@ -10,8 +10,12 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
 ?>
 <div class="modal fade" id="xacNhan<?= $chuyen['id'] ?>" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <form method="post" action="<?= duongDan('chuyenxe/xacnhan') ?>" class="modal-content" enctype="multipart/form-data"
-          onsubmit="return confirm('Bạn chắc chắn muốn xác nhận chuyến xe này? Sau khi xác nhận sẽ không tự sửa lại được nữa, phải liên hệ công ty nếu cần đổi.');">
+    <?php // Form 2 buoc: buoc 1 nhap so, buoc 2 soat lai roi moi xac nhan.
+          // Tai xe chay ca ngay, bam nham mot cai la chot nham so lieu that -
+          // nen viec "xac nhan" phai nam o mot man hinh khac han man dang go,
+          // va phai thay ro minh dang chot con so nao. ?>
+    <form method="post" action="<?= duongDan('chuyenxe/xacnhan') ?>" class="modal-content form-xac-nhan-chuyen"
+          enctype="multipart/form-data" data-id-chuyen="<?= (int)$chuyen['id'] ?>">
       <?php truongToken(); ?>
       <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
 
@@ -21,6 +25,9 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
       </div>
 
       <div class="modal-body">
+        <div class="bao-khoi-phuc" hidden></div>
+
+        <div class="buoc-nhap">
         <!-- Vao la thay ngay cac o can nhap, thong tin chuyen di (chi xem) de xuong duoi -->
         <!-- Doanh thu & tien cuoc: tai xe sua duoc neu khac thuc te -->
         <?php
@@ -50,11 +57,6 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
                 <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhiModal === '200000' ? 'active' : '' ?>" data-tien="200000">Lưu đêm</button>
                 <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhiModal === '100000' ? 'active' : '' ?>" data-tien="100000">Chạy khuya</button>
               </div>
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Chi phí kèo ngoài</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien o-chi-phi-ngoai" placeholder="0"
-                     name="chi_phi_keo_ngoai" value="<?= h(giaTriTienForm($chuyen, 'outsource_cost')) ?>">
             </div>
           </div>
           <div class="text-muted mt-2" style="font-size:12px">
@@ -96,6 +98,52 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
           </div>
         </fieldset>
 
+        <!-- Xang dau: chuyen nao cung phai khai nen de ngay ngoai, khong gap -->
+        <fieldset class="nhom-truong">
+          <legend>Xăng dầu</legend>
+          <div class="row g-2">
+            <div class="col-6 col-md-4">
+              <label class="form-label">Tiền xăng dầu</label>
+              <input type="text" class="form-control form-control-sm o-nhap-tien o-xang-dau" placeholder="0" name="xang_dau">
+            </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label">VAT 10% xăng/dầu</label>
+              <input type="text" class="form-control form-control-sm o-nhap-tien o-vat-xang-dau" placeholder="0" name="vat_xang_dau">
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label">Người trả xăng dầu</label>
+              <select name="nguoi_tra_xang_dau" class="form-select form-select-sm">
+                <option value="">-- Chọn --</option>
+                <?php foreach (danhSachNguoiTraXangDau() as $maXd => $mucXd): ?>
+                  <option value="<?= h($maXd) ?>" <?= ($chuyen['fuel_payer'] ?? '') === $maXd ? 'selected' : '' ?>>
+                    <?= h($mucXd['nhanTx']) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <?php // Nhung khoan IT khi co: gap lai het. Chuyen binh thuong tai xe
+              // chi phai go 3-4 o ben tren la xong. ?>
+        <button type="button" class="btn btn-outline-secondary w-100 nut-mo-khoan-khac" data-bs-toggle="collapse"
+                data-bs-target="#khoanKhac<?= $chuyen['id'] ?>">
+          <?= bieuTuong('plus') ?> Khoản khác (phụ phí, phạt, tạm ứng, hoàn tiền…)
+        </button>
+        <div class="collapse khoi-khoan-khac" id="khoanKhac<?= $chuyen['id'] ?>">
+
+        <!-- Chi phi keo ngoai: rat it chuyen co -->
+        <fieldset class="nhom-truong">
+          <legend>Chi phí kèo ngoài</legend>
+          <div class="row g-2">
+            <div class="col-12 col-md-4">
+              <label class="form-label">Chi phí kèo ngoài</label>
+              <input type="text" class="form-control form-control-sm o-nhap-tien o-chi-phi-ngoai" placeholder="0"
+                     name="chi_phi_keo_ngoai" value="<?= h(giaTriTienForm($chuyen, 'outsource_cost')) ?>">
+            </div>
+          </div>
+        </fieldset>
+
         <!-- Phu phi khac phat sinh thuc te -->
         <fieldset class="nhom-truong">
           <legend>Phụ phí khác (nếu có)</legend>
@@ -126,25 +174,6 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
           <legend>Chi phí thực tế bạn nhập</legend>
           <div class="row g-2">
             <div class="col-6 col-md-4">
-              <label class="form-label">Tiền xăng dầu</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien o-xang-dau" placeholder="0" name="xang_dau">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">VAT 10% xăng/dầu</label>
-              <input type="text" class="form-control form-control-sm o-nhap-tien o-vat-xang-dau" placeholder="0" name="vat_xang_dau">
-            </div>
-            <div class="col-6 col-md-4">
-              <label class="form-label">Người trả xăng dầu</label>
-              <select name="nguoi_tra_xang_dau" class="form-select form-select-sm">
-                <option value="">-- Chọn --</option>
-                <?php foreach (danhSachNguoiTraXangDau() as $maXd => $mucXd): ?>
-                  <option value="<?= h($maXd) ?>" <?= ($chuyen['fuel_payer'] ?? '') === $maXd ? 'selected' : '' ?>>
-                    <?= h($mucXd['nhanTx']) ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-            <div class="col-6 col-md-4">
               <label class="form-label">Bảo dưỡng xe</label>
               <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0" name="bao_duong">
             </div>
@@ -174,6 +203,8 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
             </div>
           </div>
         </fieldset>
+
+        </div><!-- /khoi-khoan-khac -->
 
         <!-- Thong tin chuyen di: chi xem, khong sua - de xuong duoi, gap lai vi khong can nhap gi ca -->
         <button type="button" class="btn btn-sm btn-outline-secondary w-100" data-bs-toggle="collapse"
@@ -245,11 +276,24 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
             </div>
           </fieldset>
         </div>
+        </div><!-- /buoc-nhap -->
+
+        <?php // Buoc 2: soat lai. Noi dung do JS dung tu chinh cac o vua nhap ?>
+        <div class="buoc-soat" hidden>
+          <div class="soat-tieu-de">Soát lại lần cuối rồi hãy xác nhận</div>
+          <div class="bang-soat-cuoc soat-noi-dung"></div>
+          <div class="soat-luu-y">
+            <?= bieuTuong('alert-triangle') ?>
+            Xác nhận xong bạn không tự sửa lại được, phải báo công ty.
+          </div>
+        </div>
       </div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-        <button class="btn btn-primary"><?= bieuTuong('check') ?> Xác nhận chuyến xe</button>
+      <div class="modal-footer thanh-nut-2-buoc">
+        <button type="button" class="btn btn-light nut-huy-buoc" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-light nut-quay-buoc" hidden><?= bieuTuong('arrow-left') ?> Sửa lại</button>
+        <button type="button" class="btn btn-primary nut-tiep-buoc">Tiếp tục <?= bieuTuong('arrow-right') ?></button>
+        <button type="submit" class="btn btn-success nut-chot-buoc" hidden><?= bieuTuong('check') ?> Xác nhận chuyến xe</button>
       </div>
     </form>
   </div>

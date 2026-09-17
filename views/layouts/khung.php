@@ -226,6 +226,7 @@ window.mcarRealtime = {
 <script src="<?= duongDanTinh('assets/js/o-tu-dong-gian.js') ?>"></script>
 <script src="<?= duongDanTinh('assets/js/tien.js') ?>"></script>
 <script src="<?= duongDanTinh('assets/js/dam-lich.js') ?>"></script>
+<script src="<?= duongDanTinh('assets/js/xac-nhan-chuyen.js') ?>"></script>
 <?php // dan-nhanh.js / phan-tich-ai.js chi phuc vu khoi "Dan tin nhan Zalo" o
       // form chuyen xe - khoi do da bo (nut "Them nhanh tu anh" lam thay, doc
       // duoc nhieu chang mot luc). dan-nhanh.js van con dung o trang cong khai

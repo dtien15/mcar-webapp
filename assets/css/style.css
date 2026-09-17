@@ -1656,3 +1656,67 @@ textarea.tu-dong-gian {
   }
   .nhan-tab-trang-thai .nav-link.active .so-cua-tab { background: rgba(255, 255, 255, .28); color: #fff; }
 }
+
+/* =====================================================================
+   MODAL "NHAP & XAC NHAN CHUYEN XE" CUA TAI XE
+   Tai xe go ngay tren duong, mot tay, nen o phai to va moi man chi lam
+   mot viec: buoc 1 go so, buoc 2 doc lai roi chot.
+   ===================================================================== */
+.bao-khoi-phuc {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.nut-mo-khoan-khac { margin-bottom: 14px; }
+
+.buoc-soat .soat-tieu-de {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+.buoc-soat .bang-soat-cuoc .gt.trong { color: #94a3b8; font-weight: 400; }
+.buoc-soat .soat-luu-y {
+  margin-top: 14px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  color: #92400e;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+@media (max-width: 767.98px) {
+  /* Modal chiem tron man hinh: khong con vien thua, khong lo tay cham ra
+     ngoai lam dong modal giua chung dang go */
+  .form-xac-nhan-chuyen { min-height: 100dvh; border-radius: 0; }
+  .form-xac-nhan-chuyen .modal-body { padding: 14px; }
+
+  /* 16px la nguong iOS khong tu phong to trang khi bam vao o nhap */
+  .form-xac-nhan-chuyen .form-control,
+  .form-xac-nhan-chuyen .form-select {
+    font-size: 16px;
+    min-height: 46px;
+  }
+  .form-xac-nhan-chuyen .form-label { font-size: 13px; margin-bottom: 3px; }
+  .form-xac-nhan-chuyen .nhom-truong { margin-bottom: 14px; }
+
+  /* Hang nut duoi cung: nut chinh to, de bam bang ngon cai */
+  .thanh-nut-2-buoc { position: sticky; bottom: 0; background: #fff; }
+  .thanh-nut-2-buoc .nut-tiep-buoc,
+  .thanh-nut-2-buoc .nut-chot-buoc {
+    flex: 1 1 auto;
+    min-height: 50px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .thanh-nut-2-buoc .nut-huy-buoc,
+  .thanh-nut-2-buoc .nut-quay-buoc { min-height: 50px; }
+
+  .buoc-soat .bang-soat-cuoc .nhan { min-width: 0; flex: 1 1 auto; }
+  .buoc-soat .bang-soat-cuoc > div { padding: 9px 0; font-size: 14.5px; }
+}
