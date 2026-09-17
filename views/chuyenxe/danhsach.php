@@ -7,15 +7,17 @@ function urlLocDoi(array $loc, array $doi)
     $q = array_merge($loc, $doi);
     return duongDan('chuyenxe?' . http_build_query($q));
 }
+// [nhan day du cho may tinh, nhan ngan cho dien thoai]. Man hep xep 6 tab
+// thanh luoi 3 cot 2 hang - thay het mot lan, khong phai keo ngang.
 $dsTab = [
-    ''                => 'Tất cả',
-    'moi'             => 'Mới giao',
-    'tai_xe_xac_nhan' => 'Tài xế đã xác nhận',
-    'hoan_thanh'      => 'Hoàn thành',
+    ''                => ['Tất cả', 'Tất cả'],
+    'moi'             => ['Mới giao', 'Mới giao'],
+    'tai_xe_xac_nhan' => ['Tài xế đã xác nhận', 'Đã nhận'],
+    'hoan_thanh'      => ['Hoàn thành', 'Hoàn thành'],
     // Khong phai trang thai chuyen ma la tinh trang TIEN: chay xong roi nhung
     // khach van chua tra. Rat hay gap nen tach han ra mot tab de doi tien.
-    ChuyenXeModel::TAB_KHACH_CHUA_TT => 'Khách chưa TT',
-    'da_huy'          => 'Đã hủy',
+    ChuyenXeModel::TAB_KHACH_CHUA_TT => ['Khách chưa TT', 'Chưa TT'],
+    'da_huy'          => ['Đã hủy', 'Đã hủy'],
 ];
 ?>
 
@@ -164,7 +166,10 @@ $dsTab = [
   <?php foreach ($dsTab as $gt => $nhan): ?>
     <li class="nav-item">
       <a class="nav-link <?= $loc['trang_thai'] === $gt ? 'active' : '' ?>"
-         href="<?= urlLocDoi($loc, ['trang_thai' => $gt]) ?>"><?= h($nhan) ?></a>
+         href="<?= urlLocDoi($loc, ['trang_thai' => $gt]) ?>">
+        <span class="d-none d-md-inline"><?= h($nhan[0]) ?></span>
+        <span class="d-md-none"><?= h($nhan[1]) ?></span>
+      </a>
     </li>
   <?php endforeach; ?>
 </ul>

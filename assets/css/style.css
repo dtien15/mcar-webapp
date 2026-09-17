@@ -1490,13 +1490,37 @@ textarea.tu-dong-gian {
 
 /* Tab trang thai: man hep cuon ngang mot hang thay vi xuong 2-3 hang */
 @media (max-width: 767.98px) {
+  /* Tab trang thai: luoi 3 cot 2 hang, thay het 6 tab cung luc - khong keo
+     ngang (keo ngang de bo sot tab va rat kho bam chinh xac tren dien thoai) */
   .nhan-tab-trang-thai {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    border-bottom: none;
+    background: #fff;
+    border: 1px solid var(--mau-vien);
+    border-radius: var(--bo-goc);
+    box-shadow: var(--bong);
+    padding: 6px;
   }
-  .nhan-tab-trang-thai::-webkit-scrollbar { display: none; }
-  .nhan-tab-trang-thai .nav-link { white-space: nowrap; }
+  .nhan-tab-trang-thai .nav-item { min-width: 0; }
+  .nhan-tab-trang-thai .nav-link {
+    width: 100%;
+    text-align: center;
+    padding: 7px 4px;
+    font-size: 12.5px;
+    border: none;
+    border-radius: 8px;
+    background: #f1f5f9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .nhan-tab-trang-thai .nav-link.active {
+    background: var(--mau-chinh);
+    color: #fff;
+    border: none;
+  }
 
   .tom-tat-loc { padding: 8px 12px; gap: 2px 10px; font-size: 12.5px; margin-bottom: 10px; }
   .tom-tat-loc .muc strong { font-size: 14px; }
@@ -1514,7 +1538,9 @@ textarea.tu-dong-gian {
   }
   .thanh-loc-gon .ms-auto { flex: 0 0 auto; gap: 6px !important; }
 
-  /* The bo loc va tab sat nhau hon de danh cho ho cho danh sach chuyen */
-  .the:has(> .thanh-loc-gon) { margin-bottom: 10px; }
+  /* The bo loc va tab sat nhau hon de danh cho ho cho danh sach chuyen.
+     overflow:visible vi .the mac dinh cat overflow - lam menu "..." trong
+     thanh loc bi an mat khi bam. */
+  .the:has(> .thanh-loc-gon) { margin-bottom: 10px; overflow: visible; }
   .nhan-tab-trang-thai { margin-bottom: 10px; }
 }
