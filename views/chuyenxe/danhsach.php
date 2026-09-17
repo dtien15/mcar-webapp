@@ -19,20 +19,31 @@ $dsTab = [
     ChuyenXeModel::TAB_KHACH_CHUA_TT => ['Khách chưa TT', 'Chưa TT'],
     'da_huy'          => ['Đã hủy', 'Đã hủy'],
 ];
+
+// Ben tai xe bo 2 tab khong phai viec cua ho: "Khach chua TT" (viec doi tien
+// cua ke toan) va "Da huy" (rat it khi xem). Con dung 4 tab, vua mot hang.
+if (laTaiXe()) {
+    unset($dsTab[ChuyenXeModel::TAB_KHACH_CHUA_TT], $dsTab['da_huy']);
+}
 ?>
 
 <?php if (laTaiXe()): ?>
 <!-- Bo loc (tai xe): gon lai, mac dinh gap, chi con nut Tao chuyen xe hien san -->
 <div class="the">
-  <div class="the-than d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <?php // Man hep: ca 3 nut nam gon mot hang (chu nut rut lai, chi con bieu
+        // tuong) de danh cho ho cho danh sach cuoc. Man rong van du chu. ?>
+  <div class="the-than thanh-loc-gon">
     <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#khoiBoLocTaiXe">
-      <?= bieuTuong('filter') ?> Lọc / Tìm kiếm
+      <?= bieuTuong('filter') ?> <span class="d-none d-md-inline">Lọc / Tìm kiếm</span><span class="d-md-none">Lọc</span>
     </button>
     <div class="d-flex gap-2 ms-auto">
-      <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#themNhanh">
-        <?= bieuTuong('sparkles') ?> Thêm nhanh từ ảnh
+      <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#themNhanh"
+              title="Thêm nhanh từ ảnh">
+        <?= bieuTuong('sparkles') ?> <span class="d-none d-md-inline">Thêm nhanh từ ảnh</span>
       </button>
-      <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm"><?= bieuTuong('plus') ?> Tạo chuyến xe</a>
+      <a href="<?= duongDan('chuyenxe/them') ?>" class="btn btn-success btn-sm">
+        <?= bieuTuong('plus') ?> <span class="d-none d-md-inline">Tạo chuyến xe</span><span class="d-md-none">Tạo cuốc</span>
+      </a>
     </div>
   </div>
   <div class="collapse" id="khoiBoLocTaiXe">
@@ -47,15 +58,7 @@ $dsTab = [
           <label class="form-label">Đến ngày</label>
           <input type="date" name="den_ngay" class="form-control form-control-sm" value="<?= h($loc['den_ngay']) ?>">
         </div>
-        <div class="col-6 col-md-3">
-          <label class="form-label">Số dòng/trang</label>
-          <select name="so_dong" class="form-select form-select-sm">
-            <?php foreach ([20, 50, 100] as $sd): ?>
-              <option value="<?= $sd ?>" <?= $soDong === $sd ? 'selected' : '' ?>><?= $sd ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        <div class="col-6 col-md-3">
+        <div class="col-12 col-md-6">
           <label class="form-label">Tìm kiếm</label>
           <input type="text" name="tu_khoa" class="form-control form-control-sm" placeholder="Điểm đón, ghi chú..." value="<?= h($loc['tu_khoa']) ?>">
         </div>
@@ -170,8 +173,10 @@ $dsTab = [
 </div>
 <?php endif; ?>
 
-<!-- Tab trang thai -->
-<ul class="nav nav-tabs nhan-tab-trang-thai">
+<!-- Tab trang thai. Man hep xep luoi: <= 4 tab thi du mot hang, nhieu hon
+     thi 3 cot (6 tab = 2 hang) - van thay het, khong phai keo ngang. -->
+<?php $soCotTab = count($dsTab) <= 4 ? count($dsTab) : 3; ?>
+<ul class="nav nav-tabs nhan-tab-trang-thai" style="--so-cot-tab: <?= (int)$soCotTab ?>">
   <?php foreach ($dsTab as $gt => $nhan): ?>
     <li class="nav-item">
       <a class="nav-link <?= $loc['trang_thai'] === $gt ? 'active' : '' ?>"

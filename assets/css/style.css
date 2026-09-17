@@ -1494,7 +1494,7 @@ textarea.tu-dong-gian {
      ngang (keo ngang de bo sot tab va rat kho bam chinh xac tren dien thoai) */
   .nhan-tab-trang-thai {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(var(--so-cot-tab, 3), 1fr);
     gap: 6px;
     border-bottom: none;
     background: #fff;
