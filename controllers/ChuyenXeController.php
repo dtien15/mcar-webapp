@@ -24,6 +24,7 @@ class ChuyenXeController extends Controller
             'soDong'             => $soDong,
             'conThem'            => $tongSo > count($danhSach),
             'tongHop'            => $chuyenXeModel->tongHopTheoLoc($loc),
+            'soTheoTab'          => $chuyenXeModel->demTheoTab($loc),
             'dsXe'               => $this->model('XeModel')->layTatCa(),
             // Bo loc van tra cuu duoc tai xe da nghi (chuyen cu cua ho khong mat),
             // nhung tach ra nhom rieng o cuoi danh sach.

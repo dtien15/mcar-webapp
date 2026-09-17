@@ -183,6 +183,8 @@ if (laTaiXe()) {
          href="<?= urlLocDoi($loc, ['trang_thai' => $gt]) ?>">
         <span class="d-none d-md-inline"><?= h($nhan[0]) ?></span>
         <span class="d-md-none"><?= h($nhan[1]) ?></span>
+        <?php // So chuyen cua tung tab, tinh theo dung bo loc dang dung ?>
+        <span class="so-cua-tab"><?= (int)($soTheoTab[$gt] ?? 0) ?></span>
       </a>
     </li>
   <?php endforeach; ?>
@@ -203,8 +205,9 @@ if (laTaiXe()) {
 </div>
 <?php endif; ?>
 
-<?php // Chu thich mau: chi hien dung mot lan, gon mot hang ?>
-<div class="chu-thich-mau">
+<?php // Chu thich mau. Man hep an di: mo dien thoai ra la phai thay cuoc
+      // ngay, ma o do moi the da co san huy hieu ghi ro tinh trang roi. ?>
+<div class="chu-thich-mau d-none d-md-flex">
   <span class="muc"><i class="cham cham-xong"></i>Xong hẳn</span>
   <span class="muc"><i class="cham cham-cho-chot"></i>Chờ chốt</span>
   <span class="muc"><i class="cham cham-giu-tien"></i>Tài xế giữ tiền</span>

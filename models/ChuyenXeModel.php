@@ -79,6 +79,40 @@ class ChuyenXeModel extends Model
         );
     }
 
+    /**
+     * So chuyen cua TUNG tab, dung chung bo loc hien tai (ngay, tai xe, xe,
+     * tu khoa) nhung BO qua tab dang chon - de tab nao cung hien dung so
+     * chuyen se thay neu bam vao.
+     *
+     * Dem het trong mot cau lenh thay vi 6 lan COUNT rieng.
+     */
+    public function demTheoTab(array $loc)
+    {
+        $locKhongTrangThai = $loc;
+        unset($locKhongTrangThai['trang_thai']);
+        [$dieuKien, $thamSo] = $this->dungDieuKien($locKhongTrangThai);
+
+        $dong = $this->motDong(
+            "SELECT COUNT(*) AS tat_ca,
+                    COUNT(CASE WHEN t.status = 'moi' THEN 1 END)             AS moi,
+                    COUNT(CASE WHEN t.status = 'tai_xe_xac_nhan' THEN 1 END) AS tai_xe_xac_nhan,
+                    COUNT(CASE WHEN t.status = 'hoan_thanh' THEN 1 END)      AS hoan_thanh,
+                    COUNT(CASE WHEN t.status = 'da_huy' THEN 1 END)          AS da_huy,
+                    COUNT(CASE WHEN t.collector_type = 'chua_thu' AND t.status <> 'da_huy' THEN 1 END) AS khach_chua_tt
+             FROM trips t WHERE {$dieuKien}",
+            $thamSo
+        );
+
+        return [
+            ''                => (int)($dong['tat_ca'] ?? 0),
+            'moi'             => (int)($dong['moi'] ?? 0),
+            'tai_xe_xac_nhan' => (int)($dong['tai_xe_xac_nhan'] ?? 0),
+            'hoan_thanh'      => (int)($dong['hoan_thanh'] ?? 0),
+            self::TAB_KHACH_CHUA_TT => (int)($dong['khach_chua_tt'] ?? 0),
+            'da_huy'          => (int)($dong['da_huy'] ?? 0),
+        ];
+    }
+
     /** Tong hop so lieu theo bo loc */
     public function tongHopTheoLoc(array $loc)
     {
