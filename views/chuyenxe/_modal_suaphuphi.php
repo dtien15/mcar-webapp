@@ -32,26 +32,28 @@ if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] 
           elseif ((float)$chuyen['overnight_fee'] == 100000) { $loaiPhuPhiModal = '100000'; }
         ?>
         <div class="row g-2">
-          <div class="col-6">
+          <?php // Dien thoai: moi o an het mot hang. De col-6 thi o chon bi
+                // bop nua hang, chu trong o bi cat mat duoi. ?>
+          <div class="col-12 col-md-5">
             <label class="form-label">Phụ phí (lưu đêm / chạy khuya)</label>
             <input type="text" name="luu_dem" class="form-control form-control-sm o-nhap-tien o-phu-phi" placeholder="0"
                    value="<?= h(giaTriTienForm($chuyen, 'overnight_fee')) ?>">
-            <div class="btn-group btn-group-sm mt-1 o-phu-phi-nhanh" role="group">
+            <div class="btn-group btn-group-sm mt-1 o-phu-phi-nhanh w-100" role="group">
               <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhiModal === '0' ? 'active' : '' ?>" data-tien="0">Không có</button>
               <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhiModal === '200000' ? 'active' : '' ?>" data-tien="200000">Lưu đêm</button>
               <button type="button" class="btn btn-outline-secondary <?= $loaiPhuPhiModal === '100000' ? 'active' : '' ?>" data-tien="100000">Chạy khuya</button>
             </div>
           </div>
-          <div class="col-6">
+          <div class="col-12 col-md-3">
             <label class="form-label">Phụ phí khác</label>
             <input type="text" class="form-control form-control-sm o-nhap-tien" placeholder="0"
                    name="phu_phi_khac" value="<?= h(giaTriTienForm($chuyen, 'extra_surcharge')) ?>">
           </div>
-          <div class="col-6">
+          <div class="col-12 col-md-4">
             <label class="form-label">Phụ phí khác do ai trả</label>
             <select name="nguoi_tra_phu_phi_khac" class="form-select form-select-sm">
               <option value="">-- Chọn --</option>
-              <option value="tai_xe" <?= ($chuyen['extra_surcharge_payer'] ?? '') === 'tai_xe' ? 'selected' : '' ?>>Bạn trả (cty hoàn lại)</option>
+              <option value="tai_xe" <?= ($chuyen['extra_surcharge_payer'] ?? '') === 'tai_xe' ? 'selected' : '' ?>>Bạn trả (công ty hoàn lại)</option>
               <option value="cong_ty" <?= ($chuyen['extra_surcharge_payer'] ?? '') === 'cong_ty' ? 'selected' : '' ?>>Công ty trả trực tiếp</option>
             </select>
           </div>

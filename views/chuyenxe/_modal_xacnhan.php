@@ -128,7 +128,9 @@ $aiThuModal = $chuyen['collector_type'] ?? '';
           <fieldset class="nhom-truong">
             <legend>Phụ phí khác (nếu có)</legend>
             <div class="row g-2">
-              <div class="col-6 col-md-3">
+              <?php // An het hang tren dien thoai: canh no khong co o nao
+                    // khac nen de col-6 la chua nua hang trong ?>
+              <div class="col-12 col-md-3">
                 <label class="form-label">Số tiền</label>
                 <input type="text" class="form-control o-nhap-tien" placeholder="0"
                        name="phu_phi_khac" value="<?= h(giaTriTienForm($chuyen, 'extra_surcharge')) ?>">

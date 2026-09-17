@@ -1718,3 +1718,11 @@ textarea.tu-dong-gian {
   .buoc-soat .bang-soat-cuoc .nhan { min-width: 0; flex: 1 1 auto; }
   .buoc-soat .bang-soat-cuoc > div { padding: 9px 0; font-size: 14.5px; }
 }
+
+/* Nhom nut chon nhanh phu phi: man hep keo full mot hang cho de bam, man
+   rong de chu tu do khong bi bop lai thanh 2-3 dong */
+@media (min-width: 768px) {
+  .o-phu-phi-nhanh.w-100 { width: auto !important; }
+}
+/* Nhan nut giu nguyen mot dong, khong be doi thanh 2-3 dong lam nut cao ngoang */
+.o-phu-phi-nhanh .btn { white-space: nowrap; padding-left: 10px; padding-right: 10px; }
