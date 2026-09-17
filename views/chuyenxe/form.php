@@ -377,6 +377,11 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               </div>
             </fieldset>
 
+            <?php // Nhom 3 chi co nghia voi phieu KEO GIAO NGOAI (co tra tien
+                  // cho nha xe ngoai). Phieu binh thuong khong co khoan nay nen
+                  // an di cho gon. Van hien neu chuyen cu da lo nhap chi phi keo
+                  // ngoai - khong the giau mat mot khoan tien da co. ?>
+            <?php if ($laKeoNgoai || (float)giaTri($chuyenXe, 'outsource_cost') > 0): ?>
             <!-- Nhom 3: sau khi tru keo ngoai thi minh con bao nhieu -->
             <fieldset class="nhom-tien">
               <legend><?= bieuTuong('building-bank') ?> Công ty thực nhận</legend>
@@ -393,6 +398,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                 </div>
               </div>
             </fieldset>
+            <?php endif; ?>
 
             <?php if (!$laKeoNgoai): ?>
             <!-- Nhom 4: nhung khoan tra cho tai xe.
