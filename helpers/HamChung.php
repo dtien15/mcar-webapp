@@ -362,7 +362,9 @@ function danhSachAiThu()
             'y'    => 'Tài xế đang giữ tiền, trừ vào lương đến khi nộp lại công ty.',
         ],
         'cong_ty' => [
-            'nhan' => 'Công ty thu (khách trả thẳng cho công ty)',
+            // Nhan ngan de o chon khong bi cat chu tren dien thoai; y nghia
+            // day du da co dong giai thich ngay duoi o chon.
+            'nhan' => 'Công ty thu',
             'giu'  => false,
             'y'    => 'Tài xế không cầm đồng nào, không trừ gì vào lương.',
         ],
