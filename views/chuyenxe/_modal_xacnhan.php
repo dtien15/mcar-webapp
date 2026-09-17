@@ -109,9 +109,12 @@ $aiThuModal = $chuyen['collector_type'] ?? '';
                 <label class="form-label">Tiền xăng dầu</label>
                 <input type="text" class="form-control o-nhap-tien o-xang-dau" placeholder="0" name="xang_dau">
               </div>
+              <?php // VAT khong cho go tay: no luon la 10% cua tien xang dau,
+                    // go lech mot con so la lech tien thue. May tu tinh. ?>
               <div class="col-12 col-md-3">
                 <label class="form-label">VAT 10% xăng/dầu</label>
-                <input type="text" class="form-control o-nhap-tien o-vat-xang-dau" placeholder="0" name="vat_xang_dau">
+                <input type="text" class="form-control o-nhap-tien o-vat-xang-dau o-ket-qua" placeholder="0"
+                       name="vat_xang_dau" readonly tabindex="-1">
               </div>
               <div class="col-12 col-md-6">
                 <label class="form-label">Người trả xăng dầu</label>

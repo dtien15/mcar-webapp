@@ -6,7 +6,9 @@
 //   2. Truoc khi form gui di, tu dong bo dau cham de may chu nhan dung
 //      con so (server luon chi thay chuoi so thuan, khong co dau cham).
 //   3. O co class "o-xang-dau": go tien xang dau se tu dong tinh 10% VAT
-//      vao o co class "o-vat-xang-dau" trong CUNG 1 form (van sua tay duoc).
+//      vao o co class "o-vat-xang-dau" trong CUNG 1 form. O VAT de readonly
+//      (khong go tay duoc) vi no luon an theo tien xang dau - go lech mot con
+//      so la lech tien thue.
 //   4. O "o-khach-tra" / "o-chi-phi-ngoai": tu dong tinh "Minh nhan" = Khach
 //      tra - Chi phi keo ngoai vao o co class "o-minh-nhan" (chi hien thi).
 //   5. Nut co class "nut-them-tien-khac": bam de hien/an khoi noi dung

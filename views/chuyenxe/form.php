@@ -495,7 +495,9 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
               </div>
               <div class="col-6 col-md-2">
                 <label class="form-label">VAT 10% xăng/dầu</label>
-                <input type="text" name="vat_xang_dau" class="form-control o-nhap-tien o-vat-xang-dau" placeholder="0" <?= $chiXem ?>
+                <?php // Khong cho go tay: VAT luon la 10% cua tien xang dau ?>
+                <input type="text" name="vat_xang_dau" class="form-control o-nhap-tien o-vat-xang-dau o-ket-qua"
+                       placeholder="0" readonly tabindex="-1"
                        value="<?= h(giaTriTienForm($chuyenXe, 'fuel_vat')) ?>">
               </div>
               <div class="col-6 col-md-2">
