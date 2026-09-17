@@ -203,6 +203,18 @@ if (laTaiXe()) {
 </div>
 <?php endif; ?>
 
+<?php // Chu thich mau: chi hien dung mot lan, gon mot hang ?>
+<div class="chu-thich-mau">
+  <span class="muc"><i class="cham cham-xong"></i>Xong hẳn</span>
+  <span class="muc"><i class="cham cham-cho-chot"></i>Chờ chốt</span>
+  <span class="muc"><i class="cham cham-giu-tien"></i>Tài xế giữ tiền</span>
+  <span class="muc"><i class="cham cham-chua-thu"></i>Chưa thu tiền</span>
+  <?php if (!laTaiXe()): ?>
+    <span class="muc"><i class="cham cham-cho-xac-nhan"></i>Tài xế gửi</span>
+    <span class="muc"><i class="cham cham-keo-ngoai"></i>Kèo ngoài</span>
+  <?php endif; ?>
+</div>
+
 <!-- Danh sach dang the - danh cho dien thoai -->
 <div class="ds-the-dien-thoai" id="dsTheDienThoai">
   <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_the_chuyen.php'; endforeach; ?>

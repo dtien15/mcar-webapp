@@ -1550,14 +1550,41 @@ textarea.tu-dong-gian {
    To nhe mot mau am (khong do choi) de mo danh sach ra la thay ngay co
    cuoc can kiem tra, nhung van doc duoc binh thuong.
    ===================================================================== */
+/* ---------------------------------------------------------------------
+   Mau nen mot dong / mot the chuyen xe theo tinh trang.
+   Moi chuyen chi mang MOT mau (xem mauDongChuyen() trong HamChung.php):
+     vang  - tai xe tu gui, cong ty chua xac nhan
+     do    - chua thu duoc tien cua khach
+     cam   - tai xe con cam tien cua khach, chua nop lai
+     xanh la - xong han: da chot va tien da ve cong ty
+     tim   - keo giao cho nha xe ngoai
+     xanh duong - tai xe da xac nhan, dang cho cong ty chot
+     xam   - da huy
+   Nen rat nhat + mot vach mau o le trai: du de nhan ra tu xa nhung khong
+   lam chu kho doc va khong bien bang thanh cau vong.
+   --------------------------------------------------------------------- */
 .bang tr.dong-cho-xac-nhan > td { background: #fffbeb; }
 .bang tr.dong-cho-xac-nhan > td:first-child { box-shadow: inset 3px 0 0 #f59e0b; }
+.bang tr.dong-chua-thu > td { background: #fef2f2; }
+.bang tr.dong-chua-thu > td:first-child { box-shadow: inset 3px 0 0 #ef4444; }
+.bang tr.dong-giu-tien > td { background: #fff7ed; }
+.bang tr.dong-giu-tien > td:first-child { box-shadow: inset 3px 0 0 #f97316; }
+.bang tr.dong-xong > td { background: #f0fdf4; }
+.bang tr.dong-xong > td:first-child { box-shadow: inset 3px 0 0 #22c55e; }
+.bang tr.dong-keo-ngoai > td { background: #faf5ff; }
+.bang tr.dong-keo-ngoai > td:first-child { box-shadow: inset 3px 0 0 #a855f7; }
+.bang tr.dong-cho-chot > td { background: #eff6ff; }
+.bang tr.dong-cho-chot > td:first-child { box-shadow: inset 3px 0 0 #3b82f6; }
+.bang tr.dong-huy > td { background: #f8fafc; color: #94a3b8; }
+.bang tr.dong-huy > td:first-child { box-shadow: inset 3px 0 0 #cbd5e1; }
 
-.the-chuyen-xe.cho-xac-nhan {
-  background: #fffbeb;
-  border-color: #fcd34d;
-  box-shadow: inset 3px 0 0 #f59e0b, var(--bong);
-}
+.the-chuyen-xe.dong-cho-xac-nhan { background: #fffbeb; border-color: #fcd34d; box-shadow: inset 3px 0 0 #f59e0b, var(--bong); }
+.the-chuyen-xe.dong-chua-thu     { background: #fef2f2; border-color: #fca5a5; box-shadow: inset 3px 0 0 #ef4444, var(--bong); }
+.the-chuyen-xe.dong-giu-tien     { background: #fff7ed; border-color: #fdba74; box-shadow: inset 3px 0 0 #f97316, var(--bong); }
+.the-chuyen-xe.dong-xong         { background: #f0fdf4; border-color: #86efac; box-shadow: inset 3px 0 0 #22c55e, var(--bong); }
+.the-chuyen-xe.dong-keo-ngoai    { background: #faf5ff; border-color: #d8b4fe; box-shadow: inset 3px 0 0 #a855f7, var(--bong); }
+.the-chuyen-xe.dong-cho-chot     { background: #eff6ff; border-color: #93c5fd; box-shadow: inset 3px 0 0 #3b82f6, var(--bong); }
+.the-chuyen-xe.dong-huy          { background: #f8fafc; border-color: #e2e8f0; box-shadow: inset 3px 0 0 #cbd5e1, var(--bong); }
 
 /* Bang soat lai so lieu trong modal xac nhan */
 .bang-soat-cuoc > div {
@@ -1578,3 +1605,25 @@ textarea.tu-dong-gian {
   border-radius: var(--bo-goc);
   border: 1px solid var(--mau-vien);
 }
+
+/* Chu thich mau cua danh sach chuyen xe */
+.chu-thich-mau {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: var(--mau-chu-nhat);
+}
+.chu-thich-mau .muc { display: inline-flex; align-items: center; gap: 5px; }
+.chu-thich-mau .cham {
+  width: 9px; height: 9px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.cham-xong          { background: #22c55e; }
+.cham-cho-chot      { background: #3b82f6; }
+.cham-giu-tien      { background: #f97316; }
+.cham-chua-thu      { background: #ef4444; }
+.cham-cho-xac-nhan  { background: #f59e0b; }
+.cham-keo-ngoai     { background: #a855f7; }

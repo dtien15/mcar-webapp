@@ -8,8 +8,10 @@ $cuaToi      = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
 $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
 // Tai xe tu gui cuoc, cong ty chua kiem tra -> to nhe ca dong len cho de thay
 $choXacNhan  = laQuanLy() && choQuanLyXacNhan($chuyen);
+// Mau nen theo tinh trang chuyen (xong han / thieu tien / cho xac nhan...)
+[$lopMau, $yMau] = mauDongChuyen($chuyen);
 ?>
-<tr class="<?= $choXacNhan ? 'dong-cho-xac-nhan' : '' ?>">
+<tr class="<?= h($lopMau) ?>"<?= $yMau ? ' title="' . h($yMau) . '"' : '' ?>>
   <td><?= dinhDangNgay($chuyen['trip_date']) ?></td>
   <?php if (laTaiXe()): ?><td><?= h($chuyen['pickup_time']) ?></td><?php endif; ?>
   <td>

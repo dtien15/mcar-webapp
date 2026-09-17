@@ -241,6 +241,47 @@ function choQuanLyXacNhan($chuyen)
         && ($chuyen['status'] ?? '') === 'tai_xe_xac_nhan';
 }
 
+/**
+ * Mau nen cua MOT dong/the chuyen xe - de nhin luot ca danh sach la biet
+ * chuyen nao xong han, chuyen nao con thieu tien, chuyen nao dang cho minh
+ * lam gi, khong phai doc tung chu.
+ *
+ * Chi mot mau duy nhat cho moi chuyen, uu tien viec GAP NHAT truoc: da huy
+ * -> cho xac nhan -> chua thu duoc tien -> tai xe con cam tien -> xong han
+ * -> keo ngoai -> cho chot. Tra ve [lop css, giai thich de ro chuot].
+ */
+function mauDongChuyen($chuyen)
+{
+    $trangThai   = $chuyen['status'] ?? '';
+    $laKeoNgoai  = !empty($chuyen['outsource_driver_name']) || !empty($chuyen['outsource_car_name']);
+    $taiXeGiuTien = (int)($chuyen['customer_paid'] ?? 1) === 0
+                    && (int)($chuyen['cash_remitted'] ?? 0) === 0
+                    && in_array($trangThai, ['tai_xe_xac_nhan', 'hoan_thanh'], true);
+
+    if ($trangThai === 'da_huy') {
+        return ['dong-huy', 'Chuyến đã hủy'];
+    }
+    if (laQuanLy() && choQuanLyXacNhan($chuyen)) {
+        return ['dong-cho-xac-nhan', 'Tài xế tự gửi cuốc này, công ty chưa xác nhận'];
+    }
+    if (($chuyen['collector_type'] ?? '') === 'chua_thu') {
+        return ['dong-chua-thu', 'Chưa thu được tiền của khách'];
+    }
+    if ($taiXeGiuTien) {
+        return ['dong-giu-tien', 'Tài xế đang cầm tiền của khách, chưa nộp lại công ty'];
+    }
+    if ($trangThai === 'hoan_thanh') {
+        return ['dong-xong', 'Xong hẳn: đã chốt và tiền đã về công ty'];
+    }
+    if ($laKeoNgoai) {
+        return ['dong-keo-ngoai', 'Kèo giao cho nhà xe ngoài chạy'];
+    }
+    if ($trangThai === 'tai_xe_xac_nhan') {
+        return ['dong-cho-chot', 'Tài xế đã xác nhận, chờ công ty chốt'];
+    }
+    return ['', ''];
+}
+
 /** Nhan hien thi cua trang thai chuyen xe */
 function nhanTrangThaiChuyen($trangThai, $coTaiXe = true, $laKeoNgoai = false)
 {

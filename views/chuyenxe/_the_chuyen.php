@@ -7,8 +7,9 @@ $tt          = nhanTrangThaiChuyen($chuyen["status"], !empty($chuyen["driver_id"
 $cuaToi      = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
 $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
 $choXacNhan  = laQuanLy() && choQuanLyXacNhan($chuyen);
+[$lopMau, $yMau] = mauDongChuyen($chuyen);
 ?>
-<div class="the-chuyen-xe <?= $duocXacNhan ? 'can-xac-nhan' : '' ?> <?= $choXacNhan ? 'cho-xac-nhan' : '' ?>">
+<div class="the-chuyen-xe <?= $duocXacNhan ? 'can-xac-nhan' : '' ?> <?= h($lopMau) ?>"<?= $yMau ? ' title="' . h($yMau) . '"' : '' ?>>
   <div class="dau-the">
     <div>
       <div class="ngay"><?= bieuTuong('calendar') ?> <?= dinhDangNgay($chuyen['trip_date']) ?>
