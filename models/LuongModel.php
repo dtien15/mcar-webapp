@@ -11,11 +11,27 @@ class LuongModel extends Model
     /** Danh sach bang luong cua 1 ky, kem ten tai xe */
     public function layTheoKy($thang, $nam)
     {
+        // Tai xe da nghi thi khong hien trong bang luong nua cho do roi - NHUNG
+        // chi an khi ky do cua ho thuc su khong con gi: khong chay chuyen nao,
+        // khong con no qua lai, khong cam tien khach. Con dong nao la van hien
+        // de khong bao gio giau mat tien (doanh thu/bao cao khong dung ham nay
+        // nen so lieu cong ty giu nguyen 100%).
         return $this->truyVan(
             "SELECT p.*, d.full_name AS ten_tai_xe, d.short_name AS ten_goi, d.base_salary AS luong_co_ban
              FROM payroll p
              JOIN drivers d ON d.id = p.driver_id
              WHERE p.month = ? AND p.year = ?
+               AND (d.status = 'active'
+                    OR p.trip_count > 0
+                    OR p.total_salary <> 0
+                    OR p.prev_balance <> 0
+                    OR p.remaining <> 0
+                    OR p.company_paid <> 0
+                    OR p.total_collected <> 0
+                    OR p.total_collected_usd <> 0
+                    OR p.total_collected_eur <> 0
+                    OR p.total_refund <> 0
+                    OR p.total_refund_usd <> 0)
              ORDER BY d.full_name",
             [(int)$thang, (int)$nam]
         );
@@ -222,13 +238,37 @@ class LuongModel extends Model
     }
 
     /** Tinh lai cho toan bo tai xe dang lam viec trong 1 ky */
+    /** Id tai xe co chuyen hoac co bang luong trong ky (ke ca da nghi) */
+    private function taiXeCoSoLieuTrongKy($thang, $nam)
+    {
+        $dong = $this->truyVan(
+            "SELECT driver_id FROM payroll WHERE month = ? AND year = ? AND driver_id > 0
+             UNION
+             SELECT driver_id FROM trips
+             WHERE driver_id > 0 AND MONTH(trip_date) = ? AND YEAR(trip_date) = ?",
+            [(int)$thang, (int)$nam, (int)$thang, (int)$nam]
+        );
+        return array_column($dong, 'driver_id');
+    }
+
     public function tinhLaiTatCa($thang, $nam)
     {
         require_once DUONG_DAN_GOC . '/models/TaiXeModel.php';
         $taiXeModel = new TaiXeModel();
-        $soLuong = 0;
+
+        $ds = [];
         foreach ($taiXeModel->layTaiXeDangChay() as $taiXe) {
-            $this->tinhLai($taiXe['id'], $thang, $nam);
+            $ds[(int)$taiXe['id']] = true;
+        }
+        // Tai xe da nghi nhung trong ky van con chuyen hoac con bang luong thi
+        // van phai tinh - nghi viec khong xoa tien cong cua ky do.
+        foreach ($this->taiXeCoSoLieuTrongKy($thang, $nam) as $id) {
+            $ds[(int)$id] = true;
+        }
+
+        $soLuong = 0;
+        foreach (array_keys($ds) as $idTaiXe) {
+            $this->tinhLai($idTaiXe, $thang, $nam);
             $soLuong++;
         }
         return $soLuong;

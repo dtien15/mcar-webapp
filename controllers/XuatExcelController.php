@@ -134,7 +134,8 @@ class XuatExcelController extends Controller
             'tongSo'    => $model->demTheoLoc($loc),
             'tongHop'   => $model->tongHopTheoLoc($loc),
             'dsXe'      => $this->model('XeModel')->layTatCa(),
-            'dsTaiXe'   => $this->model('TaiXeModel')->layTatCa(),
+            'dsTaiXe'      => $this->model('TaiXeModel')->layTaiXeDangChay(),
+            'dsTaiXeDaNghi' => $this->model('TaiXeModel')->layTaiXeDaNghi(),
             'soCot'     => count($this->dsCot()),
         ], 'Xuất Excel');
     }

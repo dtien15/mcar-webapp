@@ -10,10 +10,14 @@ class NguoiDungController extends Controller
         $this->yeuCauQuyen(['admin']);
 
         $nguoiDungModel = $this->model('NguoiDungModel');
+        $dangSua        = $idSua ? $nguoiDungModel->layTheoId($idSua) : null;
         $this->view('nguoidung/danhsach', [
             'danhSach' => $nguoiDungModel->layDanhSachDayDu(),
-            'dsTaiXe'  => $this->model('TaiXeModel')->layTatCa(),
-            'dangSua'  => $idSua ? $nguoiDungModel->layTheoId($idSua) : null,
+            // Chi gan tai khoan cho tai xe dang lam viec; neu tai khoan dang
+            // sua von gan voi mot tai xe da nghi thi van giu tai xe do trong o
+            // chon (khong lam mat lien ket cu).
+            'dsTaiXe'  => $this->model('TaiXeModel')->layTaiXeChon($dangSua['driver_id'] ?? null),
+            'dangSua'  => $dangSua,
         ], 'Quản lý người dùng');
     }
 

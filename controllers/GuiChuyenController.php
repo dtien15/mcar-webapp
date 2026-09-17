@@ -16,7 +16,7 @@ class GuiChuyenController extends Controller
         $nam   = (int)date('Y');
 
         $duLieu = [
-            'dsTaiXe'      => $this->model('TaiXeModel')->layTatCa(),
+            'dsTaiXe'      => $this->model('TaiXeModel')->layTaiXeDangChay(),
             'dsXe'         => $this->model('XeModel')->layTatCa(),
             'dsDaGui'      => $chuyenXeModel->layPhieuCongKhaiGanDay(30),
             'tongThangNay' => $chuyenXeModel->demPhieuCongKhaiTheoThang($thang, $nam),

@@ -25,7 +25,10 @@ class ChuyenXeController extends Controller
             'conThem'            => $tongSo > count($danhSach),
             'tongHop'            => $chuyenXeModel->tongHopTheoLoc($loc),
             'dsXe'               => $this->model('XeModel')->layTatCa(),
-            'dsTaiXe'            => $this->model('TaiXeModel')->layTatCa(),
+            // Bo loc van tra cuu duoc tai xe da nghi (chuyen cu cua ho khong mat),
+            // nhung tach ra nhom rieng o cuoi danh sach.
+            'dsTaiXe'            => $this->model('TaiXeModel')->layTaiXeDangChay(),
+            'dsTaiXeDaNghi'      => $this->model('TaiXeModel')->layTaiXeDaNghi(),
             'dsTaiXeDangChay'    => $this->model('TaiXeModel')->layTaiXeDangChay(),
             'dsLoaiKeo'          => $this->model('LoaiKeoModel')->layTatCa(),
         ];
@@ -161,7 +164,11 @@ class ChuyenXeController extends Controller
             'chuyenXe'   => $chuyenXe,
             'laKeoNgoai' => $laKeoNgoai,
             'dsXe'       => laTaiXe() ? [$xeCuaToi] : $this->model('XeModel')->layTatCa(),
-            'dsTaiXe'    => laTaiXe() ? [$taiXeModel->layTheoId(taiKhoanHienTai()['id_tai_xe'])] : $taiXeModel->layTatCa(),
+            // Chi cho chon tai xe dang lam viec; tai xe da nghi cua chuyen cu
+            // van giu nguyen trong o chon de sua lai khong bi mat.
+            'dsTaiXe'    => laTaiXe()
+                ? [$taiXeModel->layTheoId(taiKhoanHienTai()['id_tai_xe'])]
+                : $taiXeModel->layTaiXeChon($chuyenXe['driver_id'] ?? null),
             'dsLoaiKeo'  => $this->model('LoaiKeoModel')->layTatCa(),
             'dsBangGia'  => $this->model('BangGiaModel')->layTatCa(),
             'giaGoiY'    => $this->model('BangGiaModel')->layDuLieuGoiY(),

@@ -14,6 +14,30 @@ class TaiXeModel extends Model
         return $this->truyVan("SELECT * FROM drivers WHERE status = 'active' ORDER BY full_name");
     }
 
+    /**
+     * Danh sach tai xe de CHON (giao chuyen, gan tai khoan...): chi tai xe
+     * dang lam viec. Rieng $idGiuLai (tai xe dang duoc chon san o ban ghi cu)
+     * van duoc giu lai du da nghi - neu bo di thi mo ban ghi cu ra luu lai la
+     * mat luon tai xe, lech het so lieu.
+     */
+    public function layTaiXeChon($idGiuLai = null)
+    {
+        $idGiuLai = (int)$idGiuLai;
+        if ($idGiuLai > 0) {
+            return $this->truyVan(
+                "SELECT * FROM drivers WHERE status = 'active' OR id = ? ORDER BY full_name",
+                [$idGiuLai]
+            );
+        }
+        return $this->layTaiXeDangChay();
+    }
+
+    /** Tai xe da nghi - dung cho bo loc/bao cao (du lieu cu van phai tra cuu duoc) */
+    public function layTaiXeDaNghi()
+    {
+        return $this->truyVan("SELECT * FROM drivers WHERE status <> 'active' ORDER BY full_name");
+    }
+
     /** Dem so chuyen xe cua tai xe */
     public function demChuyenXe($idTaiXe)
     {

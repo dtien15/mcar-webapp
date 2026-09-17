@@ -47,6 +47,14 @@ $dsTrangThai = [
           <?php foreach ($dsTaiXe as $tx): ?>
             <option value="<?= (int)$tx['id'] ?>" <?= $loc['id_tai_xe'] == $tx['id'] ? 'selected' : '' ?>><?= h($tx['full_name']) ?></option>
           <?php endforeach; ?>
+          <?php // Tai xe da nghi van xuat bao cao duoc - de rieng mot nhom o cuoi ?>
+          <?php if (!empty($dsTaiXeDaNghi)): ?>
+            <optgroup label="Đã nghỉ">
+              <?php foreach ($dsTaiXeDaNghi as $tx): ?>
+                <option value="<?= (int)$tx['id'] ?>" <?= $loc['id_tai_xe'] == $tx['id'] ? 'selected' : '' ?>><?= h($tx['full_name']) ?></option>
+              <?php endforeach; ?>
+            </optgroup>
+          <?php endif; ?>
         </select>
       </div>
       <div class="col-6 col-md-2">
