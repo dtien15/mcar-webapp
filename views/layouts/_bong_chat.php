@@ -40,28 +40,43 @@ $laQuanLyChat = laQuanLy();
 </div>
 
 <style>
+/* Bong chat NEP SAT MEP PHAI, mot nua an ra ngoai man hinh - truoc day no
+   noi han vao trong nen hay de len nut thao tac cua dong chuyen xe ngay
+   duoi. Nep sat mep thi chiem it cho han, van bam duoc de mo chat. */
 #bongChat {
   position: fixed;
-  right: 18px;
+  right: 0;
   bottom: calc(18px + env(safe-area-inset-bottom, 0px));
   z-index: 1045;
   transition: bottom .15s ease;
 }
 #nutBongChat {
-  width: 54px; height: 54px; border-radius: 50%; border: none; cursor: pointer;
+  width: 62px; height: 56px; border: none; cursor: pointer;
+  /* Ben trai bo tron, ben phai vuong vi phan do bi mep man hinh cat mat */
+  border-radius: 28px 0 0 28px;
   background: var(--mau-chinh, #2563eb); color: #fff; font-size: 24px;
-  box-shadow: 0 6px 20px rgba(37,99,235,.35);
+  box-shadow: -4px 6px 20px rgba(37,99,235,.35);
   display: flex; align-items: center; justify-content: center; position: relative;
+  /* Day ~1/3 nut ra ngoai mep. Dung transform chu khong dung right am de
+     khong lam trang bi cuon ngang. */
+  transform: translateX(26%);
+  transition: transform .15s ease;
 }
-#nutBongChat:hover { filter: brightness(1.08); }
+/* Cham/ro vao thi nut tu tron ra cho de bam */
+#nutBongChat:hover, #nutBongChat:focus-visible { filter: brightness(1.08); transform: translateX(6%); }
+/* Bieu tuong lech ve ben trai cho can voi phan con nhin thay */
+#nutBongChat .ti { margin-right: 12px; }
 .so-chua-doc-chat {
-  position: absolute; top: -2px; right: -2px; min-width: 20px; height: 20px;
+  /* So tin chua doc phai nam ben TRAI: goc phai cua nut dang bi mep man
+     hinh cat, de ben do la khong nhin thay so */
+  position: absolute; top: -4px; left: -4px; right: auto;
+  min-width: 20px; height: 20px;
   padding: 0 5px; border-radius: 999px; background: #dc2626; color: #fff;
   font-size: 11px; font-weight: 700; display: flex; align-items: center;
   justify-content: center; border: 2px solid #fff;
 }
 #khungChat {
-  position: absolute; right: 0; bottom: 66px; width: 340px; max-width: calc(100vw - 36px);
+  position: absolute; right: 12px; bottom: 66px; width: 340px; max-width: calc(100vw - 24px);
   height: 460px; max-height: calc(100vh - 120px);
   background: #fff; border-radius: 14px; overflow: hidden;
   box-shadow: 0 12px 40px rgba(15,23,42,.22); border: 1px solid #e2e8f0;
@@ -121,6 +136,11 @@ $laQuanLyChat = laQuanLy();
   background: var(--mau-chinh, #2563eb); color: #fff; flex-shrink: 0;
 }
 .chat-trong { text-align: center; color: #94a3b8; font-size: 13px; padding: 22px 12px; }
+/* Dang mo khung chat thi nut tro lai day du - luc nay con phai bam vao no
+   de dong chat lai, de nua an thi kho bam */
+#bongChat.dang-mo #nutBongChat { transform: none; }
+#bongChat.dang-mo #nutBongChat .ti { margin-right: 0; }
+
 @media (max-width: 480px) {
   #khungChat { width: calc(100vw - 24px); height: calc(100vh - 130px); }
 }
@@ -325,6 +345,7 @@ $laQuanLyChat = laQuanLy();
   function moKhung() {
     dangMoKhung = true;
     elKhung.hidden = false;
+    document.getElementById('bongChat').classList.add('dang-mo');
     if (LA_QUAN_LY) {
       if (idTaiXeDangMo) taiTinNhan(false); else veDanhSach();
     } else {
@@ -345,6 +366,7 @@ $laQuanLyChat = laQuanLy();
   function dongKhung() {
     dangMoKhung = false;
     elKhung.hidden = true;
+    document.getElementById('bongChat').classList.remove('dang-mo');
     clearInterval(henGioHoi);
   }
 
