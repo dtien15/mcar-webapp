@@ -33,10 +33,11 @@ $choXacNhan  = laQuanLy() && choQuanLyXacNhan($chuyen);
           <?= bieuTuong('alert-triangle') ?> Trùng lịch
         </span>
       <?php endif; ?>
-      <?php if ($chuyen['cash_remitted']): ?>
-        <span class="huy-hieu-trang-thai tt-success" title="Tài xế đã nộp lại tiền cho công ty"><?= bieuTuong('cash') ?> Đã nộp lại</span>
-      <?php elseif (in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)): ?>
-        <span class="huy-hieu-trang-thai tt-warning" title="Tài xế đang cầm tiền của khách, chưa nộp lại"><?= bieuTuong('cash') ?> Chưa nộp lại</span>
+      <?php if ($huyHieuTien = huyHieuTienChuyen($chuyen)): ?>
+        <?php [$nhanTien, $iconTien, $mauTien, $yTien] = $huyHieuTien; ?>
+        <span class="huy-hieu-trang-thai tt-<?= h($mauTien) ?>" title="<?= h($yTien) ?>">
+          <?= bieuTuong($iconTien) ?> <?= h($nhanTien) ?>
+        </span>
       <?php endif; ?>
     </div>
   </div>

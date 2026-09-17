@@ -1042,6 +1042,7 @@ textarea.tu-dong-gian {
 }
 .o-trang-thai .dau-hieu.dh-canh-bao { background: #fdf1de; color: #a8650f; }
 .o-trang-thai .dau-hieu.dh-tot      { background: #e2f1ea; color: #14724e; }
+.o-trang-thai .dau-hieu.dh-loi      { background: #fde8e8; color: #b42318; }
 
 /* Cot Xe: bien so dam, ten xe lam dong phu mo - hep hon han mot dong dai */
 .o-xe .bien-so { font-weight: 600; white-space: nowrap; }

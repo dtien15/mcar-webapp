@@ -46,7 +46,9 @@
             <td class="text-end"><?= dinhDangTien($chuyen['revenue_vnd']) ?></td>
             <td><?= h(nhanAiThu($chuyen['collector_type'] ?? '')) ?></td>
             <td>
-              <?php if ($chuyen['customer_paid']): ?>
+              <?php if (($chuyen['collector_type'] ?? '') === 'chua_thu'): ?>
+                <span class="text-danger">Chưa thu được tiền</span>
+              <?php elseif ($chuyen['customer_paid']): ?>
                 Khách TT thẳng cty
               <?php elseif ($chuyen['cash_remitted']): ?>
                 Đã nộp lại

@@ -282,6 +282,37 @@ function mauDongChuyen($chuyen)
     return ['', ''];
 }
 
+/**
+ * Huy hieu TIEN cua mot chuyen: tien khach dang o dau.
+ *
+ * Truoc day cho nay chi nhin cash_remitted + trang thai, nen chuyen "Chua thu
+ * duoc tien" cung bi ghi la "Chua nop lai" - bao sai han: tai xe co cam dong
+ * nao dau ma bat nop. Gio doc dung "ai thu tien khach".
+ *
+ * Tra ve [nhan, icon, mau, giai thich] hoac null neu khong can bao gi.
+ */
+function huyHieuTienChuyen($chuyen)
+{
+    $aiThu     = $chuyen['collector_type'] ?? '';
+    $trangThai = $chuyen['status'] ?? '';
+
+    if ($trangThai === 'da_huy') {
+        return null;
+    }
+    if ($aiThu === 'chua_thu') {
+        return ['Chưa thu tiền', 'cash-off', 'danger', 'Chưa thu được tiền của khách'];
+    }
+    if (!empty($chuyen['cash_remitted'])) {
+        return ['Đã nộp lại', 'cash', 'success', 'Tài xế đã nộp lại tiền cho công ty'];
+    }
+    // customer_paid = 0 nghia la tai xe dang giu tien khach (suy tu "ai thu")
+    if ((int)($chuyen['customer_paid'] ?? 1) === 0
+        && in_array($trangThai, ['tai_xe_xac_nhan', 'hoan_thanh'], true)) {
+        return ['Chưa nộp lại', 'cash', 'warning', 'Tài xế đang cầm tiền của khách, chưa nộp lại'];
+    }
+    return null;
+}
+
 /** Nhan hien thi cua trang thai chuyen xe */
 function nhanTrangThaiChuyen($trangThai, $coTaiXe = true, $laKeoNgoai = false)
 {

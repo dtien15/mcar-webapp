@@ -52,10 +52,11 @@ $choXacNhan  = laQuanLy() && choQuanLyXacNhan($chuyen);
           $dauHieu[] = ['alert-triangle', 'dh-canh-bao',
                         'Trùng lịch — cùng ngày còn chuyến khác dùng chung xe hoặc chung tài xế'];
       }
-      if ($chuyen['cash_remitted']) {
-          $dauHieu[] = ['cash', 'dh-tot', 'Tài xế đã nộp lại tiền cho công ty'];
-      } elseif (in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true)) {
-          $dauHieu[] = ['cash', 'dh-canh-bao', 'Tài xế đang cầm tiền của khách, chưa nộp lại'];
+      // Tien khach dang o dau: dung chung ham voi the dien thoai de hai ben
+      // khong bao giờ noi hai kieu khac nhau ve cung mot chuyen.
+      if ($huyHieuTien = huyHieuTienChuyen($chuyen)) {
+          [$nhanTien, $iconTien, $mauTien, $yTien] = $huyHieuTien;
+          $dauHieu[] = [$iconTien, $mauTien === 'success' ? 'dh-tot' : ($mauTien === 'danger' ? 'dh-loi' : 'dh-canh-bao'), $nhanTien . ' — ' . $yTien];
       }
     ?>
     <?php if ($choXacNhan): ?>
