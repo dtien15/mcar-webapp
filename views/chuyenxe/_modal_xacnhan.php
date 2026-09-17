@@ -40,16 +40,19 @@ $aiThuModal = $chuyen['collector_type'] ?? '';
 
         <div class="buoc-nhap">
 
+          <?php // Dien thoai: MOI o mot hang rieng, khong chia doi. O tien
+                // chia doi thi con so dai ("4.000.000") gan cham mep, nhin
+                // roi va de go nham - tai xe go mot tay khi vua chay xong. ?>
           <!-- 1. Tien khach tra va tien cua tai xe -->
           <fieldset class="nhom-truong">
             <legend>Doanh thu &amp; tiền tài</legend>
             <div class="row g-2">
-              <div class="col-6 col-md-3">
+              <div class="col-12 col-md-3">
                 <label class="form-label">Khách trả (VNĐ)</label>
                 <input type="text" class="form-control o-nhap-tien o-khach-tra" placeholder="0"
                        name="thu_vnd" value="<?= h(giaTriTienForm($chuyen, 'revenue_vnd')) ?>">
               </div>
-              <div class="col-6 col-md-3">
+              <div class="col-12 col-md-3">
                 <label class="form-label">Tiền cuốc xe</label>
                 <input type="text" class="form-control o-nhap-tien" placeholder="0"
                        name="tien_cuoc_xe" value="<?= h(giaTriTienForm($chuyen, 'trip_fee')) ?>">
@@ -102,11 +105,11 @@ $aiThuModal = $chuyen['collector_type'] ?? '';
           <fieldset class="nhom-truong">
             <legend>Xăng dầu</legend>
             <div class="row g-2">
-              <div class="col-6 col-md-3">
+              <div class="col-12 col-md-3">
                 <label class="form-label">Tiền xăng dầu</label>
                 <input type="text" class="form-control o-nhap-tien o-xang-dau" placeholder="0" name="xang_dau">
               </div>
-              <div class="col-6 col-md-3">
+              <div class="col-12 col-md-3">
                 <label class="form-label">VAT 10% xăng/dầu</label>
                 <input type="text" class="form-control o-nhap-tien o-vat-xang-dau" placeholder="0" name="vat_xang_dau">
               </div>
@@ -155,28 +158,28 @@ $aiThuModal = $chuyen['collector_type'] ?? '';
           <fieldset class="nhom-truong">
             <legend>Khoản khác (nếu có)</legend>
             <div class="row g-2">
-              <div class="col-6 col-md-3">
+              <div class="col-12 col-md-3">
                 <label class="form-label">Chi phí kèo ngoài</label>
                 <input type="text" class="form-control o-nhap-tien o-chi-phi-ngoai" placeholder="0"
                        name="chi_phi_keo_ngoai" value="<?= h(giaTriTienForm($chuyen, 'outsource_cost')) ?>">
               </div>
-              <div class="col-6 col-md-3">
+              <div class="col-12 col-md-3">
                 <label class="form-label">Bảo dưỡng xe</label>
                 <input type="text" class="form-control o-nhap-tien" placeholder="0" name="bao_duong">
               </div>
-              <div class="col-6 col-md-3">
+              <div class="col-12 col-md-3">
                 <label class="form-label">Phạt</label>
                 <input type="text" class="form-control o-nhap-tien" placeholder="0" name="phat">
               </div>
-              <div class="col-6 col-md-3">
+              <div class="col-12 col-md-3">
                 <label class="form-label">Tạm ứng</label>
                 <input type="text" class="form-control o-nhap-tien" placeholder="0" name="tam_ung">
               </div>
-              <div class="col-6 col-md-3">
+              <div class="col-12 col-md-3">
                 <label class="form-label">Hoàn tiền VNĐ</label>
                 <input type="text" class="form-control o-nhap-tien" placeholder="0" name="hoan_tien_vnd">
               </div>
-              <div class="col-6 col-md-3">
+              <div class="col-12 col-md-3">
                 <label class="form-label">Hoàn tiền USD</label>
                 <input type="number" step="0.01" class="form-control" placeholder="0.00" name="hoan_tien_usd">
               </div>
