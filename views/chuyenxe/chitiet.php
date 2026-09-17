@@ -7,7 +7,8 @@
 <div class="khong-in mb-3 d-flex gap-2 flex-wrap align-items-center thanh-nut-trang">
   <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light btn-sm"><?= bieuTuong('arrow-left') ?> Quay lại</a>
   <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><?= bieuTuong('printer') ?> In</button>
-  <a href="<?= duongDan('chuyenxe?mo_chat=' . $chuyen['id']) ?>" class="btn btn-outline-info btn-sm">
+  <?php // Mo thang doan chat CUA CUOC NAY (moi cuoc mot doan rieng) ?>
+  <a href="<?= duongDan('chuyenxe?mo_chat_cuoc=' . $chuyen['id']) ?>" class="btn btn-outline-info btn-sm">
     <?= bieuTuong('message-circle') ?> Nhắn tin
   </a>
 </div>

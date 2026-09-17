@@ -2,10 +2,13 @@
 // =====================================================================
 // ChatModel - Tin nhan giua QUAN LY (admin/ke toan) va TAI XE.
 //
-// Moi TAI XE la 1 cuoc hoi thoai lien tuc (giong Messenger), khong chia
-// cat theo tung chuyen xe. Tin nhan van co the GAN vao 1 cuoc xe cu the
-// (trip_id) de sau nay tra cuu "tin nay noi ve cuoc nao", nhung khong bat
-// buoc - nhan tin tu do van duoc.
+// MOI CUOC XE LA MOT CUOC HOI THOAI RIENG (trip_id). Truoc day tat ca tin
+// nhan cua mot tai xe do chung vao mot doan chat dai, noi ve cuoc nao cung
+// nam lan trong do - doc lai rat de lon cuoc nay voi cuoc kia, nhat la khi
+// mot ngay chay 3-4 cuoc.
+//
+// Tin nhan cu (gui truoc khi doi, trip_id = NULL) van giu nguyen va doc
+// duoc trong mot doan rieng ten "Tin nhan chung" - khong xoa gi cua ai.
 // =====================================================================
 
 class ChatModel extends Model
@@ -68,6 +71,131 @@ class ChatModel extends Model
             "SELECT COUNT(*) FROM chat_messages
              WHERE driver_id = ? AND sender_id <> ? AND read_at IS NULL",
             [(int)$idTaiXe, (int)$idNguoiXem]
+        );
+    }
+
+    /** Toan bo tin nhan cua MOT CUOC XE */
+    public function layTinNhanTheoChuyen($idChuyen, $gioiHan = 200)
+    {
+        return $this->truyVan(
+            "SELECT * FROM (
+                SELECT c.*, u.full_name AS ten_nguoi_gui, u.role AS vai_tro_nguoi_gui
+                FROM chat_messages c
+                JOIN users u ON u.id = c.sender_id
+                WHERE c.trip_id = ?
+                ORDER BY c.created_at DESC, c.id DESC
+                LIMIT " . (int)$gioiHan . "
+             ) AS moi_nhat
+             ORDER BY created_at ASC, id ASC",
+            [(int)$idChuyen]
+        );
+    }
+
+    /** Tin nhan CU khong gan cuoc nao ("Tin nhan chung" cua 1 tai xe) */
+    public function layTinNhanChung($idTaiXe, $gioiHan = 200)
+    {
+        return $this->truyVan(
+            "SELECT * FROM (
+                SELECT c.*, u.full_name AS ten_nguoi_gui, u.role AS vai_tro_nguoi_gui
+                FROM chat_messages c
+                JOIN users u ON u.id = c.sender_id
+                WHERE c.driver_id = ? AND c.trip_id IS NULL
+                ORDER BY c.created_at DESC, c.id DESC
+                LIMIT " . (int)$gioiHan . "
+             ) AS moi_nhat
+             ORDER BY created_at ASC, id ASC",
+            [(int)$idTaiXe]
+        );
+    }
+
+    /** Danh dau da xem tin nhan cua MOT CUOC (tru tin cua chinh minh) */
+    public function danhDauDaXemChuyen($idChuyen, $idNguoiXem)
+    {
+        return $this->thucThi(
+            "UPDATE chat_messages SET read_at = NOW()
+             WHERE trip_id = ? AND sender_id <> ? AND read_at IS NULL",
+            [(int)$idChuyen, (int)$idNguoiXem]
+        );
+    }
+
+    /** Danh dau da xem doan "Tin nhan chung" cua 1 tai xe */
+    public function danhDauDaXemChung($idTaiXe, $idNguoiXem)
+    {
+        return $this->thucThi(
+            "UPDATE chat_messages SET read_at = NOW()
+             WHERE driver_id = ? AND trip_id IS NULL AND sender_id <> ? AND read_at IS NULL",
+            [(int)$idTaiXe, (int)$idNguoiXem]
+        );
+    }
+
+    /**
+     * Danh sach doan chat THEO CUOC.
+     * - $idTaiXe khac null: chi cua tai xe do (dung cho ben tai xe).
+     * - Ngoai cac cuoc da co tin nhan, con kem cac cuoc GAN DAY chua ai nhan
+     *   gi de bam vao la nhan duoc ngay (khong phai di tim trong danh sach).
+     */
+    public function layDoanChatTheoCuoc($idNguoiXem, $idTaiXe = null, $soNgayGanDay = 30, $gioiHan = 40)
+    {
+        $dieuKien = ['t.deleted_at IS NULL'];
+        $thamSo   = [(int)$idNguoiXem];
+
+        if ($idTaiXe) {
+            $dieuKien[] = 't.driver_id = ?';
+            $thamSo[]   = (int)$idTaiXe;
+        } else {
+            $dieuKien[] = 't.driver_id IS NOT NULL';
+        }
+
+        // Cuoc duoc liet ke khi: da co tin nhan, HOAC chay trong N ngay gan day
+        $dieuKien[] = '(EXISTS (SELECT 1 FROM chat_messages c WHERE c.trip_id = t.id)'
+                    . ' OR t.trip_date >= DATE_SUB(CURDATE(), INTERVAL ' . (int)$soNgayGanDay . ' DAY))';
+        $where = implode(' AND ', $dieuKien);
+
+        return $this->truyVan(
+            "SELECT t.id AS trip_id, t.driver_id, t.trip_date, t.route, t.pickup_dropoff, t.status,
+                    d.full_name AS ten_tai_xe,
+                    (SELECT c.content FROM chat_messages c
+                      WHERE c.trip_id = t.id ORDER BY c.created_at DESC, c.id DESC LIMIT 1) AS tin_cuoi,
+                    (SELECT c.created_at FROM chat_messages c
+                      WHERE c.trip_id = t.id ORDER BY c.created_at DESC, c.id DESC LIMIT 1) AS luc_cuoi,
+                    (SELECT COUNT(*) FROM chat_messages c
+                      WHERE c.trip_id = t.id AND c.sender_id <> ? AND c.read_at IS NULL) AS chua_doc
+             FROM trips t
+             LEFT JOIN drivers d ON d.id = t.driver_id
+             WHERE {$where}
+             ORDER BY chua_doc DESC, luc_cuoi IS NULL, luc_cuoi DESC, t.trip_date DESC, t.id DESC
+             LIMIT " . (int)$gioiHan,
+            $thamSo
+        );
+    }
+
+    /**
+     * Doan "Tin nhan chung" (tin cu khong gan cuoc). Tra ve null neu tai xe
+     * do khong co tin nao nhu vay - de khong bay ra mot doan trong vo nghia.
+     */
+    public function layDoanChatChung($idNguoiXem, $idTaiXe = null)
+    {
+        $dieuKien = ['c.trip_id IS NULL'];
+        $thamSo   = [(int)$idNguoiXem];   // cho SUM(...sender_id <> ?...)
+        if ($idTaiXe) {
+            $dieuKien[] = 'c.driver_id = ?';
+            $thamSo[]   = (int)$idTaiXe;
+        }
+        $where = implode(' AND ', $dieuKien);
+
+        return $this->truyVan(
+            "SELECT c.driver_id, d.full_name AS ten_tai_xe,
+                    MAX(c.created_at) AS luc_cuoi,
+                    SUM(CASE WHEN c.sender_id <> ? AND c.read_at IS NULL THEN 1 ELSE 0 END) AS chua_doc,
+                    SUBSTRING_INDEX(GROUP_CONCAT(c.content ORDER BY c.created_at DESC, c.id DESC SEPARATOR '
+'), '
+', 1) AS tin_cuoi
+             FROM chat_messages c
+             LEFT JOIN drivers d ON d.id = c.driver_id
+             WHERE {$where}
+             GROUP BY c.driver_id, d.full_name
+             ORDER BY chua_doc DESC, luc_cuoi DESC",
+            $thamSo
         );
     }
 

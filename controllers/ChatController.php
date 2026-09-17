@@ -1,37 +1,127 @@
 <?php
 // =====================================================================
 // ChatController - Chat giua quan ly (admin/ke toan) va tai xe.
-// Moi tai xe la 1 cuoc hoi thoai lien tuc; tin nhan co the gan kem 1
-// chuyen xe cu the de tra cuu lai (khong bat buoc).
+//
+// MOI CUOC XE LA MOT DOAN CHAT RIENG: mo doan nao chi thay tin nhan cua
+// dung cuoc do, khong lan voi cuoc khac. Tin nhan cu chua gan cuoc van doc
+// duoc trong doan "Tin nhan chung".
 // =====================================================================
 
 class ChatController extends Controller
 {
-    /** Danh sach cuoc hoi thoai (chi quan ly) - de ve danh sach trong bong chat */
+    /**
+     * Danh sach doan chat - moi CUOC XE mot doan.
+     * Quan ly thay cua moi tai xe; tai xe chi thay cuoc cua chinh minh.
+     */
     public function hoiThoai()
     {
-        $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->yeuCauDangNhap();
         header('Content-Type: application/json; charset=utf-8');
 
-        $ds = $this->model('ChatModel')->layDanhSachHoiThoai(taiKhoanHienTai()['id']);
-        $dsOnline = layTaiXeDangOnline();
+        $chatModel  = $this->model('ChatModel');
+        $idTaiKhoan = taiKhoanHienTai()['id'];
+        $idTaiXe    = laTaiXe() ? (int)(taiKhoanHienTai()['id_tai_xe'] ?? 0) : null;
+        $dsOnline   = laQuanLy() ? layTaiXeDangOnline() : [];
 
-        echo json_encode(['ok' => true, 'hoi_thoai' => array_map(function ($d) use ($dsOnline) {
-            return [
-                'id_tai_xe' => (int)$d['driver_id'],
-                'ten'       => $d['ten_tai_xe'],
-                'tin_cuoi'  => $d['tin_cuoi'] ?: '',
-                'thoi_gian' => $d['luc_cuoi'] ? thoiGianTuongDoi($d['luc_cuoi']) : '',
-                'chua_doc'  => (int)$d['chua_doc'],
-                'online'    => in_array((int)$d['driver_id'], $dsOnline, true),
+        $doan = [];
+
+        // Doan "Tin nhan chung": tin cu chua gan cuoc nao. Chi hien neu that
+        // su con tin - khong bay ra mot doan trong vo nghia.
+        foreach ($chatModel->layDoanChatChung($idTaiKhoan, $idTaiXe) as $c) {
+            $doan[] = [
+                'loai'      => 'chung',
+                'id'        => (int)$c['driver_id'],
+                'ten'       => laQuanLy()
+                    ? ($c['ten_tai_xe'] ?? 'Tài xế') . ' · Tin nhắn chung'
+                    : 'Tin nhắn chung (cũ)',
+                'phu'       => 'Tin nhắn cũ chưa gắn cuốc nào',
+                'tin_cuoi'  => $c['tin_cuoi'] ?: '',
+                'thoi_gian' => $c['luc_cuoi'] ? thoiGianTuongDoi($c['luc_cuoi']) : '',
+                'chua_doc'  => (int)$c['chua_doc'],
+                'online'    => false,
             ];
-        }, $ds)], JSON_UNESCAPED_UNICODE);
+        }
+
+        foreach ($chatModel->layDoanChatTheoCuoc($idTaiKhoan, $idTaiXe) as $c) {
+            $doan[] = [
+                'loai'      => 'cuoc',
+                'id'        => (int)$c['trip_id'],
+                'ten'       => dinhDangNgay($c['trip_date']) . ' · ' . ($c['route'] ?: 'Chưa có hành trình'),
+                'phu'       => laQuanLy()
+                    ? ($c['ten_tai_xe'] ?? 'Chưa giao tài xế')
+                    : ($c['pickup_dropoff'] ?: ''),
+                'tin_cuoi'  => $c['tin_cuoi'] ?: '',
+                'thoi_gian' => $c['luc_cuoi'] ? thoiGianTuongDoi($c['luc_cuoi']) : '',
+                'chua_doc'  => (int)$c['chua_doc'],
+                'online'    => in_array((int)$c['driver_id'], $dsOnline, true),
+            ];
+        }
+
+        echo json_encode(['ok' => true, 'hoi_thoai' => $doan], JSON_UNESCAPED_UNICODE);
         exit;
+    }
+
+    /**
+     * Tin nhan cua MOT CUOC XE.
+     * Tai xe chi doc duoc cuoc cua chinh minh.
+     */
+    public function cuoc($idChuyen = 0)
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $this->yeuCauDangNhap();
+
+        $chuyen = $this->model('ChuyenXeModel')->layChiTiet((int)$idChuyen);
+        if (!$chuyen || !$this->duocXemCuoc($chuyen)) {
+            http_response_code(403);
+            echo json_encode(['ok' => false, 'loi' => 'Không có quyền xem tin nhắn của cuốc này.']);
+            exit;
+        }
+
+        $chatModel  = $this->model('ChatModel');
+        $idTaiKhoan = taiKhoanHienTai()['id'];
+        $chatModel->danhDauDaXemChuyen((int)$idChuyen, $idTaiKhoan);
+
+        echo json_encode([
+            'ok'        => true,
+            'loai'      => 'cuoc',
+            'id_chuyen' => (int)$idChuyen,
+            'id_tai_xe' => (int)$chuyen['driver_id'],
+            'tieu_de'   => dinhDangNgay($chuyen['trip_date']) . ' · ' . ($chuyen['route'] ?: 'Cuốc xe'),
+            'tin_nhan'  => $this->veTinNhan($chatModel->layTinNhanTheoChuyen((int)$idChuyen), $idTaiKhoan),
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    /** Chi cho xem tin nhan cua cuoc minh co lien quan */
+    private function duocXemCuoc($chuyen)
+    {
+        if (laQuanLy()) {
+            return true;
+        }
+        return laTaiXe() && (int)$chuyen['driver_id'] === (int)(taiKhoanHienTai()['id_tai_xe'] ?? 0);
+    }
+
+    /** Doi dong du lieu tin nhan sang dang JSON cho giao dien */
+    private function veTinNhan(array $ds, $idTaiKhoan)
+    {
+        return array_map(function ($tn) use ($idTaiKhoan) {
+            return [
+                'id'            => (int)$tn['id'],
+                'noi_dung'      => $tn['content'],
+                'cua_toi'       => (int)$tn['sender_id'] === (int)$idTaiKhoan,
+                'ten_nguoi_gui' => $tn['ten_nguoi_gui'],
+                'thoi_gian'     => thoiGianTuongDoi($tn['created_at']),
+            ];
+        }, $ds);
     }
 
     /**
      * Lay toan bo tin nhan trong 1 cuoc hoi thoai.
      * Quan ly truyen $idTaiXe; tai xe khong can truyen (tu lay cua chinh minh).
+     */
+    /**
+     * Doan "Tin nhan chung" cua 1 tai xe: nhung tin CU chua gan cuoc nao.
+     * Chi de doc lai lich su - tin moi bat buoc phai thuoc mot cuoc.
      */
     public function lay($idTaiXe = 0)
     {
@@ -46,30 +136,18 @@ class ChatController extends Controller
 
         $chatModel  = $this->model('ChatModel');
         $idTaiKhoan = taiKhoanHienTai()['id'];
-        $chatModel->danhDauDaXem($idTaiXe, $idTaiKhoan);
-
-        $dsTinNhan = array_map(function ($tn) use ($idTaiKhoan) {
-            return [
-                'id'            => (int)$tn['id'],
-                'noi_dung'      => $tn['content'],
-                'cua_toi'       => (int)$tn['sender_id'] === (int)$idTaiKhoan,
-                'ten_nguoi_gui' => $tn['ten_nguoi_gui'],
-                'thoi_gian'     => thoiGianTuongDoi($tn['created_at']),
-                // Tin nay noi ve cuoc xe nao (neu duoc gui tu trong 1 cuoc cu the)
-                'cuoc'          => $tn['trip_id'] ? [
-                    'id'    => (int)$tn['trip_id'],
-                    'nhan'  => 'Cuốc ' . dinhDangNgay($tn['trip_date']) . ($tn['route'] ? ' · ' . $tn['route'] : ''),
-                ] : null,
-            ];
-        }, $chatModel->layTinNhanTheoTaiXe($idTaiXe));
+        $chatModel->danhDauDaXemChung($idTaiXe, $idTaiKhoan);
 
         $taiXe = $this->model('TaiXeModel')->layTheoId($idTaiXe);
 
         echo json_encode([
-            'ok'         => true,
-            'id_tai_xe'  => $idTaiXe,
-            'ten_tai_xe' => $taiXe['full_name'] ?? '',
-            'tin_nhan'   => $dsTinNhan,
+            'ok'        => true,
+            'loai'      => 'chung',
+            'id_tai_xe' => $idTaiXe,
+            'tieu_de'   => laQuanLy()
+                ? (($taiXe['full_name'] ?? 'Tài xế') . ' · Tin nhắn chung')
+                : 'Tin nhắn chung (cũ)',
+            'tin_nhan'  => $this->veTinNhan($chatModel->layTinNhanChung($idTaiXe), $idTaiKhoan),
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -86,13 +164,20 @@ class ChatController extends Controller
             exit;
         }
 
-        $idTaiXe  = $this->layIdTaiXeHopLe((int)($_POST['id_tai_xe'] ?? 0));
         $noiDung  = trim($_POST['noi_dung'] ?? '');
-        $idChuyen = (int)($_POST['id_chuyen'] ?? 0) ?: null;
+        $idChuyen = (int)($_POST['id_chuyen'] ?? 0);
 
-        if (!$idTaiXe) {
+        // Tin moi LUON thuoc ve mot cuoc xe - khong con nhan "chung chung"
+        // nua, vi doc lai rat de lon cuoc nay voi cuoc kia.
+        $chuyen = $idChuyen ? $this->model('ChuyenXeModel')->layTheoId($idChuyen) : null;
+        if (!$chuyen || !$this->duocXemCuoc($chuyen)) {
             http_response_code(403);
-            echo json_encode(['ok' => false, 'loi' => 'Không có quyền nhắn tin cho tài xế này.']);
+            echo json_encode(['ok' => false, 'loi' => 'Hãy mở đúng cuốc xe rồi nhắn tin trong cuốc đó.']);
+            exit;
+        }
+        $idTaiXe = (int)$chuyen['driver_id'];
+        if (!$idTaiXe) {
+            echo json_encode(['ok' => false, 'loi' => 'Cuốc này chưa giao cho tài xế nào nên chưa nhắn tin được.']);
             exit;
         }
         if ($noiDung === '') {
@@ -102,14 +187,6 @@ class ChatController extends Controller
         if (mb_strlen($noiDung) > 2000) {
             echo json_encode(['ok' => false, 'loi' => 'Tin nhắn quá dài (tối đa 2000 ký tự).']);
             exit;
-        }
-
-        // Chi gan cuoc xe neu cuoc do that su thuoc dung tai xe nay
-        if ($idChuyen) {
-            $chuyen = $this->model('ChuyenXeModel')->layTheoId($idChuyen);
-            if (!$chuyen || (int)$chuyen['driver_id'] !== $idTaiXe) {
-                $idChuyen = null;
-            }
         }
 
         $taiKhoan = taiKhoanHienTai();
@@ -128,7 +205,7 @@ class ChatController extends Controller
                 $thongBaoModel->layTaiKhoanCuaTaiXe($idTaiXe),
                 $taiKhoan['ho_ten'] . ' nhắn tin cho bạn',
                 $noiDungRutGon,
-                'chuyenxe?mo_chat=1',
+                'chuyenxe?mo_chat_cuoc=' . $idChuyen,
                 $idChuyen
             );
         } else {
@@ -136,7 +213,7 @@ class ChatController extends Controller
                 $thongBaoModel->layTaiKhoanQuanLy(),
                 $taiKhoan['ho_ten'] . ' nhắn tin cho công ty',
                 $noiDungRutGon,
-                'chuyenxe?mo_chat=' . $idTaiXe,
+                'chuyenxe?mo_chat_cuoc=' . $idChuyen,
                 $idChuyen
             );
             baoThucRealtimeQuanLy();
