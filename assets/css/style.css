@@ -1544,3 +1544,37 @@ textarea.tu-dong-gian {
   .the:has(> .thanh-loc-gon) { margin-bottom: 10px; overflow: visible; }
   .nhan-tab-trang-thai { margin-bottom: 10px; }
 }
+
+/* =====================================================================
+   CUOC DO TAI XE TU GUI LEN - cho quan ly xac nhan
+   To nhe mot mau am (khong do choi) de mo danh sach ra la thay ngay co
+   cuoc can kiem tra, nhung van doc duoc binh thuong.
+   ===================================================================== */
+.bang tr.dong-cho-xac-nhan > td { background: #fffbeb; }
+.bang tr.dong-cho-xac-nhan > td:first-child { box-shadow: inset 3px 0 0 #f59e0b; }
+
+.the-chuyen-xe.cho-xac-nhan {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  box-shadow: inset 3px 0 0 #f59e0b, var(--bong);
+}
+
+/* Bang soat lai so lieu trong modal xac nhan */
+.bang-soat-cuoc > div {
+  display: flex;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px dashed var(--mau-vien);
+}
+.bang-soat-cuoc > div:last-child { border-bottom: none; }
+.bang-soat-cuoc .ngan { border-bottom: none; padding: 3px 0; }
+.bang-soat-cuoc .nhan { color: var(--mau-chu-nhat); min-width: 116px; flex-shrink: 0; }
+.bang-soat-cuoc .gt { font-weight: 600; word-break: break-word; }
+.bang-soat-cuoc .gt.tien { font-variant-numeric: tabular-nums; }
+
+.anh-dinh-kem-soat { display: block; margin-top: 12px; }
+.anh-dinh-kem-soat img {
+  width: 100%;
+  border-radius: var(--bo-goc);
+  border: 1px solid var(--mau-vien);
+}

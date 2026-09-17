@@ -6,8 +6,10 @@
 $tt          = nhanTrangThaiChuyen($chuyen["status"], !empty($chuyen["driver_id"]), !empty($chuyen["outsource_driver_name"]));
 $cuaToi      = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
 $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
+// Tai xe tu gui cuoc, cong ty chua kiem tra -> to nhe ca dong len cho de thay
+$choXacNhan  = laQuanLy() && choQuanLyXacNhan($chuyen);
 ?>
-<tr>
+<tr class="<?= $choXacNhan ? 'dong-cho-xac-nhan' : '' ?>">
   <td><?= dinhDangNgay($chuyen['trip_date']) ?></td>
   <?php if (laTaiXe()): ?><td><?= h($chuyen['pickup_time']) ?></td><?php endif; ?>
   <td>
@@ -54,7 +56,13 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
           $dauHieu[] = ['cash', 'dh-canh-bao', 'Tài xế đang cầm tiền của khách, chưa nộp lại'];
       }
     ?>
-    <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
+    <?php if ($choXacNhan): ?>
+      <span class="huy-hieu-trang-thai tt-warning" title="Tài xế tự gửi cuốc này, công ty chưa xác nhận">
+        <?= bieuTuong('send') ?> Tài xế gửi
+      </span>
+    <?php else: ?>
+      <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
+    <?php endif; ?>
     <?php foreach ($dauHieu as [$icon, $lop, $giaiThich]): ?>
       <span class="dau-hieu <?= $lop ?>" title="<?= h($giaiThich) ?>"><?= bieuTuong($icon) ?></span>
     <?php endforeach; ?>

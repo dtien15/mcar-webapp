@@ -25,6 +25,12 @@ if (laQuanLy()) {
         $chinh = ['kieu' => 'form', 'url' => 'chuyenxe/bohuy', 'nhan' => 'Bỏ hủy',
                   'icon' => 'arrow-back-up', 'lop' => 'btn-warning',
                   'hoi' => 'Bỏ hủy, đưa chuyến trở lại trạng thái trước đó?'];
+    } elseif (choQuanLyXacNhan($chuyen)) {
+        // Tai xe tu gui cuoc len: cong ty chua kiem tra cuoc nay dung hay sai,
+        // nen viec chinh la XAC NHAN (mo ra soat lai so lieu) chu khong phai
+        // chot thang vao luong.
+        $chinh = ['kieu' => 'modal', 'dich' => '#xacNhanGui' . $chuyen['id'], 'nhan' => 'Xác nhận',
+                  'icon' => 'checklist', 'lop' => 'btn-warning'];
     } elseif ($chuyen['status'] === 'tai_xe_xac_nhan') {
         $chinh = ['kieu' => 'form', 'url' => 'chuyenxe/chot', 'nhan' => 'Chốt',
                   'icon' => 'check', 'lop' => 'btn-success',

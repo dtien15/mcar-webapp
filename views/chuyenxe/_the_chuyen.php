@@ -6,8 +6,9 @@
 $tt          = nhanTrangThaiChuyen($chuyen["status"], !empty($chuyen["driver_id"]), !empty($chuyen["outsource_driver_name"]));
 $cuaToi      = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
 $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
+$choXacNhan  = laQuanLy() && choQuanLyXacNhan($chuyen);
 ?>
-<div class="the-chuyen-xe <?= $duocXacNhan ? 'can-xac-nhan' : '' ?>">
+<div class="the-chuyen-xe <?= $duocXacNhan ? 'can-xac-nhan' : '' ?> <?= $choXacNhan ? 'cho-xac-nhan' : '' ?>">
   <div class="dau-the">
     <div>
       <div class="ngay"><?= bieuTuong('calendar') ?> <?= dinhDangNgay($chuyen['trip_date']) ?>
@@ -18,7 +19,13 @@ $duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
       <div class="hanh-trinh"><?= h($chuyen['route']) ?></div>
     </div>
     <div class="cot-trang-thai">
-      <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
+      <?php if ($choXacNhan): ?>
+        <span class="huy-hieu-trang-thai tt-warning" title="Tài xế tự gửi cuốc này, công ty chưa xác nhận">
+          <?= bieuTuong('send') ?> Tài xế gửi
+        </span>
+      <?php else: ?>
+        <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>
+      <?php endif; ?>
       <?php if (!empty($chuyen['dam_lich'])): ?>
         <span class="huy-hieu-trang-thai tt-warning"
               title="Cùng ngày còn chuyến khác dùng chung xe hoặc chung tài xế">

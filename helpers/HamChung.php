@@ -228,6 +228,19 @@ function thoiGianTuongDoi($thoiDiem)
     return date('d/m/Y H:i', $moc);
 }
 
+/**
+ * Chuyen do TAI XE tu gui len ma quan ly CHUA xac nhan.
+ *
+ * Dung chung o nhieu cho (dong bang, the, cot thao tac, modal) nen de o day
+ * de khong noi nao kiem tra thieu dieu kien roi hien sai.
+ */
+function choQuanLyXacNhan($chuyen)
+{
+    return !empty($chuyen['driver_submitted'])
+        && empty($chuyen['driver_submit_checked_at'])
+        && ($chuyen['status'] ?? '') === 'tai_xe_xac_nhan';
+}
+
 /** Nhan hien thi cua trang thai chuyen xe */
 function nhanTrangThaiChuyen($trangThai, $coTaiXe = true, $laKeoNgoai = false)
 {

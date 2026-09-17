@@ -282,6 +282,11 @@ if (laTaiXe()) {
   <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_noplai.php'; endforeach; ?>
 </div>
 
+<!-- Hop thoai quan ly xac nhan cuoc do tai xe tu gui len -->
+<div id="khoiModalXacNhanGui">
+  <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_xacnhangui.php'; endforeach; ?>
+</div>
+
 <!-- Hop thoai tai xe kiem tra/sua phu phi sau khi da xac nhan (truoc khi cong ty chot) -->
 <div id="khoiModalSuaPhuPhi">
   <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_suaphuphi.php'; endforeach; ?>
@@ -337,6 +342,7 @@ if (laTaiXe()) {
         document.getElementById('dsDongBang').insertAdjacentHTML('beforeend', kq.dong_html);
         document.getElementById('khoiModalXacNhan').insertAdjacentHTML('beforeend', kq.modal_xacnhan_html);
         document.getElementById('khoiModalNopLai').insertAdjacentHTML('beforeend', kq.modal_noplai_html);
+        document.getElementById('khoiModalXacNhanGui').insertAdjacentHTML('beforeend', kq.modal_xacnhangui_html);
         document.getElementById('khoiModalSuaPhuPhi').insertAdjacentHTML('beforeend', kq.modal_suaphuphi_html);
         document.getElementById('khoiModalNhoTaiKhac').insertAdjacentHTML('beforeend', kq.modal_nhotaikhac_html);
         document.getElementById('khoiModalHuy').insertAdjacentHTML('beforeend', kq.modal_huy_html);
@@ -398,6 +404,7 @@ if (laTaiXe()) {
         document.getElementById('dsDongBang').innerHTML = kq.dong_html;
         document.getElementById('khoiModalXacNhan').innerHTML = kq.modal_xacnhan_html;
         document.getElementById('khoiModalNopLai').innerHTML = kq.modal_noplai_html;
+        document.getElementById('khoiModalXacNhanGui').innerHTML = kq.modal_xacnhangui_html;
         document.getElementById('khoiModalSuaPhuPhi').innerHTML = kq.modal_suaphuphi_html;
         document.getElementById('khoiModalNhoTaiKhac').innerHTML = kq.modal_nhotaikhac_html;
         document.getElementById('khoiModalHuy').innerHTML = kq.modal_huy_html;
