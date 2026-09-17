@@ -6,6 +6,11 @@ $chiXem    = $khoaSua ? 'readonly' : '';
 $chiXemSel = $khoaSua ? 'disabled' : '';
 $laKeoNgoai = !empty($laKeoNgoai);      // Form rut gon cho keo giao cho nha xe ngoai
 
+// O "Goi y gia tu bang gia" dang duoc TAM AN theo yeu cau. Khong xoa code de
+// bat lai luc nao cung duoc: doi dong duoi thanh true. O nay chi la tro giup
+// nhap lieu, khong luu xuong database nen an di khong mat du lieu nao.
+$hienGoiYGia = false;
+
 /** Lay gia tri cu cua truong */
 function giaTri($chuyenXe, $cot, $macDinh = '')
 {
@@ -258,6 +263,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                 <div id="canhBaoDamLich" data-api="<?= duongDan('chuyenxe/kiemtradamlich') ?>" hidden></div>
               </div>
 
+              <?php if ($hienGoiYGia): ?>
               <div class="col-12 col-md-6">
                 <label class="form-label">Gợi ý giá từ bảng giá</label>
                 <select id="oBangGia" class="form-select" <?= $chiXemSel ?>>
@@ -268,6 +274,7 @@ function giaTri($chuyenXe, $cot, $macDinh = '')
                 </select>
                 <div id="ghiChuGoiY" class="text-muted mt-1" style="font-size:12px"></div>
               </div>
+              <?php endif; ?>
               <?php endif; ?>
               <div class="col-12 col-md-6">
                 <label class="form-label">Lưu ý từ công ty <span class="text-muted">(nếu có)</span></label>
