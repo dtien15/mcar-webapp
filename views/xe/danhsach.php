@@ -18,7 +18,9 @@
           <div class="mb-2">
             <label class="form-label">Số chỗ</label>
             <select name="so_cho" class="form-select">
-              <?php foreach (['4c' => '4 chỗ', '7c' => '7 chỗ', '16c' => '16 chỗ'] as $ma => $ten): ?>
+              <?php // Danh sach so cho lay tu danhSachSoCho() de danh muc Xe
+                    // va Bang gia luon khop nhau ?>
+              <?php foreach (danhSachSoCho() as $ma => $ten): ?>
                 <option value="<?= $ma ?>" <?= ($dangSua['seats'] ?? '4c') === $ma ? 'selected' : '' ?>><?= $ten ?></option>
               <?php endforeach; ?>
             </select>

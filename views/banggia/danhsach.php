@@ -15,33 +15,25 @@
       </div>
 
       <div class="col-12"><hr class="my-1"></div>
+      <?php // Cac o gia chay theo danhSachSoCho(): them loai xe moi o helper
+            // la bang gia tu co o nhap tuong ung, khong phai sua o day ?>
       <div class="col-12"><strong style="font-size:12px; color:#1d4ed8">GIÁ CÔNG TY</strong></div>
-      <div class="col-4 col-md-2">
-        <label class="form-label">4 chỗ</label>
-        <input type="number" step="1000" name="gia_4c_cty" class="form-control" value="<?= h($dangSua['price_4c_company'] ?? 0) ?>">
-      </div>
-      <div class="col-4 col-md-2">
-        <label class="form-label">7 chỗ</label>
-        <input type="number" step="1000" name="gia_7c_cty" class="form-control" value="<?= h($dangSua['price_7c_company'] ?? 0) ?>">
-      </div>
-      <div class="col-4 col-md-2">
-        <label class="form-label">16 chỗ</label>
-        <input type="number" step="1000" name="gia_16c_cty" class="form-control" value="<?= h($dangSua['price_16c_company'] ?? 0) ?>">
-      </div>
+      <?php foreach (danhSachSoCho() as $maCho => $tenCho): ?>
+        <div class="col-6 col-md-2">
+          <label class="form-label"><?= h($tenCho) ?></label>
+          <input type="number" step="1000" name="gia_<?= $maCho ?>_cty" class="form-control"
+                 value="<?= h($dangSua['price_' . $maCho . '_company'] ?? 0) ?>">
+        </div>
+      <?php endforeach; ?>
 
       <div class="col-12 mt-2"><strong style="font-size:12px; color:#c2410c">GIÁ KÈO NGOÀI</strong></div>
-      <div class="col-4 col-md-2">
-        <label class="form-label">4 chỗ</label>
-        <input type="number" step="1000" name="gia_4c_ngoai" class="form-control" value="<?= h($dangSua['price_4c_external'] ?? 0) ?>">
-      </div>
-      <div class="col-4 col-md-2">
-        <label class="form-label">7 chỗ</label>
-        <input type="number" step="1000" name="gia_7c_ngoai" class="form-control" value="<?= h($dangSua['price_7c_external'] ?? 0) ?>">
-      </div>
-      <div class="col-4 col-md-2">
-        <label class="form-label">16 chỗ</label>
-        <input type="number" step="1000" name="gia_16c_ngoai" class="form-control" value="<?= h($dangSua['price_16c_external'] ?? 0) ?>">
-      </div>
+      <?php foreach (danhSachSoCho() as $maCho => $tenCho): ?>
+        <div class="col-6 col-md-2">
+          <label class="form-label"><?= h($tenCho) ?></label>
+          <input type="number" step="1000" name="gia_<?= $maCho ?>_ngoai" class="form-control"
+                 value="<?= h($dangSua['price_' . $maCho . '_external'] ?? 0) ?>">
+        </div>
+      <?php endforeach; ?>
 
       <div class="col-12 mt-2">
         <button class="btn btn-primary"><?= $dangSua ? bieuTuong('device-floppy') . ' Cập nhật' : bieuTuong('plus') . ' Thêm mới' ?></button>
@@ -58,30 +50,32 @@
       <thead>
         <tr>
           <th rowspan="2" style="vertical-align:bottom">Tuyến / Tour</th>
-          <th colspan="3" class="canh-giua" style="background:#eff6ff">Giá công ty</th>
-          <th colspan="3" class="canh-giua" style="background:#fff7ed">Giá kèo ngoài</th>
+          <th colspan="<?= count(danhSachSoCho()) ?>" class="canh-giua" style="background:#eff6ff">Giá công ty</th>
+          <th colspan="<?= count(danhSachSoCho()) ?>" class="canh-giua" style="background:#fff7ed">Giá kèo ngoài</th>
           <th rowspan="2" style="vertical-align:bottom">Ghi chú</th>
           <th rowspan="2" class="canh-phai" style="vertical-align:bottom">Thao tác</th>
         </tr>
         <tr>
-          <th class="canh-phai" style="background:#eff6ff">4c</th>
-          <th class="canh-phai" style="background:#eff6ff">7c</th>
-          <th class="canh-phai" style="background:#eff6ff">16c</th>
-          <th class="canh-phai" style="background:#fff7ed">4c</th>
-          <th class="canh-phai" style="background:#fff7ed">7c</th>
-          <th class="canh-phai" style="background:#fff7ed">16c</th>
+          <?php foreach (array_keys(danhSachSoCho()) as $maCho): ?>
+            <th class="canh-phai" style="background:#eff6ff"><?= h($maCho) ?></th>
+          <?php endforeach; ?>
+          <?php foreach (array_keys(danhSachSoCho()) as $maCho): ?>
+            <th class="canh-phai" style="background:#fff7ed"><?= h($maCho) ?></th>
+          <?php endforeach; ?>
         </tr>
       </thead>
       <tbody>
       <?php foreach ($danhSach as $bg): ?>
         <tr>
           <td><strong><?= h($bg['route_name']) ?></strong></td>
-          <td class="canh-phai"><?= $bg['price_4c_company']  > 0 ? dinhDangTien($bg['price_4c_company'])  : '—' ?></td>
-          <td class="canh-phai"><?= $bg['price_7c_company']  > 0 ? dinhDangTien($bg['price_7c_company'])  : '—' ?></td>
-          <td class="canh-phai"><?= $bg['price_16c_company'] > 0 ? dinhDangTien($bg['price_16c_company']) : '—' ?></td>
-          <td class="canh-phai"><?= $bg['price_4c_external']  > 0 ? dinhDangTien($bg['price_4c_external'])  : '—' ?></td>
-          <td class="canh-phai"><?= $bg['price_7c_external']  > 0 ? dinhDangTien($bg['price_7c_external'])  : '—' ?></td>
-          <td class="canh-phai"><?= $bg['price_16c_external'] > 0 ? dinhDangTien($bg['price_16c_external']) : '—' ?></td>
+          <?php foreach (array_keys(danhSachSoCho()) as $maCho): ?>
+            <?php $gia = (float)($bg['price_' . $maCho . '_company'] ?? 0); ?>
+            <td class="canh-phai"><?= $gia > 0 ? dinhDangTien($gia) : '—' ?></td>
+          <?php endforeach; ?>
+          <?php foreach (array_keys(danhSachSoCho()) as $maCho): ?>
+            <?php $gia = (float)($bg['price_' . $maCho . '_external'] ?? 0); ?>
+            <td class="canh-phai"><?= $gia > 0 ? dinhDangTien($gia) : '—' ?></td>
+          <?php endforeach; ?>
           <td style="white-space:normal; max-width:220px"><?= h($bg['note']) ?></td>
           <td class="canh-phai">
             <div class="d-flex gap-1 justify-content-end">

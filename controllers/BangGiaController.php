@@ -27,16 +27,16 @@ class BangGiaController extends Controller
         $this->yeuCauPost();
 
         $id     = (int)($_POST['id'] ?? 0);
+        // Gia luu theo tung loai so cho trong danhSachSoCho() - them loai xe
+        // moi o helper la tu dong luu duoc, khong phai sua o day.
         $duLieu = [
-            'route_name'         => $this->chuTuForm('ten_tuyen'),
-            'price_16c_company'  => $this->soTuForm('gia_16c_cty'),
-            'price_7c_company'   => $this->soTuForm('gia_7c_cty'),
-            'price_4c_company'   => $this->soTuForm('gia_4c_cty'),
-            'price_16c_external' => $this->soTuForm('gia_16c_ngoai'),
-            'price_7c_external'  => $this->soTuForm('gia_7c_ngoai'),
-            'price_4c_external'  => $this->soTuForm('gia_4c_ngoai'),
-            'note'               => $this->chuTuForm('ghi_chu'),
+            'route_name' => $this->chuTuForm('ten_tuyen'),
+            'note'       => $this->chuTuForm('ghi_chu'),
         ];
+        foreach (array_keys(danhSachSoCho()) as $maCho) {
+            $duLieu['price_' . $maCho . '_company']  = $this->soTuForm('gia_' . $maCho . '_cty');
+            $duLieu['price_' . $maCho . '_external'] = $this->soTuForm('gia_' . $maCho . '_ngoai');
+        }
 
         if ($duLieu['route_name'] === '') {
             datThongBao('Vui lòng nhập tên tuyến.', 'danger');

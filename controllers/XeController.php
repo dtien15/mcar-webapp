@@ -30,7 +30,9 @@ class XeController extends Controller
         $duLieu = [
             'name'         => $this->chuTuForm('dong_xe'),
             'plate_number' => $this->chuTuForm('bien_so'),
-            'seats'        => $this->chuTuForm('so_cho', '4c'),
+            // Chi nhan cac loai so cho co that trong danh muc
+            'seats'        => array_key_exists($this->chuTuForm('so_cho'), danhSachSoCho())
+                                ? $this->chuTuForm('so_cho') : '4c',
             'start_date'   => $this->chuTuForm('ngay_bat_dau') ?: null,
             'company'      => $this->chuTuForm('cong_ty'),
             'status'       => $this->chuTuForm('trang_thai', 'active'),

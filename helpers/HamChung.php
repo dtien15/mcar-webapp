@@ -372,6 +372,28 @@ function huyHieuTienChuyen($chuyen)
     return null;
 }
 
+/**
+ * Cac loai so cho xe dung chung toan he thong (danh muc Xe, bang gia, goi
+ * y gia). Them loai xe moi thi sua DUY NHAT o day - nho them cot gia tuong
+ * ung trong bang price_list (price_<ma>_company / price_<ma>_external).
+ */
+function danhSachSoCho()
+{
+    return [
+        '4c'  => '4 chỗ',
+        '7c'  => '7 chỗ',
+        '10c' => '10 chỗ',
+        '16c' => '16 chỗ',
+    ];
+}
+
+/** Nhan de doc cua mot ma so cho ('7c' -> '7 chỗ') */
+function nhanSoCho($ma)
+{
+    $ds = danhSachSoCho();
+    return $ds[$ma] ?? $ma;
+}
+
 /** Nhan hien thi cua trang thai chuyen xe */
 function nhanTrangThaiChuyen($trangThai, $coTaiXe = true, $laKeoNgoai = false)
 {
