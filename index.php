@@ -18,6 +18,7 @@ require_once DUONG_DAN_GOC . '/helpers/HamChung.php';
 require_once DUONG_DAN_GOC . '/helpers/Realtime.php';
 require_once DUONG_DAN_GOC . '/core/KetNoi.php';
 KetNoi::napCauHinh(); // nap cauhinh.php ngay, khong cho toi luc dung Model moi nap
+datMuiGio();          // PHP va MySQL phai cung mot gio, xem datMuiGio()
 require_once DUONG_DAN_GOC . '/core/Model.php';
 require_once DUONG_DAN_GOC . '/core/Controller.php';
 require_once DUONG_DAN_GOC . '/core/Router.php';

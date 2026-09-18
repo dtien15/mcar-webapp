@@ -229,6 +229,61 @@ function thoiGianTuongDoi($thoiDiem)
 }
 
 /**
+ * Dat mui gio cho PHP.
+ *
+ * Mac dinh hosting hay de PHP o UTC trong khi MySQL chay theo gio may chu
+ * (thuong la gio Viet Nam). Luc do PHP va MySQL lech nhau vai tieng: cung
+ * mot chuyen ma SQL thi thay da qua gio, PHP lai thay chua - danh sach to
+ * mau mot dang, thong bao lai bao mot dang khac.
+ *
+ * Doi mui gio khac thi khai MUI_GIO trong config/cauhinh.php.
+ */
+function datMuiGio()
+{
+    date_default_timezone_set(defined('MUI_GIO') && MUI_GIO ? MUI_GIO : 'Asia/Ho_Chi_Minh');
+}
+
+/**
+ * Moc gio chay cua mot chuyen (ngay chay + gio don) duoi dang timestamp.
+ * Tra ve null neu chuyen khong ghi gio don - luc do chi tinh theo ca ngay.
+ */
+function mocGioChayChuyen($chuyen)
+{
+    $ngay = $chuyen['trip_date'] ?? '';
+    $gio  = trim((string)($chuyen['pickup_time'] ?? ''));
+    if (!$ngay) {
+        return null;
+    }
+    if ($gio === '' || !preg_match('/^\d{1,2}:\d{2}/', $gio)) {
+        return null;
+    }
+    $moc = strtotime($ngay . ' ' . $gio);
+    return $moc ?: null;
+}
+
+/**
+ * Chuyen den gio chay roi ma van chua ai xac nhan.
+ *
+ * Co gio don: qua gio do hon 1 tieng. Khong ghi gio don: qua het ngay chay.
+ * Dung chung voi dieu kien SQL trong ChuyenXeModel::sqlQuaHan() - sua mot
+ * ben thi phai sua ben kia.
+ */
+function laChuyenQuaHan($chuyen)
+{
+    if (($chuyen['status'] ?? '') !== 'moi') {
+        return false;
+    }
+    // Lay nguong tu model neu da nap; ham nay co the duoc goi o noi chua nap
+    $soPhut = class_exists('ChuyenXeModel') ? ChuyenXeModel::PHUT_QUA_HAN_XAC_NHAN : 60;
+
+    $moc = mocGioChayChuyen($chuyen);
+    if ($moc !== null) {
+        return $moc + $soPhut * 60 < time();
+    }
+    return !empty($chuyen['trip_date']) && $chuyen['trip_date'] < date('Y-m-d');
+}
+
+/**
  * Chuyen do TAI XE tu gui len ma quan ly CHUA xac nhan.
  *
  * Dung chung o nhieu cho (dong bang, the, cot thao tac, modal) nen de o day
@@ -260,6 +315,10 @@ function mauDongChuyen($chuyen)
 
     if ($trangThai === 'da_huy') {
         return ['dong-huy', 'Chuyến đã hủy'];
+    }
+    // Den gio chay roi ma chua ai xac nhan: viec gap nhat, phai nhin thay truoc
+    if (laChuyenQuaHan($chuyen)) {
+        return ['dong-qua-han', 'Đã tới giờ chạy mà chưa ai xác nhận chuyến này'];
     }
     if (laQuanLy() && choQuanLyXacNhan($chuyen)) {
         return ['dong-cho-xac-nhan', 'Tài xế tự gửi cuốc này, công ty chưa xác nhận'];

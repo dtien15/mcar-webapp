@@ -16,6 +16,11 @@ define('DB_PASS', 'DOI_MAT_KHAU_TAI_DAY');
 // false : duong dan thuong (vd /index.php?url=chuyenxe/them) - dung khi hosting khong ho tro rewrite
 define('URL_DEP', true);
 
+// --- Mui gio (tuy chon) ---
+// Bo trong / khong khai thi he thong dung 'Asia/Ho_Chi_Minh'. Chi doi khi
+// database cua hosting chay theo mui gio khac.
+// define('MUI_GIO', 'Asia/Ho_Chi_Minh');
+
 // --- Ten hien thi cua he thong ---
 define('TEN_HE_THONG', 'MCAR');
 define('TEN_CONG_TY', 'CÔNG TY CP NỤ CƯỜI MŨI NÉ');

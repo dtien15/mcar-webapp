@@ -80,6 +80,21 @@ class ThongBaoModel extends Model
         }
     }
 
+    /**
+     * Da tung bao loai nay cho chuyen xe nay chua?
+     *
+     * Dung cho cac thong bao "nhac" chay tu cron moi 10 phut (sap toi gio
+     * chua giao tai xe, qua gio chua xac nhan): khong kiem thi moi lan cron
+     * chay lai do chuong mot lan nua.
+     */
+    public function daGuiChoChuyen($loai, $idChuyen)
+    {
+        return (int)$this->motGiaTri(
+            "SELECT COUNT(*) FROM notifications WHERE type = ? AND ref_id = ?",
+            [$loai, (int)$idChuyen]
+        ) > 0;
+    }
+
     /** Dem so thong bao chua doc cua 1 tai khoan */
     public function demChuaDoc($idTaiKhoan)
     {

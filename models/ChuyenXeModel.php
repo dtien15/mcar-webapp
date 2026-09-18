@@ -11,6 +11,75 @@ class ChuyenXeModel extends Model
     /** Gia tri tab "Khach chua TT" - khong phai status that, loc theo tien */
     const TAB_KHACH_CHUA_TT = 'khach_chua_tt';
 
+    /** Gia tri tab "Qua han" - chuyen den gio chay roi ma van chua ai xac nhan */
+    const TAB_QUA_HAN = 'qua_han';
+
+    /** Bao truoc bao nhieu phut khi cuoc sap toi gio ma chua giao tai xe */
+    const PHUT_BAO_TRUOC_CHUA_GIAO = 120;
+
+    /** Qua gio don bao nhieu phut thi coi la qua han chua xac nhan */
+    const PHUT_QUA_HAN_XAC_NHAN = 60;
+
+    /**
+     * Moc thoi gian chay cua chuyen, ghep tu ngay chay + gio don.
+     * pickup_time la chu tu do nen co the rong hoac ghi kieu khac - luc do
+     * STR_TO_DATE tra ve NULL, cac cho goi phai tu xu ly (tinh theo ca ngay).
+     */
+    private function sqlMocGioChay($bang = 't')
+    {
+        return "STR_TO_DATE(CONCAT({$bang}.trip_date, ' ', NULLIF({$bang}.pickup_time, '')), '%Y-%m-%d %H:%i')";
+    }
+
+    /**
+     * Dieu kien SQL "chuyen nay da qua han ma van chua xac nhan".
+     * Co gio don: qua gio do + PHUT_QUA_HAN_XAC_NHAN phut.
+     * Khong co gio don: qua het ngay chay.
+     */
+    public function sqlQuaHan($bang = 't')
+    {
+        $moc = $this->sqlMocGioChay($bang);
+        return "({$bang}.status = 'moi' AND ("
+             . "({$moc} IS NOT NULL AND {$moc} + INTERVAL " . (int)self::PHUT_QUA_HAN_XAC_NHAN . " MINUTE < NOW())"
+             . " OR ({$moc} IS NULL AND {$bang}.trip_date < CURDATE())"
+             . "))";
+    }
+
+    /**
+     * Cuoc SAP TOI GIO CHAY ma chua giao cho tai xe nao.
+     * Khong co gio don thi tinh ca ngay: dung ngay chay la bao.
+     */
+    public function dsChuaGiaoSapToiGio()
+    {
+        $moc = $this->sqlMocGioChay();
+        return $this->truyVan(
+            "SELECT t.*, c.name AS ten_xe, c.plate_number AS bien_so
+             FROM trips t
+             LEFT JOIN cars c ON c.id = t.car_id
+             WHERE t.deleted_at IS NULL
+               AND t.status = 'moi'
+               AND (t.driver_id IS NULL OR t.driver_id = 0)
+               AND (t.outsource_driver_name IS NULL OR t.outsource_driver_name = '')
+               AND (
+                    ({$moc} IS NOT NULL AND {$moc} BETWEEN NOW() AND NOW() + INTERVAL " . (int)self::PHUT_BAO_TRUOC_CHUA_GIAO . " MINUTE)
+                 OR ({$moc} IS NULL AND t.trip_date = CURDATE())
+               )
+             ORDER BY t.trip_date, t.id"
+        );
+    }
+
+    /** Cuoc da qua han ma tai xe van chua xac nhan */
+    public function dsQuaHanChuaXacNhan()
+    {
+        return $this->truyVan(
+            "SELECT t.*, c.name AS ten_xe, c.plate_number AS bien_so, d.full_name AS ten_tai_xe
+             FROM trips t
+             LEFT JOIN cars c ON c.id = t.car_id
+             LEFT JOIN drivers d ON d.id = t.driver_id
+             WHERE t.deleted_at IS NULL AND " . $this->sqlQuaHan() . "
+             ORDER BY t.trip_date, t.id"
+        );
+    }
+
     /** Cac cot do quan ly nhap khi giao chuyen (tai xe khong sua duoc) */
     public static function cotQuanLy()
     {
@@ -98,7 +167,8 @@ class ChuyenXeModel extends Model
                     COUNT(CASE WHEN t.status = 'tai_xe_xac_nhan' THEN 1 END) AS tai_xe_xac_nhan,
                     COUNT(CASE WHEN t.status = 'hoan_thanh' THEN 1 END)      AS hoan_thanh,
                     COUNT(CASE WHEN t.status = 'da_huy' THEN 1 END)          AS da_huy,
-                    COUNT(CASE WHEN t.collector_type = 'chua_thu' AND t.status <> 'da_huy' THEN 1 END) AS khach_chua_tt
+                    COUNT(CASE WHEN t.collector_type = 'chua_thu' AND t.status <> 'da_huy' THEN 1 END) AS khach_chua_tt,
+                    COUNT(CASE WHEN {$this->sqlQuaHan()} THEN 1 END) AS qua_han
              FROM trips t WHERE {$dieuKien}",
             $thamSo
         );
@@ -109,6 +179,7 @@ class ChuyenXeModel extends Model
             'tai_xe_xac_nhan' => (int)($dong['tai_xe_xac_nhan'] ?? 0),
             'hoan_thanh'      => (int)($dong['hoan_thanh'] ?? 0),
             self::TAB_KHACH_CHUA_TT => (int)($dong['khach_chua_tt'] ?? 0),
+            self::TAB_QUA_HAN       => (int)($dong['qua_han'] ?? 0),
             'da_huy'          => (int)($dong['da_huy'] ?? 0),
         ];
     }
@@ -169,6 +240,10 @@ class ChuyenXeModel extends Model
             // dong nao. Loc rieng o day de van dung chung duoc 1 hang tab.
             if ($loc['trang_thai'] === self::TAB_KHACH_CHUA_TT) {
                 $dieuKien[] = "t.collector_type = 'chua_thu' AND t.status <> 'da_huy'";
+            } elseif ($loc['trang_thai'] === self::TAB_QUA_HAN) {
+                // Cung khong phai trang thai that: la chuyen den gio chay roi
+                // ma van chua ai xac nhan - phai goi hoi hoac giao nguoi khac.
+                $dieuKien[] = $this->sqlQuaHan();
             } else {
                 $dieuKien[] = 't.status = ?';
                 $thamSo[]   = $loc['trang_thai'];

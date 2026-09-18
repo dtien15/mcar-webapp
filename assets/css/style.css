@@ -1726,3 +1726,10 @@ textarea.tu-dong-gian {
 }
 /* Nhan nut giu nguyen mot dong, khong be doi thanh 2-3 dong lam nut cao ngoang */
 .o-phu-phi-nhanh .btn { white-space: nowrap; padding-left: 10px; padding-right: 10px; }
+
+/* Chuyen da toi gio chay ma chua ai xac nhan - viec gap nhat nen do dam hon
+   cac mau con lai mot chut */
+.bang tr.dong-qua-han > td { background: #fee2e2; }
+.bang tr.dong-qua-han > td:first-child { box-shadow: inset 3px 0 0 #b91c1c; }
+.the-chuyen-xe.dong-qua-han { background: #fee2e2; border-color: #fca5a5; box-shadow: inset 3px 0 0 #b91c1c, var(--bong); }
+.cham-qua-han { background: #b91c1c; }

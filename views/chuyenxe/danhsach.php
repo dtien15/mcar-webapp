@@ -17,6 +17,8 @@ $dsTab = [
     // Khong phai trang thai chuyen ma la tinh trang TIEN: chay xong roi nhung
     // khach van chua tra. Rat hay gap nen tach han ra mot tab de doi tien.
     ChuyenXeModel::TAB_KHACH_CHUA_TT => ['Khách chưa TT', 'Chưa TT'],
+    // Den gio chay roi ma van chua ai xac nhan - viec gap nhat trong ngay
+    ChuyenXeModel::TAB_QUA_HAN       => ['Quá hạn', 'Quá hạn'],
     'da_huy'          => ['Đã hủy', 'Đã hủy'],
 ];
 
@@ -212,6 +214,7 @@ if (laTaiXe()) {
   <span class="muc"><i class="cham cham-cho-chot"></i>Chờ chốt</span>
   <span class="muc"><i class="cham cham-giu-tien"></i>Tài xế giữ tiền</span>
   <span class="muc"><i class="cham cham-chua-thu"></i>Chưa thu tiền</span>
+  <span class="muc"><i class="cham cham-qua-han"></i>Quá hạn</span>
   <?php if (!laTaiXe()): ?>
     <span class="muc"><i class="cham cham-cho-xac-nhan"></i>Tài xế gửi</span>
     <span class="muc"><i class="cham cham-keo-ngoai"></i>Kèo ngoài</span>

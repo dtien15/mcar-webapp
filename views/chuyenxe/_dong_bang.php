@@ -59,7 +59,11 @@ $choXacNhan  = laQuanLy() && choQuanLyXacNhan($chuyen);
           $dauHieu[] = [$iconTien, $mauTien === 'success' ? 'dh-tot' : ($mauTien === 'danger' ? 'dh-loi' : 'dh-canh-bao'), $nhanTien . ' — ' . $yTien];
       }
     ?>
-    <?php if ($choXacNhan): ?>
+    <?php if (laChuyenQuaHan($chuyen)): ?>
+      <span class="huy-hieu-trang-thai tt-danger" title="Đã tới giờ chạy mà chưa ai xác nhận chuyến này">
+        <?= bieuTuong('alarm') ?> Quá giờ
+      </span>
+    <?php elseif ($choXacNhan): ?>
       <span class="huy-hieu-trang-thai tt-warning" title="Tài xế tự gửi cuốc này, công ty chưa xác nhận">
         <?= bieuTuong('send') ?> Tài xế gửi
       </span>

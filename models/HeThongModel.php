@@ -198,6 +198,18 @@ class HeThongModel extends Model
                    . 'nhiều bất thường. Nhiều khả năng tác vụ dọn dẹp định kỳ (cron) chưa được cài trên hosting.'];
         }
 
+        // 1b) Gio cua PHP va cua MySQL lech nhau -> moi thu tinh theo thoi
+        //     gian deu sai (chuyen qua han, han chot, thong bao nhac...)
+        $gioMySql = $this->motGiaTri("SELECT NOW()");
+        $lech     = $gioMySql ? abs(strtotime($gioMySql) - time()) : 0;
+        if ($lech > 300) {
+            $ds[] = ['canh_bao', 'Giờ của máy chủ web và giờ của database lệch nhau '
+                   . round($lech / 60) . ' phút (web: ' . date('H:i') . ', database: '
+                   . date('H:i', strtotime($gioMySql)) . '). Những việc tính theo thời gian '
+                   . 'như nhắc chuyến quá giờ sẽ không chính xác — cần khai MUI_GIO trong '
+                   . 'config/cauhinh.php cho khớp với database.'];
+        }
+
         // 2) Thiet bi nhan thong bao loi nhieu lan lien tiep
         $soThietBiLoi = (int)$this->motGiaTri("SELECT COUNT(*) FROM push_subscriptions WHERE fail_count >= 5");
         if ($soThietBiLoi > 0) {

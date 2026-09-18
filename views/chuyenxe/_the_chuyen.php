@@ -20,7 +20,11 @@ $choXacNhan  = laQuanLy() && choQuanLyXacNhan($chuyen);
       <div class="hanh-trinh"><?= h($chuyen['route']) ?></div>
     </div>
     <div class="cot-trang-thai">
-      <?php if ($choXacNhan): ?>
+      <?php if (laChuyenQuaHan($chuyen)): ?>
+        <span class="huy-hieu-trang-thai tt-danger" title="Đã tới giờ chạy mà chưa ai xác nhận chuyến này">
+          <?= bieuTuong('alarm') ?> Quá giờ
+        </span>
+      <?php elseif ($choXacNhan): ?>
         <span class="huy-hieu-trang-thai tt-warning" title="Tài xế tự gửi cuốc này, công ty chưa xác nhận">
           <?= bieuTuong('send') ?> Tài xế gửi
         </span>

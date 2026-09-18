@@ -17,6 +17,11 @@ class ChuyenXeController extends Controller
         $danhSach      = $chuyenXeModel->locDanhSach($loc, $soDong, 0);
         $tongSo        = $chuyenXeModel->demTheoLoc($loc);
 
+        // Luoi du phong cho cron: neu hosting chua cai cron (hoac cron chet)
+        // thi van co nguoi mo trang nay hang ngay - nhan do quet luon.
+        require_once DUONG_DAN_GOC . '/helpers/NhacChuyenXe.php';
+        quetNhacChuyenXeNeuDenHan();
+
         $duLieu = [
             'loc'                => $loc,
             'danhSach'           => $danhSach,

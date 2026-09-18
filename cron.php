@@ -16,6 +16,9 @@ define('DUONG_DAN_GOC', __DIR__);
 
 require_once DUONG_DAN_GOC . '/helpers/HamChung.php';
 require_once DUONG_DAN_GOC . '/core/KetNoi.php';
+KetNoi::napCauHinh();   // can cho helpers/Realtime.php doc WS_* trong cauhinh.php
+datMuiGio();            // dung mot gio voi web va voi MySQL
+require_once DUONG_DAN_GOC . '/helpers/Realtime.php';
 require_once DUONG_DAN_GOC . '/core/Model.php';
 require_once DUONG_DAN_GOC . '/models/ThongBaoModel.php';
 require_once DUONG_DAN_GOC . '/models/PushModel.php';
@@ -53,6 +56,17 @@ $ghiLog = [];
 // gay spam kho chiu tren dien thoai. Gio moi thong bao chi bao dung 1 lan,
 // con lai nam trong app cho nguoi dung tu xem.
 // ---------------------------------------------------------------------
+
+// ---------------------------------------------------------------------
+// Nhac ve chuyen xe theo thoi gian:
+//   - sap toi gio chay ma chua giao tai xe  -> bao quan ly
+//   - qua gio ma tai xe chua xac nhan       -> bao tai xe + quan ly
+// Moi chuyen chi bao dung 1 lan cho moi loai.
+// ---------------------------------------------------------------------
+require_once DUONG_DAN_GOC . '/helpers/NhacChuyenXe.php';
+$demNhac = quetNhacChuyenXe();
+$ghiLog[] = 'Nhắc chuyến sắp tới giờ chưa giao tài xế: ' . $demNhac['chua_giao'] . ' chuyến';
+$ghiLog[] = 'Nhắc chuyến quá giờ chưa xác nhận: ' . $demNhac['qua_han'] . ' chuyến';
 
 // ---------------------------------------------------------------------
 // Don dep thong bao cu (da doc: giu 30 ngay, chua doc: giu toi da 60 ngay)
