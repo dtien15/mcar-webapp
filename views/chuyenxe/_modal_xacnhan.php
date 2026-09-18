@@ -12,7 +12,14 @@
  * Khong co khoi "Thong tin chuyen di" o day: tai xe vua bam tu chinh the
  * chuyen do, vua doc xong thong tin - nhac lai chi lam man hinh dai them.
  */
-if (!(laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] === 'moi')) {
+// Ai duoc mo form nay:
+//  - Tai xe: cuoc cua chinh minh, chua xac nhan.
+//  - Quan ly: NHAP HO khi cuoc treo (qua gio ma tai xe khong vao xac nhan
+//    duoc). Van la form do, chi khac tieu de va noi gui di.
+$laNhapHo = laQuanLy() && ($chuyen['status'] ?? '') === 'moi';
+$laTaiXeCuaMinh = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] === 'moi';
+
+if (!$laNhapHo && !$laTaiXeCuaMinh) {
     return;
 }
 
@@ -25,18 +32,30 @@ $aiThuModal = $chuyen['collector_type'] ?? '';
 ?>
 <div class="modal fade" id="xacNhan<?= $chuyen['id'] ?>" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <form method="post" action="<?= duongDan('chuyenxe/xacnhan') ?>" class="modal-content form-xac-nhan-chuyen"
+    <form method="post" action="<?= duongDan($laNhapHo ? 'chuyenxe/xacnhanho' : 'chuyenxe/xacnhan') ?>"
+          class="modal-content form-xac-nhan-chuyen"
           enctype="multipart/form-data" data-id-chuyen="<?= (int)$chuyen['id'] ?>">
       <?php truongToken(); ?>
       <input type="hidden" name="id" value="<?= $chuyen['id'] ?>">
 
       <div class="modal-header">
-        <h5 class="modal-title"><?= bieuTuong('writing') ?> Xác nhận chuyến xe ngày <?= dinhDangNgay($chuyen['trip_date']) ?></h5>
+        <h5 class="modal-title">
+          <?= bieuTuong('writing') ?>
+          <?= $laNhapHo ? 'Nhập hộ tài xế' : 'Xác nhận chuyến xe' ?> ngày <?= dinhDangNgay($chuyen['trip_date']) ?>
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
       <div class="modal-body">
         <div class="bao-khoi-phuc" hidden></div>
+
+        <?php if ($laNhapHo): ?>
+          <div class="bao-nhap-ho">
+            <?= bieuTuong('info-circle') ?>
+            Bạn đang nhập thay cho tài xế <strong><?= h($chuyen['ten_tai_xe'] ?? '') ?></strong>.
+            Hệ thống ghi lại là công ty nhập hộ và báo cho tài xế xem lại.
+          </div>
+        <?php endif; ?>
 
         <div class="buoc-nhap">
 
@@ -205,7 +224,9 @@ $aiThuModal = $chuyen['collector_type'] ?? '';
           <div class="bang-soat-cuoc soat-noi-dung"></div>
           <div class="soat-luu-y">
             <?= bieuTuong('alert-triangle') ?>
-            Xác nhận xong bạn không tự sửa lại được, phải báo công ty.
+            <?= $laNhapHo
+              ? 'Số này sẽ vào lương của tài xế. Tài xế nhận được thông báo để xem lại.'
+              : 'Xác nhận xong bạn không tự sửa lại được, phải báo công ty.' ?>
           </div>
         </div>
       </div>
@@ -214,7 +235,9 @@ $aiThuModal = $chuyen['collector_type'] ?? '';
         <button type="button" class="btn btn-light nut-huy-buoc" data-bs-dismiss="modal">Hủy</button>
         <button type="button" class="btn btn-light nut-quay-buoc" hidden><?= bieuTuong('arrow-left') ?> Sửa lại</button>
         <button type="button" class="btn btn-primary nut-tiep-buoc">Tiếp tục <?= bieuTuong('arrow-right') ?></button>
-        <button type="submit" class="btn btn-success nut-chot-buoc" hidden><?= bieuTuong('check') ?> Xác nhận chuyến xe</button>
+        <button type="submit" class="btn btn-success nut-chot-buoc" hidden>
+          <?= bieuTuong('check') ?> <?= $laNhapHo ? 'Xác nhận hộ tài xế' : 'Xác nhận chuyến xe' ?>
+        </button>
       </div>
     </form>
   </div>

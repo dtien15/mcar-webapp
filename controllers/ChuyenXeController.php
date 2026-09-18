@@ -913,32 +913,7 @@ class ChuyenXeController extends Controller
             chuyenTrang('chuyenxe');
         }
 
-        $ketQua = $this->model('ChuyenXeModel')->taiXeXacNhan($id, $idTaiXe, [
-            'revenue_vnd'            => $this->soTuForm('thu_vnd'),
-            'trip_fee'               => $this->soTuForm('tien_cuoc_xe'),
-            'overnight_fee'          => $this->soTuForm('luu_dem'),
-            'outsource_cost'         => $this->soTuForm('chi_phi_keo_ngoai'),
-            'deposit_amount'         => $this->soTuForm('dat_coc'),
-            'collector_type'         => $this->layAiThu(),
-            'customer_paid'          => taiXeDangGiuTien($this->layAiThu()) ? 0 : 1,
-            'collector_note'         => $this->chuTuForm('ghi_chu_thu'),
-            'transfer_proof_image'   => $this->xuLyAnhCK('anh_ck'),
-            'transfer_note'          => $this->chuTuForm('ck_qua_ai'),
-            'extra_surcharge'        => $this->soTuForm('phu_phi_khac'),
-            'extra_surcharge_payer'  => $this->layNguoiTraPhuPhi(),
-            'extra_surcharge_note'   => $this->chuTuForm('ghi_chu_phu_phi_khac'),
-            'fuel_cost'      => $this->soTuForm('xang_dau'),
-            'fuel_vat'       => $this->soTuForm('vat_xang_dau'),
-            'fuel_payer'     => $this->layNguoiTraXangDau(),
-            'vetc'           => $this->soTuForm('vetc'),
-            'maintenance'    => $this->soTuForm('bao_duong'),
-            'fine'           => $this->soTuForm('phat'),
-            'refund_vnd'     => $this->soTuForm('hoan_tien_vnd'),
-            'refund_usd'     => $this->soTuForm('hoan_tien_usd'),
-            'cash_advance'   => $this->soTuForm('tam_ung'),
-            'direct_payment' => $this->soTuForm('khach_tt_truc_tiep'),
-            'note'           => $this->chuTuForm('ghi_chu'),
-        ]);
+        $ketQua = $this->model('ChuyenXeModel')->taiXeXacNhan($id, $idTaiXe, $this->soLieuXacNhanTuForm());
 
         if ($ketQua) {
             $thongBaoModel = $this->model('ThongBaoModel');
@@ -1062,6 +1037,119 @@ class ChuyenXeController extends Controller
         datThongBao('Đã xác nhận cuốc tài xế gửi. Kiểm tra xong thì bấm Chốt để tính lương.');
         baoThucRealtimeChuyenXe($chuyen['driver_id'] ?? null);
         chuyenTrang('chuyenxe');
+    }
+
+    /**
+     * Doc cac o tien cua form "Nhap & Xac nhan" ra mang de luu.
+     * Dung chung cho tai xe tu xac nhan va quan ly nhap ho - hai duong deu
+     * phai hieu form giong het nhau, khong duoc lech mot truong nao.
+     */
+    private function soLieuXacNhanTuForm()
+    {
+        return [
+            'revenue_vnd'            => $this->soTuForm('thu_vnd'),
+            'trip_fee'               => $this->soTuForm('tien_cuoc_xe'),
+            'overnight_fee'          => $this->soTuForm('luu_dem'),
+            'outsource_cost'         => $this->soTuForm('chi_phi_keo_ngoai'),
+            'deposit_amount'         => $this->soTuForm('dat_coc'),
+            'collector_type'         => $this->layAiThu(),
+            'customer_paid'          => taiXeDangGiuTien($this->layAiThu()) ? 0 : 1,
+            'collector_note'         => $this->chuTuForm('ghi_chu_thu'),
+            'transfer_proof_image'   => $this->xuLyAnhCK('anh_ck'),
+            'transfer_note'          => $this->chuTuForm('ck_qua_ai'),
+            'extra_surcharge'        => $this->soTuForm('phu_phi_khac'),
+            'extra_surcharge_payer'  => $this->layNguoiTraPhuPhi(),
+            'extra_surcharge_note'   => $this->chuTuForm('ghi_chu_phu_phi_khac'),
+            'fuel_cost'      => $this->soTuForm('xang_dau'),
+            'fuel_vat'       => $this->soTuForm('vat_xang_dau'),
+            'fuel_payer'     => $this->layNguoiTraXangDau(),
+            'vetc'           => $this->soTuForm('vetc'),
+            'maintenance'    => $this->soTuForm('bao_duong'),
+            'fine'           => $this->soTuForm('phat'),
+            'refund_vnd'     => $this->soTuForm('hoan_tien_vnd'),
+            'refund_usd'     => $this->soTuForm('hoan_tien_usd'),
+            'cash_advance'   => $this->soTuForm('tam_ung'),
+            'direct_payment' => $this->soTuForm('khach_tt_truc_tiep'),
+            'note'           => $this->chuTuForm('ghi_chu'),
+        ];
+    }
+
+    /**
+     * QUAN LY NHAP HO tai xe roi xac nhan luon.
+     * Dung khi cuoc da qua gio ma tai xe khong vao xac nhan duoc (het pin,
+     * mat mang, dang chay tiep cuoc khac...) - cong ty van chot duoc so lieu
+     * trong ngay thay vi de cuoc treo lai.
+     */
+    public function xacNhanHo()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->yeuCauPost();
+
+        $id     = (int)($_POST['id'] ?? 0);
+        $chuyen = $this->model('ChuyenXeModel')->layChiTiet($id);
+        if (!$chuyen) {
+            datThongBao('Không tìm thấy chuyến xe này.', 'danger');
+            chuyenTrang('chuyenxe');
+        }
+
+        $ketQua = $this->model('ChuyenXeModel')->quanLyXacNhanHo(
+            $id,
+            taiKhoanHienTai()['id'],
+            $this->soLieuXacNhanTuForm()
+        );
+
+        if (!$ketQua) {
+            datThongBao('Chuyến xe không hợp lệ hoặc đã được xác nhận trước đó.', 'danger');
+            chuyenTrang('chuyenxe');
+        }
+
+        $thongBaoModel = $this->model('ThongBaoModel');
+        $thongBaoModel->dongTheoChuyenXe($id, 'chuyen_xe_moi');
+
+        // Bao cho tai xe biet cong ty da nhap ho - so lieu nay vao luong cua
+        // ho nen ho phai co co hoi doc lai va bao neu sai.
+        if (!empty($chuyen['driver_id'])) {
+            $thongBaoModel->guiChoTaiXe(
+                $chuyen['driver_id'],
+                'Công ty đã nhập hộ cuốc ngày ' . dinhDangNgay($chuyen['trip_date']),
+                'Cuốc ' . ($chuyen['route'] ?? '') . ' quá giờ mà chưa thấy bạn xác nhận nên công ty '
+                    . 'nhập số thực tế giúp. Xem lại, thấy sai thì báo ngay cho công ty.',
+                'chuyenxe/chitiet/' . $id,
+                'nhap_ho_xac_nhan',
+                $id
+            );
+        }
+
+        datThongBao('Đã nhập hộ và xác nhận chuyến xe. Kiểm tra lại rồi bấm Chốt.');
+        baoThucRealtimeChuyenXe($chuyen['driver_id'] ?? null);
+        chuyenTrang('chuyenxe');
+    }
+
+    /** Nhac tai xe vao xac nhan mot cuoc dang treo */
+    public function nhacTaiXe()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan']);
+        $this->yeuCauPost();
+
+        $id     = (int)($_POST['id'] ?? 0);
+        $chuyen = $this->model('ChuyenXeModel')->layChiTiet($id);
+        if (!$chuyen || empty($chuyen['driver_id'])) {
+            datThongBao('Chuyến này chưa giao cho tài xế nào nên không nhắc được.', 'danger');
+            chuyenTrang('chuyenxe');
+        }
+
+        $this->model('ThongBaoModel')->guiChoTaiXe(
+            $chuyen['driver_id'],
+            'Nhắc: cuốc ngày ' . dinhDangNgay($chuyen['trip_date']) . ' chưa xác nhận',
+            'Công ty đang chờ bạn nhập số thực tế cho cuốc ' . ($chuyen['route'] ?? '') . '.',
+            'chuyenxe?trang_thai=' . ChuyenXeModel::TAB_QUA_HAN,
+            'nhac_xac_nhan',
+            $id,
+            true
+        );
+
+        datThongBao('Đã nhắc tài xế ' . ($chuyen['ten_tai_xe'] ?? '') . '.');
+        chuyenTrang('chuyenxe?trang_thai=' . ChuyenXeModel::TAB_QUA_HAN);
     }
 
     public function chot()

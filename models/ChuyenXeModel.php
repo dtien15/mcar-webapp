@@ -267,12 +267,14 @@ class ChuyenXeModel extends Model
         return $this->motDong(
             "SELECT t.*, c.name AS ten_xe, c.plate_number AS bien_so, c.seats AS so_cho,
                     d.full_name AS ten_tai_xe, ct.name AS ten_loai_keo,
-                    u.full_name AS ten_nguoi_xac_nhan_nop_lai
+                    u.full_name AS ten_nguoi_xac_nhan_nop_lai,
+                    nh.full_name AS ten_nguoi_nhap_ho
              FROM trips t
              LEFT JOIN cars c ON c.id = t.car_id
              LEFT JOIN drivers d ON d.id = t.driver_id
              LEFT JOIN contract_types ct ON ct.id = t.contract_type_id
              LEFT JOIN users u ON u.id = t.cash_remitted_by
+             LEFT JOIN users nh ON nh.id = t.confirmed_by_user
              WHERE t.id = ? AND t.deleted_at IS NULL",
             [(int)$id]
         );
@@ -308,6 +310,47 @@ class ChuyenXeModel extends Model
                 $duLieu['maintenance'], $duLieu['fine'], $duLieu['refund_vnd'],
                 $duLieu['refund_usd'], $duLieu['cash_advance'], $duLieu['direct_payment'],
                 $duLieu['note'], (int)$id,
+            ]
+        );
+    }
+
+    /**
+     * QUAN LY NHAP HO tai xe roi xac nhan luon.
+     *
+     * Dung khi cuoc da qua gio ma tai xe khong vao xac nhan duoc (het pin,
+     * khong co mang, dang chay tiep cuoc khac...). Cuoc van di dung duong
+     * nhu tai xe tu xac nhan - chi khac la co ghi lai NGUOI NHAP HO de sau
+     * con doi chieu khi so lieu lech.
+     */
+    public function quanLyXacNhanHo($id, $idNguoiNhap, array $duLieu)
+    {
+        $chuyen = $this->motDong(
+            "SELECT * FROM trips WHERE id = ? AND deleted_at IS NULL",
+            [(int)$id]
+        );
+        if (!$chuyen || $chuyen['status'] !== 'moi') {
+            return false;
+        }
+
+        return $this->thucThi(
+            "UPDATE trips SET revenue_vnd=?, trip_fee=?, overnight_fee=?, outsource_cost=?, deposit_amount=?, customer_paid=?,
+                    collector_type=?, collector_note=?,
+                    transfer_proof_image=COALESCE(?, transfer_proof_image), transfer_note=?,
+                    extra_surcharge=?, extra_surcharge_payer=?, extra_surcharge_note=?,
+                    fuel_cost=?, fuel_vat=?, fuel_payer=?, vetc=?, maintenance=?, fine=?,
+                    refund_vnd=?, refund_usd=?, cash_advance=?, direct_payment=?, note=?,
+                    status='tai_xe_xac_nhan', driver_confirmed_at=NOW(), confirmed_by_user=?
+             WHERE id = ?",
+            [
+                $duLieu['revenue_vnd'], $duLieu['trip_fee'], $duLieu['overnight_fee'], $duLieu['outsource_cost'],
+                $duLieu['deposit_amount'], $duLieu['customer_paid'],
+                $duLieu['collector_type'], $duLieu['collector_note'],
+                $duLieu['transfer_proof_image'], $duLieu['transfer_note'],
+                $duLieu['extra_surcharge'], $duLieu['extra_surcharge_payer'], $duLieu['extra_surcharge_note'],
+                $duLieu['fuel_cost'], $duLieu['fuel_vat'], $duLieu['fuel_payer'], $duLieu['vetc'],
+                $duLieu['maintenance'], $duLieu['fine'], $duLieu['refund_vnd'],
+                $duLieu['refund_usd'], $duLieu['cash_advance'], $duLieu['direct_payment'],
+                $duLieu['note'], (int)$idNguoiNhap, (int)$id,
             ]
         );
     }

@@ -276,8 +276,15 @@
         </div>
         <?php if ($chuyen['driver_confirmed_at']): ?>
         <div class="col-6 col-md-4">
-          <span class="text-muted d-block" style="font-size:11px">Tài xế xác nhận lúc</span>
+          <?php // Phan biet ro tai xe tu khai hay cong ty nhap ho - khi so
+                // lieu lech thi day la cho dau tien phai nhin ?>
+          <span class="text-muted d-block" style="font-size:11px">
+            <?= !empty($chuyen['confirmed_by_user']) ? 'Công ty nhập hộ lúc' : 'Tài xế xác nhận lúc' ?>
+          </span>
           <?= h(dinhDangNgay($chuyen['driver_confirmed_at'], 'd/m/Y H:i')) ?>
+          <?php if (!empty($chuyen['ten_nguoi_nhap_ho'])): ?>
+            <span class="text-muted">· <?= h($chuyen['ten_nguoi_nhap_ho']) ?></span>
+          <?php endif; ?>
         </div>
         <?php endif; ?>
         <?php if ($chuyen['completed_at']): ?>
