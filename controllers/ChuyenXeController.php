@@ -65,44 +65,20 @@ class ChuyenXeController extends Controller
         $tongSo          = $chuyenXeModel->demTheoLoc($loc);
         $dsTaiXeDangChay   = $this->model('TaiXeModel')->layTaiXeDangChay();
 
-        $theHtml          = '';
-        $dongHtml         = '';
-        $modalXacNhanHtml = '';
-        $modalNopLaiHtml  = '';
-        $modalXacNhanGuiHtml = '';
-        $modalSuaPhuPhiHtml = '';
-        $modalNhoTaiKhacHtml = '';
-        $modalHuyHtml        = '';
+        $theHtml  = '';
+        $dongHtml = '';
         foreach ($danhSach as $chuyen) {
+            // Hop thoai cua tung dong khong ren o day nua: bam nut nao thi
+            // tai rieng cai do qua hopThoai() - goi AJAX nho di mot nua.
             $duLieuThe = ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai, 'dsTaiXeDangChay' => $dsTaiXeDangChay];
-            $theHtml             .= $this->dungView('chuyenxe/_the_chuyen', $duLieuThe);
-            $dongHtml            .= $this->dungView('chuyenxe/_dong_bang', $duLieuThe);
-            $modalXacNhanHtml    .= $this->dungView('chuyenxe/_modal_xacnhan', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
-            $modalNopLaiHtml     .= $this->dungView('chuyenxe/_modal_noplai', ['chuyen' => $chuyen]);
-            $modalXacNhanGuiHtml .= $this->dungView('chuyenxe/_modal_xacnhangui', ['chuyen' => $chuyen]);
-            $modalSuaPhuPhiHtml  .= $this->dungView('chuyenxe/_modal_suaphuphi', ['chuyen' => $chuyen, 'idTaiXeHienTai' => $idTaiXeHienTai]);
-            $modalNhoTaiKhacHtml .= $this->dungView('chuyenxe/_modal_nhotaikhac', $duLieuThe);
-
-            // Chuyen tai them cung phai co hop thoai Huy / Bao khach huy,
-            // khong thi bam nut Huy o nhung dong do se khong ra gi ca
-            if (laQuanLy() && $chuyen['status'] !== 'da_huy') {
-                $modalHuyHtml .= $this->dungView('chuyenxe/_modal_huy', ['chuyen' => $chuyen]);
-            } elseif (laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai
-                      && !in_array($chuyen['status'], ['da_huy', 'hoan_thanh'], true)) {
-                $modalHuyHtml .= $this->dungView('chuyenxe/_modal_baohuy', ['chuyen' => $chuyen]);
-            }
+            $theHtml  .= $this->dungView('chuyenxe/_the_chuyen', $duLieuThe);
+            $dongHtml .= $this->dungView('chuyenxe/_dong_bang', $duLieuThe);
         }
 
         echo json_encode([
             'ok'                    => true,
             'the_html'              => $theHtml,
             'dong_html'             => $dongHtml,
-            'modal_xacnhan_html'    => $modalXacNhanHtml,
-            'modal_noplai_html'     => $modalNopLaiHtml,
-            'modal_xacnhangui_html' => $modalXacNhanGuiHtml,
-            'modal_suaphuphi_html'  => $modalSuaPhuPhiHtml,
-            'modal_nhotaikhac_html' => $modalNhoTaiKhacHtml,
-            'modal_huy_html'        => $modalHuyHtml,
             'so_dong_them'          => count($danhSach),
             'con_them'              => $tongSo > ($boQua + count($danhSach)),
         ]);
@@ -114,6 +90,62 @@ class ChuyenXeController extends Controller
     {
         $soDong = (int)layGet('so_dong', 20);
         return in_array($soDong, [20, 50, 100], true) ? $soDong : 20;
+    }
+
+    /**
+     * Tra ve HTML cua MOT hop thoai cho dung mot chuyen - tai khi nguoi dung
+     * bam, khong dung san san san trong trang.
+     *
+     * Truoc day moi lan mo danh sach 20 chuyen la ren san toan bo hop thoai
+     * cua ca 20 dong (nhap & xac nhan, nop lai, sua phu phi, nho tai khac,
+     * huy...) - chiem khoang 60% dung luong trang trong khi mot luc nguoi
+     * dung chi mo mot cai.
+     */
+    public function hopThoai($loai = '', $id = 0)
+    {
+        $this->yeuCauDangNhap();
+
+        $dsHopThoai = [
+            'xacnhan'    => ['taixe', 'admin', 'ketoan'],
+            'xacnhangui' => ['admin', 'ketoan'],
+            'noplai'     => ['admin', 'ketoan'],
+            'huy'        => ['admin', 'ketoan'],
+            'suaphuphi'  => ['taixe'],
+            'nhotaikhac' => ['taixe'],
+            'baohuy'     => ['taixe'],
+        ];
+
+        $vaiTro = taiKhoanHienTai()['vai_tro'] ?? '';
+        if (!isset($dsHopThoai[$loai]) || !in_array($vaiTro, $dsHopThoai[$loai], true)) {
+            http_response_code(403);
+            exit('');
+        }
+
+        $chuyen = $this->model('ChuyenXeModel')->layChiTiet((int)$id);
+        if (!$chuyen) {
+            http_response_code(404);
+            exit('');
+        }
+
+        // Tai xe chi duoc mo hop thoai cua chuyen minh chay
+        $idTaiXeHienTai = laTaiXe() ? (int)(taiKhoanHienTai()['id_tai_xe'] ?? 0) : null;
+        if (laTaiXe() && (int)$chuyen['driver_id'] !== $idTaiXeHienTai) {
+            http_response_code(403);
+            exit('');
+        }
+
+        $duLieu = [
+            'chuyen'         => $chuyen,
+            'idTaiXeHienTai' => $idTaiXeHienTai,
+        ];
+        if ($loai === 'nhotaikhac') {
+            $duLieu['dsTaiXeDangChay'] = $this->model('TaiXeModel')->layTaiXeDangChay();
+        }
+
+        // Cac partial tu kiem tra dieu kien lan nua (trang thai chuyen, ai
+        // duoc lam gi) - khong dung dieu kien thi tra ve rong.
+        echo $this->dungView('chuyenxe/_modal_' . $loai, $duLieu);
+        exit;
     }
 
     /** Form them chuyen xe moi */

@@ -327,44 +327,14 @@ if (laTaiXe()) {
   </button>
 </div>
 
-<!-- Hop thoai tai xe nhap chi phi & xac nhan -->
-<div id="khoiModalXacNhan">
-  <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_xacnhan.php'; endforeach; ?>
-</div>
-
-<!-- Hop thoai ke toan/quan ly xac nhan tai xe da nop lai tien -->
-<div id="khoiModalNopLai">
-  <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_noplai.php'; endforeach; ?>
-</div>
-
-<!-- Hop thoai quan ly xac nhan cuoc do tai xe tu gui len -->
-<div id="khoiModalXacNhanGui">
-  <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_xacnhangui.php'; endforeach; ?>
-</div>
-
-<!-- Hop thoai tai xe kiem tra/sua phu phi sau khi da xac nhan (truoc khi cong ty chot) -->
-<div id="khoiModalSuaPhuPhi">
-  <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_suaphuphi.php'; endforeach; ?>
-</div>
-
-<!-- Hop thoai tai xe nho tai xe khac chay gium chuyen cua minh -->
-<div id="khoiModalNhoTaiKhac">
-  <?php foreach ($danhSach as $chuyen): include DUONG_DAN_GOC . '/views/chuyenxe/_modal_nhotaikhac.php'; endforeach; ?>
-</div>
+<?php // Hop thoai cua tung dong (Nhap & Xac nhan, Nop lai, Sua phu phi,
+      // Nho tai xe khac, Huy chuyen, Bao khach huy, Duyet phieu) KHONG con
+      // ren san o day nua - truoc day 20 dong la ren ngan ay cai, chiem
+      // khoang 60% dung luong trang trong khi mot luc chi mo mot cai.
+      // Gio bam nut nao thi tai rieng hop thoai do ve (assets/js/hop-thoai.js). ?>
+<div id="khoiHopThoai" data-url="<?= duongDan('chuyenxe/hopthoai') ?>"></div>
 
 <?php include DUONG_DAN_GOC . '/views/chuyenxe/_modal_them_nhanh.php'; ?>
-
-<!-- Hop thoai huy chuyen (quan ly) va bao khach huy (tai xe) -->
-<div id="khoiModalHuy">
-  <?php foreach ($danhSach as $chuyen): ?>
-    <?php if (laQuanLy() && $chuyen['status'] !== 'da_huy'): ?>
-      <?php include DUONG_DAN_GOC . '/views/chuyenxe/_modal_huy.php'; ?>
-    <?php elseif (laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai
-                  && !in_array($chuyen['status'], ['da_huy', 'hoan_thanh'], true)): ?>
-      <?php include DUONG_DAN_GOC . '/views/chuyenxe/_modal_baohuy.php'; ?>
-    <?php endif; ?>
-  <?php endforeach; ?>
-</div>
 
 
 <script>
@@ -376,10 +346,16 @@ if (laTaiXe()) {
   var nutXemThem = document.getElementById('nutXemThem');
   if (!nutXemThem) return;
 
+  var khoiXemThem = document.getElementById('khoiXemThem');
   var boQua = <?= (int)count($danhSach) ?>;
   var dangTai = false;
 
-  nutXemThem.addEventListener('click', function () {
+  // Tu dong tai toi da bao nhieu dong roi dung lai, bat nguoi dung bam nut.
+  // Khong co gioi han nay thi man hinh to + danh sach vai nghin cuoc se cu
+  // the tai het ca nghin dong khi cuon xuong, may yeu se dung hinh.
+  var GIOI_HAN_TU_DONG = 200;
+
+  function taiThemMotTrang() {
     if (dangTai) return;
     dangTai = true;
     nutXemThem.disabled = true;
@@ -395,12 +371,6 @@ if (laTaiXe()) {
 
         document.getElementById('dsTheDienThoai').insertAdjacentHTML('beforeend', kq.the_html);
         document.getElementById('dsDongBang').insertAdjacentHTML('beforeend', kq.dong_html);
-        document.getElementById('khoiModalXacNhan').insertAdjacentHTML('beforeend', kq.modal_xacnhan_html);
-        document.getElementById('khoiModalNopLai').insertAdjacentHTML('beforeend', kq.modal_noplai_html);
-        document.getElementById('khoiModalXacNhanGui').insertAdjacentHTML('beforeend', kq.modal_xacnhangui_html);
-        document.getElementById('khoiModalSuaPhuPhi').insertAdjacentHTML('beforeend', kq.modal_suaphuphi_html);
-        document.getElementById('khoiModalNhoTaiKhac').insertAdjacentHTML('beforeend', kq.modal_nhotaikhac_html);
-        document.getElementById('khoiModalHuy').insertAdjacentHTML('beforeend', kq.modal_huy_html);
 
         boQua += kq.so_dong_them;
 
@@ -408,7 +378,7 @@ if (laTaiXe()) {
           nutXemThem.disabled = false;
           nutXemThem.textContent = 'Xem thêm';
         } else {
-          document.getElementById('khoiXemThem').setAttribute('hidden', '');
+          khoiXemThem.setAttribute('hidden', '');
         }
         dangTai = false;
       })
@@ -417,7 +387,27 @@ if (laTaiXe()) {
         nutXemThem.disabled = false;
         nutXemThem.textContent = 'Xem thêm (thử lại)';
       });
-  });
+  }
+
+  nutXemThem.addEventListener('click', taiThemMotTrang);
+
+  // ---------------------------------------------------------------
+  // Cuon toi dau tai toi do: khi khoi "Xem them" sap lot vao man hinh
+  // (con cach 300px) thi tu tai trang tiep theo, khong phai bam nut.
+  // Nut van giu lai: dung khi da qua GIOI_HAN_TU_DONG dong, va cho
+  // trinh duyet cu khong co IntersectionObserver.
+  // ---------------------------------------------------------------
+  if ('IntersectionObserver' in window && khoiXemThem) {
+    var nguoiQuanSat = new IntersectionObserver(function (dsMuc) {
+      dsMuc.forEach(function (muc) {
+        if (!muc.isIntersecting) return;
+        if (khoiXemThem.hasAttribute('hidden')) return;
+        if (boQua >= GIOI_HAN_TU_DONG) return;   // nhieu qua roi thi de nguoi dung tu bam
+        taiThemMotTrang();
+      });
+    }, { rootMargin: '300px 0px' });
+    nguoiQuanSat.observe(khoiXemThem);
+  }
 
   // ---------------------------------------------------------------
   // Realtime: co ai vua tao/sua/xac nhan/chot chuyen xe -> tai lai dung
@@ -457,12 +447,6 @@ if (laTaiXe()) {
         if (!kq.ok) return;
         document.getElementById('dsTheDienThoai').innerHTML = kq.the_html;
         document.getElementById('dsDongBang').innerHTML = kq.dong_html;
-        document.getElementById('khoiModalXacNhan').innerHTML = kq.modal_xacnhan_html;
-        document.getElementById('khoiModalNopLai').innerHTML = kq.modal_noplai_html;
-        document.getElementById('khoiModalXacNhanGui').innerHTML = kq.modal_xacnhangui_html;
-        document.getElementById('khoiModalSuaPhuPhi').innerHTML = kq.modal_suaphuphi_html;
-        document.getElementById('khoiModalNhoTaiKhac').innerHTML = kq.modal_nhotaikhac_html;
-        document.getElementById('khoiModalHuy').innerHTML = kq.modal_huy_html;
 
         if (kq.con_them) {
           document.getElementById('khoiXemThem').removeAttribute('hidden');

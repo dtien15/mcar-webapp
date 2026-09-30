@@ -24,7 +24,7 @@ if (laQuanLy()) {
     // Tai xe bao khach huy: cong ty phai quyet ngay (huy that hay van chay),
     // de treo thi tai xe khong biet con phai di hay thoi.
     if (dangBaoKhachHuy($chuyen)) {
-        $chinh = ['kieu' => 'modal', 'dich' => '#huyChuyen' . $chuyen['id'], 'nhan' => 'Xác nhận hủy',
+        $chinh = ['kieu' => 'modal', 'modal' => 'huy', 'dich' => '#huyChuyen' . $chuyen['id'], 'nhan' => 'Xác nhận hủy',
                   'icon' => 'ban', 'lop' => 'btn-danger'];
     }
 
@@ -33,10 +33,10 @@ if (laQuanLy()) {
     // nhap so thuc te. Viec nay dung truoc ca "qua gio" vi phieu chua duyet
     // thi khong ai nhap duoc gi ca.
     elseif (choQuanLyXacNhan($chuyen)) {
-        $chinh = ['kieu' => 'modal', 'dich' => '#xacNhanGui' . $chuyen['id'], 'nhan' => 'Duyệt phiếu',
+        $chinh = ['kieu' => 'modal', 'modal' => 'xacnhangui', 'dich' => '#xacNhanGui' . $chuyen['id'], 'nhan' => 'Duyệt phiếu',
                   'icon' => 'checklist', 'lop' => 'btn-warning'];
     } elseif (laChuyenQuaHan($chuyen)) {
-        $chinh = ['kieu' => 'modal', 'dich' => '#xacNhan' . $chuyen['id'], 'nhan' => 'Nhập hộ',
+        $chinh = ['kieu' => 'modal', 'modal' => 'xacnhan', 'dich' => '#xacNhan' . $chuyen['id'], 'nhan' => 'Nhập hộ',
                   'icon' => 'writing', 'lop' => 'btn-danger'];
     } elseif ($chuyen['status'] === 'da_huy') {
         $chinh = ['kieu' => 'form', 'url' => 'chuyenxe/bohuy', 'nhan' => 'Bỏ hủy',
@@ -47,15 +47,15 @@ if (laQuanLy()) {
                   'icon' => 'check', 'lop' => 'btn-success',
                   'hoi' => 'Chốt hoàn thành chuyến xe này?'];
     } elseif ($dangGiuTien) {
-        $chinh = ['kieu' => 'modal', 'dich' => '#nopLai' . $chuyen['id'], 'nhan' => 'Đã nộp lại',
+        $chinh = ['kieu' => 'modal', 'modal' => 'noplai', 'dich' => '#nopLai' . $chuyen['id'], 'nhan' => 'Đã nộp lại',
                   'icon' => 'cash', 'lop' => 'btn-success'];
     }
 } elseif ($cuaToi) {
     if ($duocXacNhan) {
-        $chinh = ['kieu' => 'modal', 'dich' => '#xacNhan' . $chuyen['id'], 'nhan' => 'Nhập & Xác nhận',
+        $chinh = ['kieu' => 'modal', 'modal' => 'xacnhan', 'dich' => '#xacNhan' . $chuyen['id'], 'nhan' => 'Nhập & Xác nhận',
                   'icon' => 'writing', 'lop' => 'btn-primary'];
     } elseif ($chuyen['status'] === 'tai_xe_xac_nhan') {
-        $chinh = ['kieu' => 'modal', 'dich' => '#suaPhuPhi' . $chuyen['id'], 'nhan' => 'Sửa phụ phí',
+        $chinh = ['kieu' => 'modal', 'modal' => 'suaphuphi', 'dich' => '#suaPhuPhi' . $chuyen['id'], 'nhan' => 'Sửa phụ phí',
                   'icon' => 'receipt', 'lop' => 'btn-outline-primary'];
     }
 }
@@ -76,7 +76,7 @@ if (laQuanLy()) {
         // Chua qua gio thi "Nhap ho" nam trong menu cho do noi bat.
         // Phieu chua duyet thi khong nhap duoc - phai duyet phieu truoc.
         if (!laChuyenQuaHan($chuyen) && !choQuanLyXacNhan($chuyen)) {
-            $menu[] = ['kieu' => 'modal', 'dich' => '#xacNhan' . $chuyen['id'],
+            $menu[] = ['kieu' => 'modal', 'modal' => 'xacnhan', 'dich' => '#xacNhan' . $chuyen['id'],
                        'nhan' => 'Nhập hộ tài xế', 'icon' => 'writing'];
         }
     }
@@ -88,7 +88,7 @@ if (laQuanLy()) {
     // Nut chinh dang la "Da nop lai" thi khong lap lai trong menu
     if ($chuyen['status'] === 'tai_xe_xac_nhan' && (int)$chuyen['customer_paid'] === 0
         && (int)$chuyen['cash_remitted'] === 0) {
-        $menu[] = ['kieu' => 'modal', 'dich' => '#nopLai' . $chuyen['id'],
+        $menu[] = ['kieu' => 'modal', 'modal' => 'noplai', 'dich' => '#nopLai' . $chuyen['id'],
                    'nhan' => 'Xác nhận đã nộp lại tiền', 'icon' => 'cash'];
     }
     if ($chuyen['cash_remitted'] && laQuanTri()) {
@@ -101,12 +101,12 @@ if (laQuanLy()) {
                    'hoi' => 'Bỏ qua báo khách hủy, chuyến vẫn chạy bình thường?'];
     }
     if ($chuyen['status'] !== 'da_huy') {
-        $menu[] = ['kieu' => 'modal', 'dich' => '#huyChuyen' . $chuyen['id'],
+        $menu[] = ['kieu' => 'modal', 'modal' => 'huy', 'dich' => '#huyChuyen' . $chuyen['id'],
                    'nhan' => 'Hủy chuyến', 'icon' => 'ban', 'nguyHiem' => true];
     }
 } elseif ($cuaToi) {
     if ($duocXacNhan) {
-        $menu[] = ['kieu' => 'modal', 'dich' => '#nhoTaiKhac' . $chuyen['id'],
+        $menu[] = ['kieu' => 'modal', 'modal' => 'nhotaikhac', 'dich' => '#nhoTaiKhac' . $chuyen['id'],
                    'nhan' => 'Nhờ tài xế khác chạy', 'icon' => 'users'];
     }
     if (!in_array($chuyen['status'], ['da_huy', 'hoan_thanh'], true)) {
@@ -116,7 +116,7 @@ if (laQuanLy()) {
                        'icon' => 'arrow-back-up',
                        'hoi' => 'Khách chạy lại bình thường, bỏ báo hủy?'];
         } else {
-            $menu[] = ['kieu' => 'modal', 'dich' => '#baoHuy' . $chuyen['id'],
+            $menu[] = ['kieu' => 'modal', 'modal' => 'baohuy', 'dich' => '#baoHuy' . $chuyen['id'],
                        'nhan' => 'Báo khách hủy', 'icon' => 'bell-exclamation', 'nguyHiem' => true];
         }
     }
@@ -141,7 +141,7 @@ $nhanChat = json_encode('Cuốc ' . dinhDangNgay($chuyen['trip_date'])
       </form>
     <?php else: ?>
       <button type="button" class="btn btn-sm <?= $chinh['lop'] ?> nut-chinh"
-              data-bs-toggle="modal" data-bs-target="<?= $chinh['dich'] ?>">
+              data-hop-thoai="<?= h($chinh['modal']) ?>" data-id-chuyen="<?= (int)$chuyen['id'] ?>">
         <?= bieuTuong($chinh['icon']) ?> <?= h($chinh['nhan']) ?>
       </button>
     <?php endif; ?>
@@ -179,7 +179,7 @@ $nhanChat = json_encode('Cuốc ' . dinhDangNgay($chuyen['trip_date'])
               </a>
             <?php elseif ($m['kieu'] === 'modal'): ?>
               <button type="button" class="dropdown-item <?= !empty($m['nguyHiem']) ? 'muc-nguy-hiem' : '' ?>"
-                      data-bs-toggle="modal" data-bs-target="<?= $m['dich'] ?>">
+                      data-hop-thoai="<?= h($m['modal']) ?>" data-id-chuyen="<?= (int)$chuyen['id'] ?>">
                 <?= bieuTuong($m['icon']) ?> <?= h($m['nhan']) ?>
               </button>
             <?php else: ?>
