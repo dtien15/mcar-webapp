@@ -21,11 +21,18 @@ if (laQuanLy()) {
     $dangGiuTien = (int)$chuyen['customer_paid'] === 0 && (int)$chuyen['cash_remitted'] === 0
                    && in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true);
 
+    // Tai xe bao khach huy: cong ty phai quyet ngay (huy that hay van chay),
+    // de treo thi tai xe khong biet con phai di hay thoi.
+    if (dangBaoKhachHuy($chuyen)) {
+        $chinh = ['kieu' => 'modal', 'dich' => '#huyChuyen' . $chuyen['id'], 'nhan' => 'Xác nhận hủy',
+                  'icon' => 'ban', 'lop' => 'btn-danger'];
+    }
+
     // Phieu do tai xe tu tao, cong ty chua duyet: viec dau tien phai lam la
     // DUYET PHIEU (xac nhan co cuoc nay that) - duyet xong tai xe moi duoc
     // nhap so thuc te. Viec nay dung truoc ca "qua gio" vi phieu chua duyet
     // thi khong ai nhap duoc gi ca.
-    if (choQuanLyXacNhan($chuyen)) {
+    elseif (choQuanLyXacNhan($chuyen)) {
         $chinh = ['kieu' => 'modal', 'dich' => '#xacNhanGui' . $chuyen['id'], 'nhan' => 'Duyệt phiếu',
                   'icon' => 'checklist', 'lop' => 'btn-warning'];
     } elseif (laChuyenQuaHan($chuyen)) {
@@ -88,6 +95,11 @@ if (laQuanLy()) {
         $menu[] = ['kieu' => 'form', 'url' => 'chuyenxe/huyxacnhannoplai', 'nhan' => 'Hủy xác nhận nộp lại',
                    'icon' => 'arrow-back-up', 'hoi' => 'Hủy xác nhận đã nộp lại tiền?'];
     }
+    if (dangBaoKhachHuy($chuyen)) {
+        $menu[] = ['kieu' => 'form', 'url' => 'chuyenxe/bobaohuy', 'nhan' => 'Bỏ qua báo hủy',
+                   'icon' => 'arrow-back-up',
+                   'hoi' => 'Bỏ qua báo khách hủy, chuyến vẫn chạy bình thường?'];
+    }
     if ($chuyen['status'] !== 'da_huy') {
         $menu[] = ['kieu' => 'modal', 'dich' => '#huyChuyen' . $chuyen['id'],
                    'nhan' => 'Hủy chuyến', 'icon' => 'ban', 'nguyHiem' => true];
@@ -98,8 +110,15 @@ if (laQuanLy()) {
                    'nhan' => 'Nhờ tài xế khác chạy', 'icon' => 'users'];
     }
     if (!in_array($chuyen['status'], ['da_huy', 'hoan_thanh'], true)) {
-        $menu[] = ['kieu' => 'modal', 'dich' => '#baoHuy' . $chuyen['id'],
-                   'nhan' => 'Báo khách hủy', 'icon' => 'bell-exclamation', 'nguyHiem' => true];
+        if (dangBaoKhachHuy($chuyen)) {
+            // Da bao roi: khong bao lai nua, chi cho rut lai khi khach goi lai
+            $menu[] = ['kieu' => 'form', 'url' => 'chuyenxe/bobaohuy', 'nhan' => 'Bỏ báo khách hủy',
+                       'icon' => 'arrow-back-up',
+                       'hoi' => 'Khách chạy lại bình thường, bỏ báo hủy?'];
+        } else {
+            $menu[] = ['kieu' => 'modal', 'dich' => '#baoHuy' . $chuyen['id'],
+                       'nhan' => 'Báo khách hủy', 'icon' => 'bell-exclamation', 'nguyHiem' => true];
+        }
     }
 }
 

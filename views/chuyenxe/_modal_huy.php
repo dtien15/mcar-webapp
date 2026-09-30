@@ -7,6 +7,11 @@
  * cong ty bu cho tai xe - ca hai van chay vao luong nhu chuyen binh thuong.
  */
 $giaiDoanHienTai = $chuyen['cancel_stage'] ?? 'chua_di';
+// Tai xe da bao khach huy thi dien san ly do ho ghi, khoi phai go lai
+$lyDoSan = $chuyen['cancel_reason'] ?? '';
+if ($lyDoSan === '' && !empty($chuyen['cancel_reported_reason'])) {
+    $lyDoSan = $chuyen['cancel_reported_reason'];
+}
 ?>
 <div class="modal fade" id="huyChuyen<?= $chuyen['id'] ?>" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
@@ -20,6 +25,16 @@ $giaiDoanHienTai = $chuyen['cancel_stage'] ?? 'chua_di';
       </div>
 
       <div class="modal-body">
+        <?php if (dangBaoKhachHuy($chuyen)): ?>
+          <div class="alert alert-danger" style="font-size:12.8px">
+            <?= bieuTuong('bell-exclamation') ?>
+            Tài xế <strong><?= h($chuyen['ten_tai_xe'] ?? '') ?></strong> đã báo khách hủy
+            lúc <?= h(dinhDangNgay($chuyen['cancel_reported_at'], 'H:i d/m/Y')) ?>.
+            <?php if (!empty($chuyen['cancel_reported_reason'])): ?>
+              Lý do: <strong><?= h($chuyen['cancel_reported_reason']) ?></strong>.
+            <?php endif; ?>
+          </div>
+        <?php endif; ?>
         <div class="tom-tat-chuyen mb-3">
           <div><?= h($chuyen['route']) ?></div>
           <div class="text-muted" style="font-size:12.5px">
@@ -46,7 +61,7 @@ $giaiDoanHienTai = $chuyen['cancel_stage'] ?? 'chua_di';
           <label class="form-label">Lý do hủy</label>
           <input name="ly_do_huy" class="form-control" maxlength="255"
                  placeholder="Khách đổi lịch, khách không tới, xe hỏng…"
-                 value="<?= h($chuyen['cancel_reason'] ?? '') ?>">
+                 value="<?= h($lyDoSan) ?>">
         </div>
 
         <!-- Chi hien khi tai xe da chay - huy truoc gio don thi thuong khong ai mat gi -->

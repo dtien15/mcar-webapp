@@ -67,6 +67,32 @@ class ChuyenXeModel extends Model
         );
     }
 
+    /**
+     * Tai xe bao khach huy - ghi thang len chuyen de ca hai ben deu nhin
+     * thay, khong phai chi mot thong bao roi thoi.
+     * Chua huy that: huy hay khong la quyet dinh cua cong ty.
+     */
+    public function baoKhachHuy($id, $idNguoiBao, $lyDo)
+    {
+        return $this->thucThi(
+            "UPDATE trips
+                SET cancel_reported_at = NOW(), cancel_reported_reason = ?, cancel_reported_by = ?
+              WHERE id = ? AND deleted_at IS NULL AND status <> 'da_huy'",
+            [$lyDo !== '' ? $lyDo : null, (int)$idNguoiBao, (int)$id]
+        );
+    }
+
+    /** Go danh dau bao khach huy (tai xe bao nham, hoac khach goi lai) */
+    public function boBaoKhachHuy($id)
+    {
+        return $this->thucThi(
+            "UPDATE trips
+                SET cancel_reported_at = NULL, cancel_reported_reason = NULL, cancel_reported_by = NULL
+              WHERE id = ?",
+            [(int)$id]
+        );
+    }
+
     /** Cuoc da qua han ma tai xe van chua xac nhan */
     public function dsQuaHanChuaXacNhan()
     {

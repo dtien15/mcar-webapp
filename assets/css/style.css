@@ -1745,3 +1745,8 @@ textarea.tu-dong-gian {
   font-size: 13px;
   margin-bottom: 14px;
 }
+
+/* Tai xe bao khach huy, cong ty chua quyet - viec can quyet ngay trong ngay */
+.bang tr.dong-bao-huy > td { background: #fee2e2; }
+.bang tr.dong-bao-huy > td:first-child { box-shadow: inset 3px 0 0 #dc2626; }
+.the-chuyen-xe.dong-bao-huy { background: #fee2e2; border-color: #fca5a5; box-shadow: inset 3px 0 0 #dc2626, var(--bong); }

@@ -5,6 +5,10 @@
  * Tai xe khong tu huy duoc vi huy dinh den tien (khach den bu bao nhieu, cong
  * ty bu cong cho tai xe bao nhieu) - ho chi bao len, cong ty xem roi quyet dinh.
  */
+// Da bao roi thi thoi, khong cho bao chong len nhau
+if (dangBaoKhachHuy($chuyen)) {
+    return;
+}
 ?>
 <div class="modal fade" id="baoHuy<?= $chuyen['id'] ?>" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">

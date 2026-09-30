@@ -302,6 +302,14 @@ function choQuanLyXacNhan($chuyen)
 }
 
 /**
+ * Tai xe da bao khach huy ma cong ty chua quyet (huy hay khong huy).
+ */
+function dangBaoKhachHuy($chuyen)
+{
+    return !empty($chuyen['cancel_reported_at']) && ($chuyen['status'] ?? '') !== 'da_huy';
+}
+
+/**
  * Chuyen nay da den luc nhap so thuc te & xac nhan chua?
  *
  * Chuyen cong ty giao: nhap duoc ngay. Phieu tai xe tu tao: phai cho cong
@@ -332,6 +340,11 @@ function mauDongChuyen($chuyen)
 
     if ($trangThai === 'da_huy') {
         return ['dong-huy', 'Chuyến đã hủy'];
+    }
+    // Tai xe bao khach huy: cong ty phai quyet ngay (huy hay van chay),
+    // de treo thi tai xe khong biet duong nao ma lan
+    if (dangBaoKhachHuy($chuyen)) {
+        return ['dong-bao-huy', 'Tài xế báo khách hủy — chờ công ty quyết định'];
     }
     // Den gio chay roi ma chua ai xac nhan: viec gap nhat, phai nhin thay truoc
     if (laChuyenQuaHan($chuyen)) {

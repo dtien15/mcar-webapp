@@ -21,7 +21,12 @@ $choXacNhan  = choQuanLyXacNhan($chuyen);
       <div class="hanh-trinh"><?= h($chuyen['route']) ?></div>
     </div>
     <div class="cot-trang-thai">
-      <?php if ($choXacNhan): ?>
+      <?php if (dangBaoKhachHuy($chuyen)): ?>
+        <span class="huy-hieu-trang-thai tt-danger"
+              title="<?= h('Tài xế báo khách hủy' . (!empty($chuyen['cancel_reported_reason']) ? ': ' . $chuyen['cancel_reported_reason'] : '') . ' — công ty chưa quyết định') ?>">
+          <?= bieuTuong('bell-exclamation') ?> Báo khách hủy
+        </span>
+      <?php elseif ($choXacNhan): ?>
         <span class="huy-hieu-trang-thai tt-warning"
               title="Phiếu do tài xế tự tạo, công ty chưa duyệt — duyệt xong tài xế mới nhập số được">
           <?= bieuTuong('send') ?> <?= laTaiXe() ? 'Chờ duyệt' : 'Tài xế gửi' ?>

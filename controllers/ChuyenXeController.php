@@ -704,18 +704,61 @@ class ChuyenXeController extends Controller
 
         $lyDo = $this->chuTuForm('ly_do_huy');
 
+        // Ghi thang len chuyen: truoc day chi gui mot thong bao roi thoi,
+        // danh sach hai ben van tron nhu chua co gi - tai xe bam xong khong
+        // thay dong tinh gi nen tuong hong.
+        $this->model('ChuyenXeModel')->baoKhachHuy($id, taiKhoanHienTai()['id'], $lyDo);
+
         $this->model('ThongBaoModel')->guiChoQuanLy(
             'Tài xế báo khách hủy chuyến ngày ' . dinhDangNgay($chuyen['trip_date']),
             trim($chuyen['ten_tai_xe'] . ' báo khách hủy chuyến ' . $chuyen['route'] . '.'
                 . ($lyDo !== '' ? ' Lý do: ' . $lyDo . '.' : '')
-                . ' Vào chuyến để xác nhận hủy.'),
-            'chuyenxe',
+                . ' Mở chuyến để xác nhận hủy hoặc bỏ qua báo.'),
+            'chuyenxe/chitiet/' . $id,
             'tai_xe_bao_huy',
             $id
         );
 
         datThongBao('Đã báo cho công ty. Chờ công ty xác nhận hủy.');
-        baoThucRealtimeQuanLy();
+        baoThucRealtimeChuyenXe($idTaiXe);
+        chuyenTrang('chuyenxe');
+    }
+
+    /**
+     * Go danh dau "tai xe bao khach huy".
+     * Tai xe go khi bao nham hoac khach goi lai; quan ly go khi quyet dinh
+     * van chay chuyen nay.
+     */
+    public function boBaoHuy()
+    {
+        $this->yeuCauQuyen(['admin', 'ketoan', 'taixe']);
+        $this->yeuCauPost();
+
+        $id     = (int)($_POST['id'] ?? 0);
+        $chuyen = $this->model('ChuyenXeModel')->layChiTiet($id);
+        $idTaiXe = (int)(taiKhoanHienTai()['id_tai_xe'] ?? 0);
+
+        if (!$chuyen || (laTaiXe() && (int)$chuyen['driver_id'] !== $idTaiXe)) {
+            datThongBao('Không bỏ báo được cho chuyến này.', 'danger');
+            chuyenTrang('chuyenxe');
+        }
+
+        $this->model('ChuyenXeModel')->boBaoKhachHuy($id);
+
+        if (laQuanLy() && !empty($chuyen['driver_id'])) {
+            $this->model('ThongBaoModel')->guiChoTaiXe(
+                $chuyen['driver_id'],
+                'Chuyến ngày ' . dinhDangNgay($chuyen['trip_date']) . ' vẫn chạy bình thường',
+                'Công ty đã xem báo khách hủy của bạn và quyết định vẫn chạy chuyến '
+                    . ($chuyen['route'] ?? '') . '.',
+                'chuyenxe',
+                'bo_bao_huy',
+                $id
+            );
+        }
+
+        datThongBao(laQuanLy() ? 'Đã bỏ qua báo hủy. Chuyến vẫn chạy bình thường.' : 'Đã bỏ báo khách hủy.');
+        baoThucRealtimeChuyenXe($chuyen['driver_id'] ?? null);
         chuyenTrang('chuyenxe');
     }
 
