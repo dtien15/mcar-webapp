@@ -21,21 +21,20 @@ if (laQuanLy()) {
     $dangGiuTien = (int)$chuyen['customer_paid'] === 0 && (int)$chuyen['cash_remitted'] === 0
                    && in_array($chuyen['status'], ['tai_xe_xac_nhan', 'hoan_thanh'], true);
 
-    // Cuoc qua gio ma van chua ai xac nhan: viec chinh la NHAP HO cho xong,
-    // dung de treo lai - cuoc chua xac nhan thi khong vao luong duoc.
-    if (laChuyenQuaHan($chuyen)) {
+    // Phieu do tai xe tu tao, cong ty chua duyet: viec dau tien phai lam la
+    // DUYET PHIEU (xac nhan co cuoc nay that) - duyet xong tai xe moi duoc
+    // nhap so thuc te. Viec nay dung truoc ca "qua gio" vi phieu chua duyet
+    // thi khong ai nhap duoc gi ca.
+    if (choQuanLyXacNhan($chuyen)) {
+        $chinh = ['kieu' => 'modal', 'dich' => '#xacNhanGui' . $chuyen['id'], 'nhan' => 'Duyệt phiếu',
+                  'icon' => 'checklist', 'lop' => 'btn-warning'];
+    } elseif (laChuyenQuaHan($chuyen)) {
         $chinh = ['kieu' => 'modal', 'dich' => '#xacNhan' . $chuyen['id'], 'nhan' => 'Nhập hộ',
                   'icon' => 'writing', 'lop' => 'btn-danger'];
     } elseif ($chuyen['status'] === 'da_huy') {
         $chinh = ['kieu' => 'form', 'url' => 'chuyenxe/bohuy', 'nhan' => 'Bỏ hủy',
                   'icon' => 'arrow-back-up', 'lop' => 'btn-warning',
                   'hoi' => 'Bỏ hủy, đưa chuyến trở lại trạng thái trước đó?'];
-    } elseif (choQuanLyXacNhan($chuyen)) {
-        // Tai xe tu gui cuoc len: cong ty chua kiem tra cuoc nay dung hay sai,
-        // nen viec chinh la XAC NHAN (mo ra soat lai so lieu) chu khong phai
-        // chot thang vao luong.
-        $chinh = ['kieu' => 'modal', 'dich' => '#xacNhanGui' . $chuyen['id'], 'nhan' => 'Xác nhận',
-                  'icon' => 'checklist', 'lop' => 'btn-warning'];
     } elseif ($chuyen['status'] === 'tai_xe_xac_nhan') {
         $chinh = ['kieu' => 'form', 'url' => 'chuyenxe/chot', 'nhan' => 'Chốt',
                   'icon' => 'check', 'lop' => 'btn-success',
@@ -63,12 +62,13 @@ if (laQuanLy()) {
 
     if ($chuyen['status'] === 'moi') {
         // Nhac tai xe: gui lai mot thong bao, dung khi ho quen chua vao xac nhan
-        if (!empty($chuyen['driver_id'])) {
+        if (!empty($chuyen['driver_id']) && !choQuanLyXacNhan($chuyen)) {
             $menu[] = ['kieu' => 'form', 'url' => 'chuyenxe/nhactaixe', 'nhan' => 'Nhắc tài xế',
                        'icon' => 'bell', 'hoi' => 'Gửi thông báo nhắc tài xế vào xác nhận chuyến này?'];
         }
-        // Chua qua gio thi "Nhap ho" nam trong menu cho do noi bat
-        if (!laChuyenQuaHan($chuyen)) {
+        // Chua qua gio thi "Nhap ho" nam trong menu cho do noi bat.
+        // Phieu chua duyet thi khong nhap duoc - phai duyet phieu truoc.
+        if (!laChuyenQuaHan($chuyen) && !choQuanLyXacNhan($chuyen)) {
             $menu[] = ['kieu' => 'modal', 'dich' => '#xacNhan' . $chuyen['id'],
                        'nhan' => 'Nhập hộ tài xế', 'icon' => 'writing'];
         }

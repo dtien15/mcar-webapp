@@ -16,8 +16,10 @@
 //  - Tai xe: cuoc cua chinh minh, chua xac nhan.
 //  - Quan ly: NHAP HO khi cuoc treo (qua gio ma tai xe khong vao xac nhan
 //    duoc). Van la form do, chi khac tieu de va noi gui di.
-$laNhapHo = laQuanLy() && ($chuyen['status'] ?? '') === 'moi';
-$laTaiXeCuaMinh = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && $chuyen['status'] === 'moi';
+// Phieu tai xe tu tao ma cong ty chua duyet thi chua ai nhap so duoc -
+// phai duyet phieu truoc da.
+$laNhapHo = laQuanLy() && duocNhapXacNhan($chuyen);
+$laTaiXeCuaMinh = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai && duocNhapXacNhan($chuyen);
 
 if (!$laNhapHo && !$laTaiXeCuaMinh) {
     return;

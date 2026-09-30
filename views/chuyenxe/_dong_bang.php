@@ -5,9 +5,10 @@
  */
 $tt          = nhanTrangThaiChuyen($chuyen["status"], !empty($chuyen["driver_id"]), !empty($chuyen["outsource_driver_name"]));
 $cuaToi      = laTaiXe() && $chuyen['driver_id'] == $idTaiXeHienTai;
-$duocXacNhan = $cuaToi && $chuyen['status'] === 'moi';
-// Tai xe tu gui cuoc, cong ty chua kiem tra -> to nhe ca dong len cho de thay
-$choXacNhan  = laQuanLy() && choQuanLyXacNhan($chuyen);
+// Phieu tai xe tu tao ma cong ty chua duyet thi chua nhap so duoc
+$duocXacNhan = $cuaToi && duocNhapXacNhan($chuyen);
+// Phieu cho duyet -> to nhe ca dong len cho de thay
+$choXacNhan  = choQuanLyXacNhan($chuyen);
 // Mau nen theo tinh trang chuyen (xong han / thieu tien / cho xac nhan...)
 [$lopMau, $yMau] = mauDongChuyen($chuyen);
 ?>
@@ -59,13 +60,14 @@ $choXacNhan  = laQuanLy() && choQuanLyXacNhan($chuyen);
           $dauHieu[] = [$iconTien, $mauTien === 'success' ? 'dh-tot' : ($mauTien === 'danger' ? 'dh-loi' : 'dh-canh-bao'), $nhanTien . ' — ' . $yTien];
       }
     ?>
-    <?php if (laChuyenQuaHan($chuyen)): ?>
+    <?php if ($choXacNhan): ?>
+      <span class="huy-hieu-trang-thai tt-warning"
+            title="Phiếu do tài xế tự tạo, công ty chưa duyệt — duyệt xong tài xế mới nhập số được">
+        <?= bieuTuong('send') ?> <?= laTaiXe() ? 'Chờ duyệt' : 'Tài xế gửi' ?>
+      </span>
+    <?php elseif (laChuyenQuaHan($chuyen)): ?>
       <span class="huy-hieu-trang-thai tt-danger" title="Đã tới giờ chạy mà chưa ai xác nhận chuyến này">
         <?= bieuTuong('alarm') ?> Quá giờ
-      </span>
-    <?php elseif ($choXacNhan): ?>
-      <span class="huy-hieu-trang-thai tt-warning" title="Tài xế tự gửi cuốc này, công ty chưa xác nhận">
-        <?= bieuTuong('send') ?> Tài xế gửi
       </span>
     <?php else: ?>
       <span class="huy-hieu-trang-thai tt-<?= h($tt['mau']) ?>"><?= h($tt['nhan']) ?></span>

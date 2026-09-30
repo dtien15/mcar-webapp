@@ -290,6 +290,10 @@ class ChuyenXeModel extends Model
         if (!$chuyen || $chuyen['status'] !== 'moi') {
             return false;
         }
+        // Phieu do chinh tai xe tu tao thi phai duoc cong ty duyet da
+        if (!empty($chuyen['driver_submitted']) && empty($chuyen['driver_submit_checked_at'])) {
+            return false;
+        }
 
         return $this->thucThi(
             "UPDATE trips SET revenue_vnd=?, trip_fee=?, overnight_fee=?, outsource_cost=?, deposit_amount=?, customer_paid=?,
@@ -339,7 +343,9 @@ class ChuyenXeModel extends Model
                     extra_surcharge=?, extra_surcharge_payer=?, extra_surcharge_note=?,
                     fuel_cost=?, fuel_vat=?, fuel_payer=?, vetc=?, maintenance=?, fine=?,
                     refund_vnd=?, refund_usd=?, cash_advance=?, direct_payment=?, note=?,
-                    status='tai_xe_xac_nhan', driver_confirmed_at=NOW(), confirmed_by_user=?
+                    status='tai_xe_xac_nhan', driver_confirmed_at=NOW(), confirmed_by_user=?,
+                    driver_submit_checked_at=COALESCE(driver_submit_checked_at, NOW()),
+                    driver_submit_checked_by=COALESCE(driver_submit_checked_by, ?)
              WHERE id = ?",
             [
                 $duLieu['revenue_vnd'], $duLieu['trip_fee'], $duLieu['overnight_fee'], $duLieu['outsource_cost'],
@@ -350,7 +356,7 @@ class ChuyenXeModel extends Model
                 $duLieu['fuel_cost'], $duLieu['fuel_vat'], $duLieu['fuel_payer'], $duLieu['vetc'],
                 $duLieu['maintenance'], $duLieu['fine'], $duLieu['refund_vnd'],
                 $duLieu['refund_usd'], $duLieu['cash_advance'], $duLieu['direct_payment'],
-                $duLieu['note'], (int)$idNguoiNhap, (int)$id,
+                $duLieu['note'], (int)$idNguoiNhap, (int)$idNguoiNhap, (int)$id,
             ]
         );
     }

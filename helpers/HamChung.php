@@ -284,7 +284,12 @@ function laChuyenQuaHan($chuyen)
 }
 
 /**
- * Chuyen do TAI XE tu gui len ma quan ly CHUA xac nhan.
+ * PHIEU do tai xe tu tao ma cong ty CHUA DUYET.
+ *
+ * Tai xe tu tao phieu thi moi chi la to phieu: chua chay, chua co so thuc
+ * te. Cong ty phai duyet phieu do truoc (dung la cuoc that, dung khach,
+ * dung xe) - duyet xong tai xe moi nhap so va xac nhan chuyen nhu binh
+ * thuong. Duyet phieu KHAC voi chot chuyen.
  *
  * Dung chung o nhieu cho (dong bang, the, cot thao tac, modal) nen de o day
  * de khong noi nao kiem tra thieu dieu kien roi hien sai.
@@ -293,7 +298,19 @@ function choQuanLyXacNhan($chuyen)
 {
     return !empty($chuyen['driver_submitted'])
         && empty($chuyen['driver_submit_checked_at'])
-        && ($chuyen['status'] ?? '') === 'tai_xe_xac_nhan';
+        && ($chuyen['status'] ?? '') === 'moi';
+}
+
+/**
+ * Chuyen nay da den luc nhap so thuc te & xac nhan chua?
+ *
+ * Chuyen cong ty giao: nhap duoc ngay. Phieu tai xe tu tao: phai cho cong
+ * ty duyet phieu da - khong thi tai xe tu tao phieu roi tu khai tien luon,
+ * cong ty khong kip kiem gi ca.
+ */
+function duocNhapXacNhan($chuyen)
+{
+    return ($chuyen['status'] ?? '') === 'moi' && !choQuanLyXacNhan($chuyen);
 }
 
 /**
@@ -320,8 +337,8 @@ function mauDongChuyen($chuyen)
     if (laChuyenQuaHan($chuyen)) {
         return ['dong-qua-han', 'Đã tới giờ chạy mà chưa ai xác nhận chuyến này'];
     }
-    if (laQuanLy() && choQuanLyXacNhan($chuyen)) {
-        return ['dong-cho-xac-nhan', 'Tài xế tự gửi cuốc này, công ty chưa xác nhận'];
+    if (choQuanLyXacNhan($chuyen)) {
+        return ['dong-cho-xac-nhan', 'Phiếu do tài xế tự tạo, công ty chưa duyệt'];
     }
     if (($chuyen['collector_type'] ?? '') === 'chua_thu') {
         return ['dong-chua-thu', 'Chưa thu được tiền của khách'];

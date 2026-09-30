@@ -339,18 +339,16 @@ class ChuyenXeController extends Controller
 
             datThongBao('Đã cập nhật chuyến xe.');
         } elseif (laTaiXe()) {
-            // Tai xe tu tao chuyen va tu bao cao so lieu thuc te ngay -> coi nhu da tu xac nhan,
-            // khong can qua buoc "Nhap chi phi & Xac nhan" nua rieng biet.
-            $duLieu['status']              = 'tai_xe_xac_nhan';
-            $duLieu['driver_confirmed_at'] = date('Y-m-d H:i:s');
-            // Danh dau la chuyen TAI XE TU GUI: quan ly chua he kiem tra cuoc
-            // nay co that/co dung khong, nen o danh sach no phai noi bat rieng
-            // va phai bam "Xac nhan" truoc, khong duoc chot thang vao luong.
-            $duLieu['driver_submitted']    = 1;
+            // Tai xe tu tao thi moi chi la TO PHIEU: chua chay, chua co so
+            // thuc te nen van la "Moi giao" nhu chuyen cong ty giao. Cong ty
+            // phai duyet phieu nay truoc, duyet xong tai xe moi nhap so va
+            // xac nhan - khong de tai xe vua tu tao phieu vua tu khai tien.
+            $duLieu['status']           = 'moi';
+            $duLieu['driver_submitted'] = 1;
             $idMoi = $chuyenXeModel->them($duLieu);
 
-            $this->baoChoQuanLyChoChot($idMoi);
-            datThongBao('Đã tạo chuyến xe. Chờ công ty xác nhận.');
+            $this->baoChoQuanLyDuyetPhieu($idMoi);
+            datThongBao('Đã tạo phiếu. Chờ công ty duyệt rồi bạn nhập số và xác nhận.');
         } else {
             $duLieu['status'] = 'moi';
             $idMoi = $chuyenXeModel->them($duLieu);
@@ -1000,11 +998,11 @@ class ChuyenXeController extends Controller
 
     /** Quan ly chot hoan thanh chuyen xe */
     /**
-     * Quan ly XAC NHAN mot chuyen do tai xe tu gui len la dung.
+     * Quan ly DUYET PHIEU do tai xe tu tao.
      *
-     * Tach han ra khoi "Chot": chot la dua chuyen vao luong, ma chuyen tai xe
-     * tu gui thi cong ty chua he kiem tra. Xac nhan xong chuyen van o trang
-     * thai cu, chi khac la het "cho xac nhan" - luc do nut Chot moi hien ra.
+     * Duyet phieu KHAC voi chot chuyen: day chi la xac nhan "co cuoc nay
+     * that, thong tin dung" de tai xe duoc phep nhap so thuc te va xac nhan.
+     * Chuyen van o trang thai "Moi giao" sau khi duyet.
      */
     public function xacNhanTaiXeGui()
     {
@@ -1026,15 +1024,17 @@ class ChuyenXeController extends Controller
         if (!empty($chuyen['driver_id'])) {
             $this->model('ThongBaoModel')->guiChoTaiXe(
                 $chuyen['driver_id'],
-                'Cuốc ngày ' . dinhDangNgay($chuyen['trip_date']) . ' đã được xác nhận',
-                'Công ty đã kiểm tra và xác nhận cuốc ' . $chuyen['route'] . ' bạn gửi là đúng.',
-                'chuyenxe',
-                'chuyen_duoc_xac_nhan',
-                $id
+                'Phiếu ngày ' . dinhDangNgay($chuyen['trip_date']) . ' đã được duyệt',
+                'Công ty đã duyệt phiếu ' . $chuyen['route'] . ' bạn tạo. '
+                    . 'Chạy xong thì vào nhập số thực tế và xác nhận chuyến.',
+                'chuyenxe?trang_thai=moi',
+                'phieu_duoc_duyet',
+                $id,
+                true
             );
         }
 
-        datThongBao('Đã xác nhận cuốc tài xế gửi. Kiểm tra xong thì bấm Chốt để tính lương.');
+        datThongBao('Đã duyệt phiếu. Tài xế nhập số thực tế rồi xác nhận chuyến.');
         baoThucRealtimeChuyenXe($chuyen['driver_id'] ?? null);
         chuyenTrang('chuyenxe');
     }
@@ -1348,6 +1348,20 @@ class ChuyenXeController extends Controller
     }
 
     /** Bao cho quan ly biet 1 chuyen xe dang cho chot (sau khi tai xe xac nhan hoac tu tao) */
+    /** Tai xe vua tu tao mot phieu -> bao quan ly vao duyet */
+    private function baoChoQuanLyDuyetPhieu($idChuyen)
+    {
+        $chuyen = $this->model('ChuyenXeModel')->layChiTiet($idChuyen);
+        $this->model('ThongBaoModel')->guiChoQuanLy(
+            'Tài xế ' . ($chuyen['ten_tai_xe'] ?? '') . ' vừa tạo phiếu, chờ duyệt',
+            'Ngày ' . dinhDangNgay($chuyen['trip_date'] ?? '') . ' · ' . ($chuyen['route'] ?? '')
+                . ' — kiểm tra rồi bấm Duyệt phiếu để tài xế nhập số thực tế.',
+            'chuyenxe?trang_thai=moi',
+            'cho_duyet_phieu',
+            $idChuyen
+        );
+    }
+
     private function baoChoQuanLyChoChot($idChuyen)
     {
         $chuyen = $this->model('ChuyenXeModel')->layChiTiet($idChuyen);
