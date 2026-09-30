@@ -143,6 +143,9 @@ $nhanChat = json_encode('Cuốc ' . dinhDangNgay($chuyen['trip_date'])
   <?php // ---- 3. Con lai gom vao menu ---- ?>
   <?php if ($menu): ?>
     <div class="dropdown">
+      <?php // Menu nay xo ra ngoai the: the co bo goc tron nen cat overflow,
+            // danh sach chi con 1 dong thi the rat thap va menu bi cat ngang.
+            // Xu ly o assets/js/dam-lich.js: dang mo menu thi cho the tran. ?>
       <button type="button" class="btn btn-sm btn-outline-secondary nut-phu"
               data-bs-toggle="dropdown" data-bs-auto-close="true"
               aria-expanded="false" title="Thao tác khác">

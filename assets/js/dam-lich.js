@@ -91,13 +91,19 @@
 // cho bang tran ra, dong menu la tra lai nhu cu.
 // =====================================================================
 (function () {
+  // Cho tran ca bang CUON NGANG lan THE bao ngoai: the co bo goc tron nen
+  // cat overflow, danh sach chi con 1-2 dong thi the rat thap, menu xo
+  // xuong la bi cat ngang.
+  function cacVungCat(el) {
+    if (!el || !el.closest) return [];
+    return [el.closest('.bang-cuon'), el.closest('.the')].filter(Boolean);
+  }
+
   document.addEventListener('show.bs.dropdown', function (su) {
-    var bang = su.target.closest ? su.target.closest('.bang-cuon') : null;
-    if (bang) bang.classList.add('dang-mo-menu');
+    cacVungCat(su.target).forEach(function (v) { v.classList.add('dang-mo-menu'); });
   });
 
   document.addEventListener('hidden.bs.dropdown', function (su) {
-    var bang = su.target.closest ? su.target.closest('.bang-cuon') : null;
-    if (bang) bang.classList.remove('dang-mo-menu');
+    cacVungCat(su.target).forEach(function (v) { v.classList.remove('dang-mo-menu'); });
   });
 })();

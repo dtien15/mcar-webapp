@@ -955,9 +955,10 @@ textarea.tu-dong-gian {
   padding-right: 0;
 }
 
-/* Menu "..." nam trong bang cuon ngang se bi cat mat - mo ra thi cho bang
-   tran tam thoi (JS them lop nay khi menu mo) */
+/* Menu "..." nam trong bang cuon ngang / trong the bo goc tron deu bi cat
+   mat - mo ra thi cho tran tam thoi (JS them lop nay khi menu mo) */
 .bang-cuon.dang-mo-menu { overflow: visible; }
+.the.dang-mo-menu { overflow: visible; }
 
 /* =====================================================================
    "Them nhanh tu anh" + giao chuyen ngay tren danh sach
