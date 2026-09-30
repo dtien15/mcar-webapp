@@ -64,6 +64,14 @@ if (laTaiXe()) {
           <label class="form-label">Tìm kiếm</label>
           <input type="text" name="tu_khoa" class="form-control form-control-sm" placeholder="Điểm đón, ghi chú..." value="<?= h($loc['tu_khoa']) ?>">
         </div>
+        <div class="col-12">
+          <div class="chon-nhanh-ngay">
+            <?php foreach (khoangNgayNhanh() as $k): ?>
+              <a class="btn btn-sm <?= ($loc['tu_ngay'] === $k['tu'] && $loc['den_ngay'] === $k['den']) ? 'btn-primary' : 'btn-outline-secondary' ?>"
+                 href="<?= urlLocDoi($loc, ['tu_ngay' => $k['tu'], 'den_ngay' => $k['den']]) ?>"><?= h($k['nhan']) ?></a>
+            <?php endforeach; ?>
+          </div>
+        </div>
         <div class="col-12 d-flex gap-2">
           <button class="btn btn-primary btn-sm"><?= bieuTuong('search') ?> Lọc</button>
           <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light btn-sm">Bỏ lọc</a>
@@ -80,9 +88,14 @@ if (laTaiXe()) {
 <div class="the">
   <div class="the-than thanh-loc-gon d-md-none">
     <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#khoiBoLocQuanLy">
-      <?php // Ngay rut gon d/m cho vua mot hang tren dien thoai ?>
+      <?php // Ngay rut gon d/m cho vua mot hang tren dien thoai. Khong loc
+            // ngay thi ghi thang la "Tat ca" cho khoi doan. ?>
       <?= bieuTuong('filter') ?>
-      <?= h($loc['tu_ngay'] ? date('d/m', strtotime($loc['tu_ngay'])) : '…') ?> – <?= h($loc['den_ngay'] ? date('d/m', strtotime($loc['den_ngay'])) : '…') ?>
+      <?php if ($loc['tu_ngay'] || $loc['den_ngay']): ?>
+        <?= h($loc['tu_ngay'] ? date('d/m', strtotime($loc['tu_ngay'])) : '…') ?> – <?= h($loc['den_ngay'] ? date('d/m', strtotime($loc['den_ngay'])) : '…') ?>
+      <?php else: ?>
+        Tất cả
+      <?php endif; ?>
     </button>
     <div class="d-flex gap-2 ms-auto">
       <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#themNhanh"
@@ -154,6 +167,17 @@ if (laTaiXe()) {
         <label class="form-label">Tìm kiếm</label>
         <input type="text" name="tu_khoa" class="form-control form-control-sm" placeholder="Điểm đón, ghi chú..." value="<?= h($loc['tu_khoa']) ?>">
       </div>
+      <?php // Chon nhanh khoang ngay hay dung - khong phai ai cung biet go
+            // ngay vao hai o tren ?>
+      <div class="col-12">
+        <div class="chon-nhanh-ngay">
+          <?php foreach (khoangNgayNhanh() as $kKey => $k): ?>
+            <a class="btn btn-sm <?= ($loc['tu_ngay'] === $k['tu'] && $loc['den_ngay'] === $k['den']) ? 'btn-primary' : 'btn-outline-secondary' ?>"
+               href="<?= urlLocDoi($loc, ['tu_ngay' => $k['tu'], 'den_ngay' => $k['den']]) ?>"><?= h($k['nhan']) ?></a>
+          <?php endforeach; ?>
+        </div>
+      </div>
+
       <div class="col-12 hang-nut-bo-loc">
         <button class="btn btn-primary btn-sm nut-loc"><?= bieuTuong('search') ?> Lọc</button>
         <a href="<?= duongDan('chuyenxe') ?>" class="btn btn-light btn-sm nut-bo-loc">Bỏ lọc</a>
@@ -197,11 +221,24 @@ if (laTaiXe()) {
      chuyen va bang nhieu tien - de lien danh sach chuyen len cao, mo trang
      ra la thay cuoc ngay, khong phai cuon. -->
 <?php if (!laTaiXe()): ?>
+<?php
+  // Bao cao luon can mot ky cu the: dang xem "tat ca" thi mo bao cao cua
+  // thang nay cho khoi tinh ca nam.
+  $kyBaoCao = [
+      'tu_ngay'  => $loc['tu_ngay'] ?: date('Y-m-01'),
+      'den_ngay' => $loc['den_ngay'] ?: date('Y-m-t'),
+  ];
+?>
 <div class="tom-tat-loc">
   <span class="muc"><strong><?= (int)$tongHop['so_chuyen'] ?></strong> chuyến</span>
   <span class="muc">Thu <strong><?= dinhDangTien($tongHop['thu_vnd']) ?>đ</strong></span>
   <span class="muc">Tiền cuốc <strong><?= dinhDangTien($tongHop['tien_tai']) ?>đ</strong></span>
-  <a class="muc-lien-ket" href="<?= duongDan('baocao?' . http_build_query(['tu_ngay' => $loc['tu_ngay'], 'den_ngay' => $loc['den_ngay']])) ?>">
+  <span class="muc muc-ky">
+    <?= ($loc['tu_ngay'] || $loc['den_ngay'])
+        ? h(dinhDangNgay($loc['tu_ngay'])) . ' – ' . h(dinhDangNgay($loc['den_ngay']))
+        : 'tất cả các ngày' ?>
+  </span>
+  <a class="muc-lien-ket" href="<?= duongDan('baocao?' . http_build_query($kyBaoCao)) ?>">
     Xem báo cáo <?= bieuTuong('arrow-right') ?>
   </a>
 </div>

@@ -302,6 +302,23 @@ function choQuanLyXacNhan($chuyen)
 }
 
 /**
+ * Cac khoang ngay chon nhanh o bo loc danh sach chuyen xe.
+ * De rong ('') nghia la khong loc ngay - xem tat ca.
+ */
+function khoangNgayNhanh()
+{
+    return [
+        'tat_ca'      => ['nhan' => 'Tất cả',      'tu' => '',                      'den' => ''],
+        'hom_nay'     => ['nhan' => 'Hôm nay',     'tu' => date('Y-m-d'),           'den' => date('Y-m-d')],
+        'bay_ngay'    => ['nhan' => '7 ngày qua',  'tu' => date('Y-m-d', strtotime('-6 days')), 'den' => date('Y-m-d')],
+        'thang_nay'   => ['nhan' => 'Tháng này',   'tu' => date('Y-m-01'),          'den' => date('Y-m-t')],
+        'thang_truoc' => ['nhan' => 'Tháng trước',
+                          'tu'  => date('Y-m-01', strtotime('first day of last month')),
+                          'den' => date('Y-m-t', strtotime('last day of last month'))],
+    ];
+}
+
+/**
  * Tai xe da bao khach huy ma cong ty chua quyet (huy hay khong huy).
  */
 function dangBaoKhachHuy($chuyen)

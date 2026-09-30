@@ -1597,11 +1597,19 @@ class ChuyenXeController extends Controller
     }
 
     /** Doc bo loc tu query string, tai xe chi thay du lieu cua minh */
+    /**
+     * Bo loc cua trang Chuyen xe.
+     *
+     * MAC DINH KHONG LOC NGAY: mo trang ra la thay ngay nhung phieu moi nhat
+     * (danh sach xep ngay chay moi nhat truoc). Truoc day mac dinh khoa vao
+     * thang hien tai - phieu chay dau thang sau hay cuoi thang truoc deu bi
+     * giau di, ma khong phai ai cung biet chinh bo loc.
+     */
     private function layBoLoc()
     {
         $loc = [
-            'tu_ngay'    => layGet('tu_ngay', date('Y-m-01')),
-            'den_ngay'   => layGet('den_ngay', date('Y-m-t')),
+            'tu_ngay'    => layGet('tu_ngay'),
+            'den_ngay'   => layGet('den_ngay'),
             'id_xe'      => layGet('id_xe'),
             'id_tai_xe'  => layGet('id_tai_xe'),
             'trang_thai' => layGet('trang_thai'),

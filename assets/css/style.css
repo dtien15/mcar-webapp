@@ -1750,3 +1750,14 @@ textarea.tu-dong-gian {
 .bang tr.dong-bao-huy > td { background: #fee2e2; }
 .bang tr.dong-bao-huy > td:first-child { box-shadow: inset 3px 0 0 #dc2626; }
 .the-chuyen-xe.dong-bao-huy { background: #fee2e2; border-color: #fca5a5; box-shadow: inset 3px 0 0 #dc2626, var(--bong); }
+
+/* Nut chon nhanh khoang ngay trong bo loc chuyen xe */
+.chon-nhanh-ngay {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chon-nhanh-ngay .btn { font-size: 12.5px; }
+
+/* Dong tom tat: ghi ro dang xem khoang ngay nao */
+.tom-tat-loc .muc-ky { color: var(--mau-chu-nhat); font-size: 12.5px; }
