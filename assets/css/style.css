@@ -1004,6 +1004,60 @@ textarea.tu-dong-gian {
   display: block;
 }
 
+/* Buoc xem truoc "Them nhanh": moi chuyen la 1 the doc tu tren xuong (dien
+   thoai khong phai keo ngang bang). Chu/o nhap to, de bam, nguoi khong rành
+   cong nghe nhin la biet dien o dau. */
+.tn-giao-tat-ca {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+.tn-giao-tat-ca .form-label { font-weight: 600; }
+.tn-ds-the { display: flex; flex-direction: column; gap: 12px; }
+.tn-the {
+  border: 1px solid var(--mau-vien);
+  border-radius: 12px;
+  padding: 12px;
+  background: #fff;
+  box-shadow: var(--bong);
+  transition: opacity .15s;
+}
+.tn-the.tn-bo-qua { opacity: .45; background: var(--mau-nen); }
+.tn-dau-the {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.tn-dau-the .form-check-input { width: 22px; height: 22px; margin: 0; flex-shrink: 0; }
+.tn-nhan { display: block; font-size: 13px; color: var(--mau-chu-nhat); margin-bottom: 3px; }
+.tn-the .is-invalid { border-color: #dc3545; background: #fff5f5; }
+/* O tai xe da chon: to xanh cho biet chuyen nay se duoc giao luon */
+.tn-o-tai-xe.tn-da-chon { border-color: #16a34a; background-color: #f0fdf4; font-weight: 600; }
+
+/* Dien thoai khong co Ctrl+V / keo tha: doi chu huong dan cho dung */
+.tn-chi-dien-thoai { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  .tn-chi-may-tinh { display: none; }
+  .tn-chi-dien-thoai { display: block; }
+}
+
+@media (max-width: 575.98px) {
+  /* Chu 16px: iPhone khong tu phong to man hinh khi bam vao o nhap */
+  #themNhanh .form-control,
+  #themNhanh .form-select { font-size: 16px; min-height: 44px; }
+  #themNhanh .vung-tha-anh { min-height: 140px; }
+  #themNhanh .tn-nut-lon { flex: 1 1 auto; min-height: 46px; font-size: 16px; }
+  #themNhanh .modal-footer { flex-wrap: nowrap; }
+  #themNhanh .modal-footer .btn-outline-secondary { min-height: 46px; }
+  .anh-goc-xem-truoc img { max-width: 120px; }
+}
+
 /* Bang xem truoc: o nhap gon, khong vien day de nhin nhu bang chu khong nhu form */
 .bang-xem-truoc td { padding: 5px 6px; vertical-align: middle; }
 .bang-xem-truoc .form-control,

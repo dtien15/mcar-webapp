@@ -462,9 +462,9 @@ class ChuyenXeController extends Controller
     /**
      * Tao NHIEU chuyen cung luc tu bang xem truoc cua "Them nhanh".
      *
-     * Quan ly: cac chuyen tao ra CHUA gan tai xe - dung luong lam viec that:
-     * nguoi dieu phoi nhan mot anh lich trinh nhieu chang, tao het cac chang
-     * do truoc da, roi moi lan luot chon tai xe cho tung chuyen.
+     * Quan ly: chon tai xe ngay tren tung chuyen trong bang xem truoc (giao
+     * luon, tai xe nhan thong bao ngay). Chuyen nao de trong tai xe thi tao
+     * o trang thai "Chua giao", chon tai xe sau tren danh sach nhu cu.
      *
      * Tai xe: cung 1 modal, nhung tao ra GAN SAN cho chinh minh + xe mac
      * dinh cua minh (giong luu() khi tai xe tu tao 1 chuyen) - ho thuong
@@ -501,11 +501,26 @@ class ChuyenXeController extends Controller
         // Luu 1 lan, gan chung cho tat ca chuyen doc ra tu anh do.
         $anhLichTrinh = $this->xuLyAnhTaiLen('anh', 'lichtrinh', 'Ảnh lịch trình');
 
+        // Quan ly chon tai xe ngay tren tung chuyen trong bang xem truoc: chi
+        // nhan tai xe dang lam viec, xe lay theo xe mac dinh cua tai xe do.
+        // Dong nao de trong thi van tao o trang thai "Chua giao" nhu cu.
+        $xeTheoTaiXe = [];
+        if (!laTaiXe()) {
+            foreach ($this->model('TaiXeModel')->layTaiXeDangChay() as $tx) {
+                $xeTheoTaiXe[(int)$tx['id']] = $tx['car_id'] ? (int)$tx['car_id'] : null;
+            }
+        }
+
         $dsLuu = [];
         foreach ($dsGui as $c) {
             $ngay = trim($c['ngay_chay'] ?? '');
             if ($ngay === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $ngay)) {
                 continue;   // khong co ngay chay hop le thi bo qua dong do
+            }
+
+            $idTaiXeChon = (int)($c['id_tai_xe'] ?? 0);
+            if (!array_key_exists($idTaiXeChon, $xeTheoTaiXe)) {
+                $idTaiXeChon = 0;
             }
 
             $dsLuu[] = [
@@ -522,8 +537,10 @@ class ChuyenXeController extends Controller
                 'contract_type_id' => !empty($c['id_loai_keo']) ? (int)$c['id_loai_keo'] : null,
                 // Tai xe tu tao: gan san chinh minh + xe mac dinh, khong de trong
                 // cho ai giao (ho khong the tu giao chuyen cho nguoi khac o day).
-                'driver_id'       => $xeMacDinh ? (int)taiKhoanHienTai()['id_tai_xe'] : null,
-                'car_id'          => $xeMacDinh ? (int)$xeMacDinh['id'] : null,
+                'driver_id'       => $xeMacDinh ? (int)taiKhoanHienTai()['id_tai_xe']
+                                   : ($idTaiXeChon ?: null),
+                'car_id'          => $xeMacDinh ? (int)$xeMacDinh['id']
+                                   : ($idTaiXeChon ? $xeTheoTaiXe[$idTaiXeChon] : null),
                 'attachment_image' => $anhLichTrinh,
                 'status'          => 'moi',
             ];
@@ -537,11 +554,36 @@ class ChuyenXeController extends Controller
 
         if (laTaiXe()) {
             datThongBao('Đã tạo ' . count($dsId) . ' chuyến cho chính bạn. Vào từng chuyến bấm "Xác nhận" để nhập số liệu thực tế.');
+            baoThucRealtimeChuyenXe((int)taiKhoanHienTai()['id_tai_xe']);
         } else {
-            datThongBao('Đã tạo ' . count($dsId) . ' chuyến, chưa giao cho tài xế nào. '
-                      . 'Chọn tài xế ngay trên danh sách để giao.');
+            // Chuyen nao da chon tai xe thi bao cho tai xe do ngay, nhu khi giao tung chuyen
+            $soDaGiao = 0;
+            $dsTaiXeDuocGiao = [];
+            foreach ($dsId as $i => $idMoi) {
+                if (empty($dsLuu[$i]['driver_id'])) {
+                    continue;
+                }
+                $this->baoChuyenXeMoi($idMoi, $dsLuu[$i]);
+                $dsTaiXeDuocGiao[$dsLuu[$i]['driver_id']] = true;
+                $soDaGiao++;
+            }
+            $soChuaGiao = count($dsId) - $soDaGiao;
+
+            $loiBao = 'Đã tạo ' . count($dsId) . ' chuyến';
+            if ($soDaGiao && $soChuaGiao) {
+                $loiBao .= ': ' . $soDaGiao . ' chuyến đã giao tài xế, ' . $soChuaGiao . ' chuyến chưa giao.';
+            } elseif ($soDaGiao) {
+                $loiBao .= ' và đã giao cho tài xế.';
+            } else {
+                $loiBao .= ', chưa giao cho tài xế nào. Chọn tài xế ngay trên danh sách để giao.';
+            }
+            datThongBao($loiBao);
+
+            baoThucRealtimeChuyenXe(null);
+            foreach (array_keys($dsTaiXeDuocGiao) as $idTx) {
+                baoThucRealtimeTaiXe($idTx);
+            }
         }
-        baoThucRealtimeChuyenXe(laTaiXe() ? (int)taiKhoanHienTai()['id_tai_xe'] : null);
 
         // Tra ve khoang ngay cua cac chuyen vua tao de danh sach nhay thang
         // toi do. Khong co no thi tao chuyen thang sau xong nhin vao danh

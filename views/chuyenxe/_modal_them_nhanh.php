@@ -3,19 +3,19 @@
  * Partial: modal "Them nhanh" - dan anh lich trinh hoac doan tin nhan, AI doc
  * ra cac chang roi tao het mot luc.
  *
- * Khac han form "Them chuyen xe" (mo tung cai, dien day du, phai chon tai xe
- * ngay): o day chi can dung so lieu cua khach, CHUA gan tai xe - vi luc nhan
- * lich trinh nguoi dieu phoi thuong chua biet giao cho ai. Chon tai xe lam sau,
- * ngay tren danh sach.
+ * Moi chuyen doc ra hien thanh 1 THE (khong phai bang keo ngang) de dien
+ * thoai nhin la hieu. Quan ly chon tai xe ngay tren tung the - giao luon khi
+ * bam Tao. De trong thi chuyen o trang thai "Chua giao", chon sau tren danh
+ * sach nhu cu.
  *
- * Nhan vao: $dsLoaiKeo
+ * Nhan vao: $dsLoaiKeo, $dsTaiXeDangChay
  */
 ?>
 <div class="modal fade" id="themNhanh" tabindex="-1"
      data-token="<?= h(taoToken()) ?>"
      data-api-phantich="<?= duongDan('chuyenxe/phantichai') ?>"
      data-api-tao="<?= duongDan('chuyenxe/taonhanh') ?>">
-  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-sm-down">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title"><?= bieuTuong('sparkles') ?> Thêm nhanh nhiều chuyến</h5>
@@ -33,8 +33,9 @@
                 <input type="file" id="tnFileAnh" accept="image/png,image/jpeg,image/webp" hidden>
                 <div id="tnChuaCoAnh">
                   <?= bieuTuong('photo-plus', 'bieu-tuong-to') ?>
-                  <div class="fw-semibold mt-2">Dán ảnh vào đây (Ctrl+V)</div>
-                  <div class="text-muted" style="font-size:12.5px">hoặc bấm để chọn file · kéo thả cũng được</div>
+                  <div class="fw-semibold mt-2 tn-chi-may-tinh">Dán ảnh vào đây (Ctrl+V)</div>
+                  <div class="text-muted tn-chi-may-tinh" style="font-size:12.5px">hoặc bấm để chọn file · kéo thả cũng được</div>
+                  <div class="fw-semibold mt-2 tn-chi-dien-thoai">Bấm vào đây để chọn ảnh</div>
                 </div>
                 <img id="tnXemAnh" alt="Ảnh đã chọn" hidden>
               </div>
@@ -50,8 +51,8 @@
             </div>
           </div>
 
-          <div class="d-flex gap-2 align-items-center mt-3">
-            <button type="button" class="btn btn-primary" id="tnNutPhanTich">
+          <div class="d-flex flex-wrap gap-2 align-items-center mt-3">
+            <button type="button" class="btn btn-primary tn-nut-lon" id="tnNutPhanTich">
               <?= bieuTuong('sparkles') ?> Phân tích
             </button>
             <span class="text-muted" id="tnTrangThai" style="font-size:13px"></span>
@@ -63,10 +64,7 @@
         <!-- ===== Buoc 2: xem truoc & sua truoc khi tao ===== -->
         <div id="tnBuoc2" hidden>
           <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
-            <strong id="tnTieuDeXemTruoc"></strong>
-            <span class="text-muted" style="font-size:12.5px">
-              Kiểm tra lại rồi sửa thẳng trong bảng. Bỏ tick dòng nào không muốn tạo.
-            </span>
+            <strong id="tnTieuDeXemTruoc" style="font-size:16px"></strong>
             <button type="button" class="btn btn-sm btn-outline-secondary ms-auto" id="tnLamLai">
               <?= bieuTuong('arrow-back-up') ?> Phân tích lại
             </button>
@@ -82,44 +80,33 @@
             <span class="text-muted">Ảnh này sẽ được lưu kèm các chuyến tạo ra.</span>
           </div>
 
-          <div class="bang-cuon">
-            <table class="bang bang-xem-truoc">
-              <thead>
-                <tr>
-                  <th style="width:34px"><input type="checkbox" class="form-check-input" id="tnChonTatCa" checked></th>
-                  <th style="width:140px">Ngày chạy <span class="text-danger">*</span></th>
-                  <th style="width:96px">Giờ đón</th>
-                  <th style="width:150px">Hành trình</th>
-                  <th style="width:160px">Điểm đón</th>
-                  <th style="width:160px">Điểm trả</th>
-                  <th style="width:140px">Khách</th>
-                  <th style="width:120px">Điện thoại</th>
-                  <th style="width:70px">Số khách</th>
-                  <th style="width:130px">Khách trả</th>
-                  <th style="width:130px">Nhận kèo</th>
-                </tr>
-              </thead>
-              <tbody id="tnBangXemTruoc"></tbody>
-            </table>
-          </div>
+          <?php if (!laTaiXe()): ?>
+            <!-- Lich trinh nhieu chang thuong do 1 tai xe chay het: chon 1 lan
+                 la dien vao tat ca cac the ben duoi (van doi rieng tung the duoc) -->
+            <div class="tn-giao-tat-ca" id="tnKhoiGiaoTatCa" hidden>
+              <label class="form-label mb-1" for="tnGiaoTatCa">Giao tất cả cho</label>
+              <select class="form-select" id="tnGiaoTatCa">
+                <option value="">-- Chọn tài xế --</option>
+              </select>
+            </div>
+          <?php endif; ?>
 
-          <div class="alert alert-secondary mt-2 mb-0" style="font-size:12.8px">
-            <?= bieuTuong('info-circle') ?>
-            <?php if (laTaiXe()): ?>
+          <div id="tnBangXemTruoc" class="tn-ds-the"></div>
+
+          <?php if (laTaiXe()): ?>
+            <div class="alert alert-secondary mt-2 mb-0" style="font-size:12.8px">
+              <?= bieuTuong('info-circle') ?>
               Các chuyến này tạo ra cho <strong>chính bạn</strong> + xe mặc định của bạn, ở trạng thái
               <strong>Mới giao</strong>. Vào từng chuyến bấm "Xác nhận" để nhập số liệu thực tế (doanh thu,
               tiền cuốc...) như khi tạo tay 1 chuyến.
-            <?php else: ?>
-              Các chuyến này tạo ra ở trạng thái <strong>Chưa giao</strong> — chưa gắn tài xế nào.
-              Ra danh sách chọn tài xế ở từng dòng rồi bấm Giao, lúc đó tài xế mới nhận được thông báo.
-            <?php endif; ?>
-          </div>
+            </div>
+          <?php endif; ?>
         </div>
       </div>
 
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
-        <button type="button" class="btn btn-success" id="tnNutTao" hidden>
+        <button type="button" class="btn btn-success tn-nut-lon" id="tnNutTao" hidden>
           <?= bieuTuong('check') ?> <span id="tnChuNutTao">Tạo chuyến</span>
         </button>
       </div>
@@ -130,5 +117,11 @@
 <!-- Danh sach loai keo dung de dung o chon trong bang xem truoc -->
 <script type="application/json" id="tnDsLoaiKeo"><?= json_encode(
   array_map(function ($k) { return ['id' => (int)$k['id'], 'ten' => $k['name']]; }, $dsLoaiKeo),
-  JSON_UNESCAPED_UNICODE
+  JSON_UNESCAPED_UNICODE | JSON_HEX_TAG
+) ?></script>
+<!-- Tai xe dang lam viec - de quan ly chon giao ngay tren tung the (tai xe tu tao thi khong can) -->
+<script type="application/json" id="tnDsTaiXe"><?= json_encode(
+  laTaiXe() ? [] : array_map(function ($t) { return ['id' => (int)$t['id'], 'ten' => $t['full_name']]; },
+                             $dsTaiXeDangChay ?? []),
+  JSON_UNESCAPED_UNICODE | JSON_HEX_TAG
 ) ?></script>
