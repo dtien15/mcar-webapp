@@ -10,16 +10,21 @@ $duocXacNhan = $cuaToi && duocNhapXacNhan($chuyen);
 $choXacNhan  = choQuanLyXacNhan($chuyen);
 [$lopMau, $yMau] = mauDongChuyen($chuyen);
 ?>
-<div class="the-chuyen-xe <?= $duocXacNhan ? 'can-xac-nhan' : '' ?> <?= h($lopMau) ?>"<?= $yMau ? ' title="' . h($yMau) . '"' : '' ?>>
+<?php
+// Ngay da hien o dai phan cach phia tren (JS gom theo ngay), trong the chi
+// can GIO cho to ro - nhin luot la biet chuyen nao chay truoc.
+$tenXe = !empty($chuyen['outsource_car_name'])
+    ? $chuyen['outsource_car_name'] . ' (ngoài)'
+    : trim(($chuyen['ten_xe'] ?? '') . ' ' . ($chuyen['bien_so'] ?? ''));
+$coTaiXe = !empty($chuyen['driver_id']) || !empty($chuyen['outsource_driver_name']);
+?>
+<div class="the-chuyen-xe <?= $duocXacNhan ? 'can-xac-nhan' : '' ?> <?= h($lopMau) ?>"
+     data-ngay="<?= h($chuyen['trip_date']) ?>"<?= $yMau ? ' title="' . h($yMau) . '"' : '' ?>>
   <div class="dau-the">
-    <div>
-      <div class="ngay"><?= bieuTuong('calendar') ?> <?= dinhDangNgay($chuyen['trip_date']) ?>
-        <?php if ($chuyen['pickup_time']): ?>
-          <span class="gio"><?= bieuTuong('clock') ?> <?= h($chuyen['pickup_time']) ?></span>
-        <?php endif; ?>
-      </div>
-      <div class="hanh-trinh"><?= h($chuyen['route']) ?></div>
-    </div>
+    <?php if ($chuyen['pickup_time']): ?>
+      <div class="gio-don"><?= h($chuyen['pickup_time']) ?></div>
+    <?php endif; ?>
+    <div class="hanh-trinh"><?= h($chuyen['route'] !== '' ? $chuyen['route'] : 'Chưa có hành trình') ?></div>
     <div class="cot-trang-thai">
       <?php if (dangBaoKhachHuy($chuyen)): ?>
         <span class="huy-hieu-trang-thai tt-danger"
@@ -57,22 +62,25 @@ $choXacNhan  = choQuanLyXacNhan($chuyen);
     <div class="dia-diem"><?= bieuTuong('map-pin') ?> <?= h($chuyen['pickup_dropoff']) ?></div>
   <?php endif; ?>
 
-  <div class="thong-tin-the">
-    <div><span class="nhan">Xe</span><span class="gt"><?= !empty($chuyen['outsource_car_name'])
-      ? h($chuyen['outsource_car_name']) . ' (ngoài)'
-      : h(trim($chuyen['ten_xe'] . ' ' . $chuyen['bien_so'])) ?></span></div>
-    <?php if (!laTaiXe()): ?>
-      <div><span class="nhan">Tài xế</span>
-        <span class="gt"><?php include __DIR__ . '/_o_giao_tai_xe.php'; ?></span>
-      </div>
+  <!-- Xe · tai xe gop 1 dong; chuyen chua giao thi o chon tai xe chiem tron dong rieng -->
+  <div class="dong-phu">
+    <span class="muc-phu"><?= bieuTuong('car') ?> <?= $tenXe !== '' ? h($tenXe) : '<span class="chua-co">Chưa có xe</span>' ?></span>
+    <?php if (!laTaiXe() && $coTaiXe): ?>
+      <span class="muc-phu"><?= bieuTuong('steering-wheel') ?> <?php include __DIR__ . '/_o_giao_tai_xe.php'; ?></span>
     <?php endif; ?>
     <?php if (!empty($chuyen['customer_name'])): ?>
-      <div><span class="nhan">Khách</span><span class="gt"><?= h($chuyen['customer_name']) ?></span></div>
+      <span class="muc-phu"><?= bieuTuong('user') ?> <?= h($chuyen['customer_name']) ?></span>
     <?php endif; ?>
-    <div><span class="nhan">Khách trả</span><span class="gt"><?= dinhDangTien($chuyen['revenue_vnd']) ?>đ</span></div>
-    <div><span class="nhan">Tiền cuốc</span><span class="gt nhan-manh"><?= dinhDangTien($chuyen['trip_fee']) ?>đ</span></div>
+  </div>
+  <?php if (!laTaiXe() && !$coTaiXe): ?>
+    <div class="dong-giao"><?php include __DIR__ . '/_o_giao_tai_xe.php'; ?></div>
+  <?php endif; ?>
+
+  <div class="dong-tien">
+    <span>Khách trả <b><?= dinhDangTien($chuyen['revenue_vnd']) ?>đ</b></span>
+    <span>Cuốc <b class="nhan-manh"><?= dinhDangTien($chuyen['trip_fee']) ?>đ</b></span>
     <?php if (laTaiXe() && $chuyen['fuel_cost'] > 0): ?>
-      <div><span class="nhan">Xăng dầu</span><span class="gt"><?= dinhDangTien($chuyen['fuel_cost']) ?>đ</span></div>
+      <span>Xăng <b><?= dinhDangTien($chuyen['fuel_cost']) ?>đ</b></span>
     <?php endif; ?>
   </div>
 

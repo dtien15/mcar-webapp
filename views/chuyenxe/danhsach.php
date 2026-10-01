@@ -339,6 +339,69 @@ if (laTaiXe()) {
 
 <script>
 // ---------------------------------------------------------------
+// Dai ngay tren danh sach the (dien thoai): gom cac chuyen cung ngay duoi
+// 1 dai "Thu 7 · 04/10/2026 · 3 chuyen", dinh tren dau khi cuon - nhieu
+// chuyen van biet ngay dang o ngay nao. Ve lai moi khi danh sach doi
+// (Xem them, realtime tai lai) nho MutationObserver.
+// ---------------------------------------------------------------
+(function () {
+  var ds = document.getElementById('dsTheDienThoai');
+  if (!ds) return;
+  var THU = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+
+  function chuoiNgay(d) {
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  }
+
+  function veDaiNgay() {
+    qs.disconnect();
+    ds.querySelectorAll('.dai-ngay').forEach(function (d) { d.remove(); });
+
+    var homNay = new Date();
+    var ngayGan = {};
+    ngayGan[chuoiNgay(homNay)] = 'Hôm nay';
+    ngayGan[chuoiNgay(new Date(homNay.getTime() + 864e5))] = 'Ngày mai';
+    ngayGan[chuoiNgay(new Date(homNay.getTime() - 864e5))] = 'Hôm qua';
+
+    var dem = {};
+    ds.querySelectorAll('.the-chuyen-xe[data-ngay]').forEach(function (t) {
+      var n = t.getAttribute('data-ngay');
+      dem[n] = (dem[n] || 0) + 1;
+    });
+
+    var truoc = null;
+    ds.querySelectorAll('.the-chuyen-xe[data-ngay]').forEach(function (t) {
+      var n = t.getAttribute('data-ngay');
+      if (n === truoc) return;
+      truoc = n;
+      var p = n.split('-');
+      var d = new Date(+p[0], +p[1] - 1, +p[2]);
+      var dai = document.createElement('div');
+      dai.className = 'dai-ngay' + (ngayGan[n] === 'Hôm nay' ? ' hom-nay' : '');
+      dai.innerHTML = '<span></span>' + (ngayGan[n] ? '<span class="nhan-ngay-gan"></span>' : '')
+                    + '<span class="so-chuyen-ngay"></span>';
+      dai.children[0].textContent = THU[d.getDay()] + ' · ' + p[2] + '/' + p[1] + '/' + p[0];
+      if (ngayGan[n]) dai.querySelector('.nhan-ngay-gan').textContent = ngayGan[n];
+      dai.querySelector('.so-chuyen-ngay').textContent = dem[n] + ' chuyến';
+      t.parentNode.insertBefore(dai, t);
+    });
+
+    qs.observe(ds, { childList: true });
+  }
+
+  // Dai ngay dinh ngay duoi thanh tren (thanh tren cao thap tuy man hinh)
+  function doCaoThanhTren() {
+    var tt = document.querySelector('.thanh-tren');
+    document.documentElement.style.setProperty('--cao-thanh-tren', (tt ? tt.offsetHeight : 0) + 'px');
+  }
+
+  var qs = new MutationObserver(veDaiNgay);
+  veDaiNgay();
+  doCaoThanhTren();
+  window.addEventListener('resize', doCaoThanhTren);
+})();
+
+// ---------------------------------------------------------------
 // "Xem them": tai them 1 trang chuyen xe qua AJAX, noi vao DOM
 // thay vi tai lai ca trang / tai het du lieu 1 luc (do nang).
 // ---------------------------------------------------------------
