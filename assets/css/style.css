@@ -783,6 +783,17 @@ textarea.tu-dong-gian {
 }
 .dai-ngay .so-chuyen-ngay { margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--mau-chu-nhat); }
 .dai-ngay.hom-nay { color: var(--mau-chinh-dam); border-bottom-color: var(--mau-chinh); }
+/* Ranh gioi giua cac ngay sap toi va cac ngay da qua */
+.dai-da-qua {
+  margin: 22px 0 4px;
+  padding: 6px 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mau-chu-nhat);
+  background: #e2e8f0;
+  border-radius: 8px;
+}
 .the-chuyen-xe .thong-tin-the {
   display: grid;
   grid-template-columns: 1fr 1fr;

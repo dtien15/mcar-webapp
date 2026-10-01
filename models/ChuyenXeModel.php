@@ -134,9 +134,28 @@ class ChuyenXeModel extends Model
      * Lay danh sach chuyen xe kem thong tin xe / tai xe / loai keo, co phan trang.
      * $loc: ['tu_ngay','den_ngay','id_tai_xe','id_xe','trang_thai','tu_khoa']
      */
-    public function locDanhSach(array $loc, $gioiHan = 20, $boQua = 0)
+    public function locDanhSach(array $loc, $gioiHan = 20, $boQua = 0, $uuTienHomNay = false)
     {
         [$dieuKien, $thamSo] = $this->dungDieuKien($loc);
+
+        // $uuTienHomNay (chi man danh sach Chuyen xe) - thu tu de nguoi
+        // dieu phoi/tai xe vao la thay viec truoc mat:
+        //   1. HOM NAY -> ngay mai -> xa hon (ngay tang dan)
+        //   2. roi moi toi cac ngay DA QUA (gan nhat truoc)
+        // Trong 1 ngay xep theo GIO DON (chuyen chua co gio xuong cuoi ngay).
+        // Gio don la chu go tay ("08:00", "8h00"...) nen doi 'h' -> ':' roi
+        // doc thanh gio that, khong so sanh chuoi (tranh "8h00" xep sau "10:00").
+        // Ngay hom nay lay theo PHP (dung mui gio he thong), date() an toan de ghep.
+        $homNay  = date('Y-m-d');
+        $gioDon  = "STR_TO_DATE(REPLACE(REPLACE(LOWER(TRIM(t.pickup_time)), 'h', ':'), 'g', ':'), '%H:%i')";
+        // Cac noi khac (Tong quan, Xuat Excel, tim kiem) giu thu tu cu: moi nhat truoc.
+        $thuTu = $uuTienHomNay
+            ? "(t.trip_date < '{$homNay}'),
+               CASE WHEN t.trip_date >= '{$homNay}' THEN DATEDIFF(t.trip_date, '{$homNay}')
+                    ELSE DATEDIFF('{$homNay}', t.trip_date) END,
+               (t.pickup_time IS NULL OR TRIM(t.pickup_time) = '' OR {$gioDon} IS NULL),
+               {$gioDon}, t.pickup_time, t.id"
+            : "t.trip_date DESC, t.id DESC";
 
         return $this->truyVan(
             "SELECT t.*,
@@ -157,7 +176,7 @@ class ChuyenXeModel extends Model
              LEFT JOIN drivers d ON d.id = t.driver_id
              LEFT JOIN contract_types ct ON ct.id = t.contract_type_id
              WHERE {$dieuKien}
-             ORDER BY t.trip_date DESC, t.id DESC
+             ORDER BY {$thuTu}
              LIMIT " . (int)$gioiHan . " OFFSET " . (int)$boQua,
             $thamSo
         );

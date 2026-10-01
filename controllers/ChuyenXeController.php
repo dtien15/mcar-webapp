@@ -14,7 +14,7 @@ class ChuyenXeController extends Controller
         $loc           = $this->layBoLoc();
         $soDong        = $this->soDongMoiTrang();
         $chuyenXeModel = $this->model('ChuyenXeModel');
-        $danhSach      = $chuyenXeModel->locDanhSach($loc, $soDong, 0);
+        $danhSach      = $chuyenXeModel->locDanhSach($loc, $soDong, 0, true);
         $tongSo        = $chuyenXeModel->demTheoLoc($loc);
 
         // Luoi du phong cho cron: neu hosting chua cai cron (hoac cron chet)
@@ -61,7 +61,7 @@ class ChuyenXeController extends Controller
         $idTaiXeHienTai = laTaiXe() ? taiKhoanHienTai()['id_tai_xe'] : null;
 
         $chuyenXeModel   = $this->model('ChuyenXeModel');
-        $danhSach        = $chuyenXeModel->locDanhSach($loc, $soDong, $boQua);
+        $danhSach        = $chuyenXeModel->locDanhSach($loc, $soDong, $boQua, true);
         $tongSo          = $chuyenXeModel->demTheoLoc($loc);
         $dsTaiXeDangChay   = $this->model('TaiXeModel')->layTaiXeDangChay();
 

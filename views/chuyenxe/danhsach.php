@@ -355,7 +355,7 @@ if (laTaiXe()) {
 
   function veDaiNgay() {
     qs.disconnect();
-    ds.querySelectorAll('.dai-ngay').forEach(function (d) { d.remove(); });
+    ds.querySelectorAll('.dai-ngay, .dai-da-qua').forEach(function (d) { d.remove(); });
 
     var homNay = new Date();
     var ngayGan = {};
@@ -369,11 +369,25 @@ if (laTaiXe()) {
       dem[n] = (dem[n] || 0) + 1;
     });
 
+    // Danh sach xep: hom nay -> cac ngay toi -> roi moi toi ngay da qua.
+    // Cho bat dau sang ngay da qua co 1 tieu de rieng, khong thi dang o
+    // ngay 15/10 luot xuong gap 30/09 de tuong lon xon.
+    var chuoiHomNay = chuoiNgay(homNay);
+    var coNgayToi = false, daChenDaQua = false;
+
     var truoc = null;
     ds.querySelectorAll('.the-chuyen-xe[data-ngay]').forEach(function (t) {
       var n = t.getAttribute('data-ngay');
       if (n === truoc) return;
       truoc = n;
+      if (n >= chuoiHomNay) coNgayToi = true;
+      if (n < chuoiHomNay && coNgayToi && !daChenDaQua) {
+        daChenDaQua = true;
+        var tieuDe = document.createElement('div');
+        tieuDe.className = 'dai-da-qua';
+        tieuDe.textContent = 'Các ngày đã qua';
+        t.parentNode.insertBefore(tieuDe, t);
+      }
       var p = n.split('-');
       var d = new Date(+p[0], +p[1] - 1, +p[2]);
       var dai = document.createElement('div');
