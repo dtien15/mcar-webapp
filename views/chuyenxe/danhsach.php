@@ -158,7 +158,7 @@ if (laTaiXe()) {
       <div class="col-6 col-md-2">
         <label class="form-label">Số dòng/trang</label>
         <select name="so_dong" class="form-select form-select-sm">
-          <?php foreach ([20, 50, 100] as $sd): ?>
+          <?php foreach ([10, 20, 50, 100] as $sd): ?>
             <option value="<?= $sd ?>" <?= $soDong === $sd ? 'selected' : '' ?>><?= $sd ?></option>
           <?php endforeach; ?>
         </select>
@@ -516,7 +516,7 @@ if (laTaiXe()) {
     var thamSo = new URLSearchParams(window.location.search);
     thamSo.set('bo_qua', 0);
     thamSo.set('lam_moi', 1);
-    thamSo.set('so_dong_hien', boQua || <?= (int)count($danhSach) ?> || 20);
+    thamSo.set('so_dong_hien', boQua || <?= (int)count($danhSach) ?> || 10);
 
     fetch('<?= duongDan('chuyenxe/taithem') ?>?' + thamSo.toString(), { credentials: 'same-origin' })
       .then(function (r) { return r.json(); })

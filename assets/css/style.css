@@ -1906,3 +1906,14 @@ textarea.tu-dong-gian {
 
 /* Dong tom tat: ghi ro dang xem khoang ngay nao */
 .tom-tat-loc .muc-ky { color: var(--mau-chu-nhat); font-size: 12.5px; }
+
+/* =====================================================================
+   DANH SACH DAI TREN DIEN THOAI: cho trinh duyet bo qua phan chua cuon toi
+   Khong ve nhung the dang nam ngoai man hinh -> cuon muot hon han. Chi ap
+   dung cho THE (dien thoai), khong ap cho dong bang vi bang can do het cac
+   dong moi chia duoc do rong cot. Trinh duyet cu khong hieu thi bo qua.
+   ===================================================================== */
+.the-chuyen-xe {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}

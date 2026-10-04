@@ -57,7 +57,7 @@ class ChuyenXeController extends Controller
         // "lam_moi=1": dung khi realtime tai lai DUNG so dong dang hien (co the
         // le, vd 27 sau khi bam "Xem them" vai lan) - khac voi "Xem them" binh
         // thuong chi cho phep 20/50/100 moi lan tai.
-        $soDong = layGet('lam_moi') ? min(500, max(1, (int)layGet('so_dong_hien', 20))) : $this->soDongMoiTrang();
+        $soDong = layGet('lam_moi') ? min(500, max(1, (int)layGet('so_dong_hien', 10))) : $this->soDongMoiTrang();
         $idTaiXeHienTai = laTaiXe() ? taiKhoanHienTai()['id_tai_xe'] : null;
 
         $chuyenXeModel   = $this->model('ChuyenXeModel');
@@ -88,8 +88,10 @@ class ChuyenXeController extends Controller
     /** Doc so dong/trang tu query string, chi cho phep 20/50/100, mac dinh 20 */
     private function soDongMoiTrang()
     {
-        $soDong = (int)layGet('so_dong', 20);
-        return in_array($soDong, [20, 50, 100], true) ? $soDong : 20;
+        // Mac dinh 10 dong: danh sach dai la may yeu (nhat la dien thoai)
+        // cuon giat ngay. Cuon gan toi cuoi thi tu tai them 10 dong nua.
+        $soDong = (int)layGet('so_dong', 10);
+        return in_array($soDong, [10, 20, 50, 100], true) ? $soDong : 10;
     }
 
     /**
