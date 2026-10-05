@@ -1917,3 +1917,56 @@ textarea.tu-dong-gian {
   content-visibility: auto;
   contain-intrinsic-size: auto 320px;
 }
+
+/* =====================================================================
+   THANH CHUYEN TRANG cua danh sach chuyen xe
+   ===================================================================== */
+.thanh-phan-trang {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: 14px 0 18px;
+}
+.thanh-phan-trang .dang-xem { font-size: 13px; color: var(--mau-chu-nhat); }
+.thanh-phan-trang .dang-xem strong { color: var(--mau-chu); }
+.thanh-phan-trang .cac-nut-trang {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.nut-trang {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--mau-vien);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--mau-chu);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  justify-content: center;
+}
+.nut-trang:hover { border-color: var(--mau-chinh); color: var(--mau-chinh); }
+.nut-trang.dang-o {
+  background: var(--mau-chinh);
+  border-color: var(--mau-chinh);
+  color: #fff;
+  cursor: default;
+}
+.nut-trang.tat { opacity: .45; pointer-events: none; }
+.dau-cach-trang { color: var(--mau-chu-nhat); padding: 0 2px; }
+
+@media (max-width: 575.98px) {
+  /* Chua cho bong chat o goc phai duoi khoi de len nut trang cuoi */
+  .thanh-phan-trang { gap: 8px; margin-bottom: 76px; }
+  .thanh-phan-trang .dang-xem { width: 100%; }
+  .thanh-phan-trang .cac-nut-trang { margin-left: 0; width: 100%; }
+  .nut-trang { height: 40px; min-width: 40px; flex: 1 1 auto; }
+}

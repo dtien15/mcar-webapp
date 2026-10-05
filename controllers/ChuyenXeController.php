@@ -14,8 +14,14 @@ class ChuyenXeController extends Controller
         $loc           = $this->layBoLoc();
         $soDong        = $this->soDongMoiTrang();
         $chuyenXeModel = $this->model('ChuyenXeModel');
-        $danhSach      = $chuyenXeModel->locDanhSach($loc, $soDong, 0, true);
-        $tongSo        = $chuyenXeModel->demTheoLoc($loc);
+
+        // Phan trang that: moi lan chi doc va ve dung $soDong dong, bam so
+        // trang de xem tiep. Truoc day cuon xuong la tu tai them roi noi vao
+        // trang - danh sach cu dai ra mai, may yeu cuon rat giat.
+        $tongSo  = $chuyenXeModel->demTheoLoc($loc);
+        $soTrang = max(1, (int)ceil($tongSo / $soDong));
+        $trang   = min(max(1, (int)layGet('trang', 1)), $soTrang);
+        $danhSach = $chuyenXeModel->locDanhSach($loc, $soDong, ($trang - 1) * $soDong, true);
 
         // Luoi du phong cho cron: neu hosting chua cai cron (hoac cron chet)
         // thi van co nguoi mo trang nay hang ngay - nhan do quet luon.
@@ -27,7 +33,10 @@ class ChuyenXeController extends Controller
             'danhSach'           => $danhSach,
             'tongSo'             => $tongSo,
             'soDong'             => $soDong,
-            'conThem'            => $tongSo > count($danhSach),
+            'trang'              => $trang,
+            'soTrang'            => $soTrang,
+            // Cac tham so loc hien tai, de thanh chuyen trang giu nguyen bo loc
+            'thamSoLoc'          => array_merge($loc, ['so_dong' => $soDong]),
             'tongHop'            => $chuyenXeModel->tongHopTheoLoc($loc),
             'soTheoTab'          => $chuyenXeModel->demTheoTab($loc),
             'dsXe'               => $this->model('XeModel')->layTatCa(),
@@ -43,9 +52,13 @@ class ChuyenXeController extends Controller
     }
 
     /**
-     * API "Xem thêm" - tai them 1 trang chuyen xe theo bo loc hien tai (AJAX,
-     * tra ve JSON chua san HTML da render de JS chi can noi vao DOM, khong
-     * phai tai lai toan bo trang / load het du lieu nang mot luc).
+     * API lay MOT TRANG chuyen xe theo bo loc hien tai (AJAX).
+     *
+     * Dung cho hai viec:
+     *   - Bam so trang: doi noi dung danh sach ma khong tai lai ca trang web.
+     *   - Realtime: co ai vua sua gi do thi ve lai dung trang dang xem.
+     *
+     * Tra ve HTML da ren san de JS chi viec thay vao DOM.
      */
     public function taiThem()
     {
@@ -53,17 +66,16 @@ class ChuyenXeController extends Controller
         header('Content-Type: application/json; charset=utf-8');
 
         $loc    = $this->layBoLoc();
-        $boQua  = max(0, (int)layGet('bo_qua', 0));
-        // "lam_moi=1": dung khi realtime tai lai DUNG so dong dang hien (co the
-        // le, vd 27 sau khi bam "Xem them" vai lan) - khac voi "Xem them" binh
-        // thuong chi cho phep 20/50/100 moi lan tai.
-        $soDong = layGet('lam_moi') ? min(500, max(1, (int)layGet('so_dong_hien', 10))) : $this->soDongMoiTrang();
+        $soDong = $this->soDongMoiTrang();
         $idTaiXeHienTai = laTaiXe() ? taiKhoanHienTai()['id_tai_xe'] : null;
 
-        $chuyenXeModel   = $this->model('ChuyenXeModel');
-        $danhSach        = $chuyenXeModel->locDanhSach($loc, $soDong, $boQua, true);
-        $tongSo          = $chuyenXeModel->demTheoLoc($loc);
-        $dsTaiXeDangChay   = $this->model('TaiXeModel')->layTaiXeDangChay();
+        $chuyenXeModel = $this->model('ChuyenXeModel');
+        $tongSo  = $chuyenXeModel->demTheoLoc($loc);
+        $soTrang = max(1, (int)ceil($tongSo / $soDong));
+        $trang   = min(max(1, (int)layGet('trang', 1)), $soTrang);
+
+        $danhSach        = $chuyenXeModel->locDanhSach($loc, $soDong, ($trang - 1) * $soDong, true);
+        $dsTaiXeDangChay = $this->model('TaiXeModel')->layTaiXeDangChay();
 
         $theHtml  = '';
         $dongHtml = '';
@@ -76,11 +88,20 @@ class ChuyenXeController extends Controller
         }
 
         echo json_encode([
-            'ok'                    => true,
-            'the_html'              => $theHtml,
-            'dong_html'             => $dongHtml,
-            'so_dong_them'          => count($danhSach),
-            'con_them'              => $tongSo > ($boQua + count($danhSach)),
+            'ok'              => true,
+            'the_html'        => $theHtml,
+            'dong_html'       => $dongHtml,
+            'phan_trang_html' => $this->dungView('chuyenxe/_phan_trang', [
+                'trang'     => $trang,
+                'soTrang'   => $soTrang,
+                'tongSo'    => $tongSo,
+                'soDong'    => $soDong,
+                'thamSoLoc' => array_merge($loc, ['so_dong' => $soDong]),
+            ]),
+            'trang'           => $trang,
+            'so_trang'        => $soTrang,
+            'tong_so'         => $tongSo,
+            'so_dong'         => count($danhSach),
         ]);
         exit;
     }

@@ -272,7 +272,7 @@ if (laTaiXe()) {
 <!-- Danh sach dang bang - danh cho may tinh -->
 <div class="the bang-may-tinh">
   <div class="the-dau">
-    <span>Danh sách chuyến xe (<?= (int)$tongSo ?> dòng)</span>
+    <span>Danh sách chuyến xe</span>
   </div>
   <div class="the-than the-than-khong-dem bang-cuon">
     <?php
@@ -320,12 +320,8 @@ if (laTaiXe()) {
   </div>
 </div>
 
-<!-- Xem them -->
-<div class="text-center my-3" id="khoiXemThem" <?= $conThem ? '' : 'hidden' ?>>
-  <button type="button" class="btn btn-outline-primary" id="nutXemThem">
-    <?= bieuTuong('chevron-down') ?> Xem thêm
-  </button>
-</div>
+<?php // Thanh chuyen trang: moi trang dung $soDong chuyen, bam so de xem tiep ?>
+<?php include DUONG_DAN_GOC . '/views/chuyenxe/_phan_trang.php'; ?>
 
 <?php // Hop thoai cua tung dong (Nhap & Xac nhan, Nop lai, Sua phu phi,
       // Nho tai xe khac, Huy chuyen, Bao khach huy, Duyet phieu) KHONG con
@@ -416,79 +412,71 @@ if (laTaiXe()) {
 })();
 
 // ---------------------------------------------------------------
-// "Xem them": tai them 1 trang chuyen xe qua AJAX, noi vao DOM
-// thay vi tai lai ca trang / tai het du lieu 1 luc (do nang).
+// Chuyen trang bang AJAX: bam so trang thi chi thay phan danh sach,
+// khong tai lai ca trang web (nhanh hon han, khong mat vi tri cuon).
+// Cac nut van la link that nen khong co JS cung bam duoc binh thuong.
 // ---------------------------------------------------------------
 (function () {
-  var nutXemThem = document.getElementById('nutXemThem');
-  if (!nutXemThem) return;
-
-  var khoiXemThem = document.getElementById('khoiXemThem');
-  var boQua = <?= (int)count($danhSach) ?>;
+  var URL_TAI = '<?= duongDan('chuyenxe/taithem') ?>';
   var dangTai = false;
+  var trangHienTai = <?= (int)$trang ?>;
 
-  // Tu dong tai toi da bao nhieu dong roi dung lai, bat nguoi dung bam nut.
-  // Khong co gioi han nay thi man hinh to + danh sach vai nghin cuoc se cu
-  // the tai het ca nghin dong khi cuon xuong, may yeu se dung hinh.
-  var GIOI_HAN_TU_DONG = 200;
+  function veDanhSach(kq) {
+    document.getElementById('dsTheDienThoai').innerHTML = kq.the_html;
+    document.getElementById('dsDongBang').innerHTML = kq.dong_html;
+    var thanh = document.getElementById('thanhPhanTrang');
+    if (thanh && kq.phan_trang_html) thanh.outerHTML = kq.phan_trang_html;
+    trangHienTai = kq.trang;
+  }
 
-  function taiThemMotTrang() {
+  function doiTrang(trang, luuLichSu) {
     if (dangTai) return;
     dangTai = true;
-    nutXemThem.disabled = true;
-    nutXemThem.textContent = 'Đang tải...';
 
     var thamSo = new URLSearchParams(window.location.search);
-    thamSo.set('bo_qua', boQua);
+    thamSo.set('trang', trang);
 
-    fetch('<?= duongDan('chuyenxe/taithem') ?>?' + thamSo.toString(), { credentials: 'same-origin' })
+    fetch(URL_TAI + '?' + thamSo.toString(), { credentials: 'same-origin' })
       .then(function (r) { return r.json(); })
       .then(function (kq) {
-        if (!kq.ok) return;
-
-        document.getElementById('dsTheDienThoai').insertAdjacentHTML('beforeend', kq.the_html);
-        document.getElementById('dsDongBang').insertAdjacentHTML('beforeend', kq.dong_html);
-
-        boQua += kq.so_dong_them;
-
-        if (kq.con_them) {
-          nutXemThem.disabled = false;
-          nutXemThem.textContent = 'Xem thêm';
-        } else {
-          khoiXemThem.setAttribute('hidden', '');
-        }
         dangTai = false;
+        if (!kq.ok) return;
+        veDanhSach(kq);
+
+        if (luuLichSu) {
+          history.pushState({ trang: kq.trang }, '', '<?= duongDan('chuyenxe') ?>?' + thamSo.toString());
+        }
+        // Len dau danh sach cho de doc trang vua mo
+        var moc = document.querySelector('.nhan-tab-trang-thai') || document.body;
+        moc.scrollIntoView({ block: 'start', behavior: 'smooth' });
       })
       .catch(function () {
         dangTai = false;
-        nutXemThem.disabled = false;
-        nutXemThem.textContent = 'Xem thêm (thử lại)';
+        // Mat mang: de trinh duyet tu di theo link nhu binh thuong
+        window.location.href = '<?= duongDan('chuyenxe') ?>?' + thamSo.toString();
       });
   }
 
-  nutXemThem.addEventListener('click', taiThemMotTrang);
+  document.addEventListener('click', function (su) {
+    var nut = su.target.closest ? su.target.closest('#thanhPhanTrang .nut-trang') : null;
+    if (!nut) return;
+
+    su.preventDefault();
+    if (nut.classList.contains('tat') || nut.classList.contains('dang-o')) return;
+
+    var trang = new URLSearchParams(nut.getAttribute('href').split('?')[1] || '').get('trang');
+    if (trang) doiTrang(parseInt(trang, 10), true);
+  });
+
+  // Bam nut Back/Forward cua trinh duyet
+  window.addEventListener('popstate', function () {
+    var trang = parseInt(new URLSearchParams(window.location.search).get('trang') || '1', 10);
+    doiTrang(trang, false);
+  });
 
   // ---------------------------------------------------------------
-  // Cuon toi dau tai toi do: khi khoi "Xem them" sap lot vao man hinh
-  // (con cach 300px) thi tu tai trang tiep theo, khong phai bam nut.
-  // Nut van giu lai: dung khi da qua GIOI_HAN_TU_DONG dong, va cho
-  // trinh duyet cu khong co IntersectionObserver.
-  // ---------------------------------------------------------------
-  if ('IntersectionObserver' in window && khoiXemThem) {
-    var nguoiQuanSat = new IntersectionObserver(function (dsMuc) {
-      dsMuc.forEach(function (muc) {
-        if (!muc.isIntersecting) return;
-        if (khoiXemThem.hasAttribute('hidden')) return;
-        if (boQua >= GIOI_HAN_TU_DONG) return;   // nhieu qua roi thi de nguoi dung tu bam
-        taiThemMotTrang();
-      });
-    }, { rootMargin: '300px 0px' });
-    nguoiQuanSat.observe(khoiXemThem);
-  }
-
-  // ---------------------------------------------------------------
-  // Realtime: co ai vua tao/sua/xac nhan/chot chuyen xe -> tai lai dung
-  // so dong dang hien de thay ngay trang thai moi, khong can bam F5.
+  // Realtime: co ai vua tao/sua/xac nhan/chot chuyen xe -> ve lai dung
+  // trang dang xem de thay ngay trang thai moi, khong can bam F5.
   //
   // 3 lop de du lieu LUON dung, khong phu thuoc hoan toan vao 1 tin nhac
   // WebSocket duy nhat (tin co the bi bo lo: dang mo modal, WebSocket vua
@@ -504,33 +492,20 @@ if (laTaiXe()) {
 
   function taiLaiTheoRealtime() {
     if (dangTai) return;
-    // Dang mo bat ky modal nao (Xac nhan/Nop lai/Sua phu phi/Nho tai khac) hoac
-    // dang mo menu "..." cua 1 dong thi KHONG thay the DOM luc nay - se lam mat
-    // modal/menu + du lieu dang go dang lung. Danh dau lai de tu chay ngay khi
-    // dong lai (xem duoi).
+    // Dang mo bat ky hop thoai nao hoac menu "..." cua 1 dong thi KHONG thay
+    // the DOM luc nay - se lam mat hop thoai/menu + du lieu dang go dang lung.
+    // Danh dau lai de tu chay ngay khi dong lai (xem duoi).
     if (document.querySelector('.modal.show, .dropdown-menu.show')) {
       coCapNhatBiHoanLai = true;
       return;
     }
 
     var thamSo = new URLSearchParams(window.location.search);
-    thamSo.set('bo_qua', 0);
-    thamSo.set('lam_moi', 1);
-    thamSo.set('so_dong_hien', boQua || <?= (int)count($danhSach) ?> || 10);
+    thamSo.set('trang', trangHienTai);
 
-    fetch('<?= duongDan('chuyenxe/taithem') ?>?' + thamSo.toString(), { credentials: 'same-origin' })
+    fetch(URL_TAI + '?' + thamSo.toString(), { credentials: 'same-origin' })
       .then(function (r) { return r.json(); })
-      .then(function (kq) {
-        if (!kq.ok) return;
-        document.getElementById('dsTheDienThoai').innerHTML = kq.the_html;
-        document.getElementById('dsDongBang').innerHTML = kq.dong_html;
-
-        if (kq.con_them) {
-          document.getElementById('khoiXemThem').removeAttribute('hidden');
-        } else {
-          document.getElementById('khoiXemThem').setAttribute('hidden', '');
-        }
-      })
+      .then(function (kq) { if (kq.ok) veDanhSach(kq); })
       .catch(function () { /* mat mang thi bo qua, lop doi phong ben duoi se thu lai */ });
   }
 

@@ -69,9 +69,11 @@ foreach ($menu as $m) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title><?= h($tieuDe ?? 'MCAR') ?> · <?= h($tenHeThong) ?></title>
+<?php // Bat tay truoc voi CDN (DNS + TLS) de khong phai cho khi bat dau tai css/js ?>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css" rel="stylesheet">
-<link rel="stylesheet" href="<?= duongDan('assets/vendor/driverjs/driver.css') ?>">
 <link rel="stylesheet" href="<?= duongDanTinh('assets/css/style.css') ?>">
 
 <!-- Biểu tượng trang (favicon) -->
@@ -232,9 +234,48 @@ window.mcarRealtime = {
       // form chuyen xe - khoi do da bo (nut "Them nhanh tu anh" lam thay, doc
       // duoc nhieu chang mot luc). dan-nhanh.js van con dung o trang cong khai
       // /guichuyen nhung trang do co layout rieng va tu nap lay file nay. ?>
+<?php // "Them nhanh tu anh" (19KB) chi dung o trang Chuyen xe - cac trang khac
+      // khong tai cho nhe ?>
+<?php if ($duongDanHienTai === 'chuyenxe'): ?>
 <script src="<?= duongDanTinh('assets/js/them-nhanh.js') ?>"></script>
-<script src="<?= duongDan('assets/vendor/driverjs/driver.js') ?>"></script>
-<script src="<?= duongDanTinh('assets/js/tro-giup.js') ?>"></script>
+<?php endif; ?>
+<?php // Tour huong dan (driver.js + tro-giup.js, khoang 32KB) truoc day tai o
+      // MOI trang du hau het khong ai bam. Gio chi tai khi bam nut Tro giup. ?>
+<script>
+(function () {
+  var nut = document.getElementById('nutTroGiup');
+  if (!nut) return;
+
+  var dangTai = false, daTai = false;
+
+  function them(the, thuocTinh) {
+    return new Promise(function (xong, loi) {
+      var el = document.createElement(the);
+      Object.keys(thuocTinh).forEach(function (k) { el[k] = thuocTinh[k]; });
+      el.onload = xong; el.onerror = loi;
+      document.head.appendChild(el);
+    });
+  }
+
+  nut.addEventListener('click', function () {
+    if (daTai || dangTai) return;   // da tai roi thi tro-giup.js tu lo
+    dangTai = true;
+    nut.disabled = true;
+
+    them('link', { rel: 'stylesheet', href: '<?= duongDan('assets/vendor/driverjs/driver.css') ?>' })
+      .then(function () { return them('script', { src: '<?= duongDan('assets/vendor/driverjs/driver.js') ?>' }); })
+      .then(function () { return them('script', { src: '<?= duongDanTinh('assets/js/tro-giup.js') ?>' }); })
+      .then(function () {
+        daTai = true; dangTai = false; nut.disabled = false;
+        nut.click();   // bam ho lan nua de tour chay ngay
+      })
+      .catch(function () {
+        dangTai = false; nut.disabled = false;
+        alert('Không tải được phần hướng dẫn. Kiểm tra mạng rồi thử lại.');
+      });
+  });
+})();
+</script>
 <script>
 // ---------------------------------------------------------------
 // Mo/dong thanh ben tren dien thoai
